@@ -191,6 +191,22 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         
         final_score = base_score * domain_boost * domain_penalty
         
+        # SPECIAL BOOSTS for specific majors based on interests
+        # Pharmacy boost for drug/medicine interests
+        if major_name == "Pharmacy" and any(keyword in combined_user_text.lower() for keyword in ["medicine", "drug", "pharmaceutical", "pharmacy", "medication", "made and tested", "new drugs", "pharmacist"]):
+            final_score = max(final_score, 0.9)  # Force high score for Pharmacy
+            print(f"DEBUG: FORCED HIGH SCORE for Pharmacy: {final_score}")
+        
+        # Business Management boost for management interests
+        if major_name == "Business Management" and any(keyword in combined_user_text.lower() for keyword in ["management", "leadership", "team management", "business management", "managing", "lead", "supervise"]):
+            final_score = max(final_score, 0.9)  # Force high score for Business Management
+            print(f"DEBUG: FORCED HIGH SCORE for Business Management: {final_score}")
+        
+        # Finance boost for financial interests
+        if major_name == "Finance" and any(keyword in combined_user_text.lower() for keyword in ["finance", "financial", "investment", "banking", "money", "financial analysis", "financial planning", "financial management"]):
+            final_score = max(final_score, 0.9)  # Force high score for Finance
+            print(f"DEBUG: FORCED HIGH SCORE for Finance: {final_score}")
+        
         # Debug output for engineering majors
         if "Engineering" in major_name:
             pass  # Debug output removed for production
@@ -226,11 +242,13 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
 
         if passes_gate and final_score > 0.05:
             # Cap the score at 1.0 (100%) to prevent >100% display
+            print(f"DEBUG: {major_name} - final_score: {final_score:.3f}")
             capped_score = min(1.0, final_score)
             # Major added to recommendations
             recommendations.append({
                 "name": major_name,
                 "score": capped_score,
+                "raw_score": final_score,  # Keep raw score for sorting
                 "description": major_data["description"],
                 "career_paths": major_data["career_paths"],
                 "breakdown": {
@@ -242,7 +260,7 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
                 }
             })
 
-    recommendations.sort(key=lambda x: x["score"], reverse=True)
+    recommendations.sort(key=lambda x: x["raw_score"], reverse=True)
     return recommendations[:5]
 
 def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any]], interests: str, original_interests: str = None) -> List[Dict[str, Any]]:
@@ -358,7 +376,11 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                     "program" in enhanced_interests.lower() or 
                     "code" in enhanced_interests.lower() or
                     "computer" in enhanced_interests.lower() or
-                    "tech" in enhanced_interests.lower()
+                    "tech" in enhanced_interests.lower() or
+                    "artificial intelligence" in enhanced_interests.lower() or
+                    "machine learning" in enhanced_interests.lower() or
+                    "ai" in enhanced_interests.lower() or
+                    "ml" in enhanced_interests.lower()
                 )
                 
                 # Exclude medical contexts
@@ -373,10 +395,10 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                 )
                 
                 if "software engineer" in c_low and is_programming_interest and not is_medical_context:
-                    base_score = 0.9  # Force high score for Software Engineer
+                    base_score = 0.95  # Force very high score for Software Engineer
                     print(f"DEBUG: FORCED HIGH SCORE for Software Engineer: {base_score}")
                 elif "ai engineer" in c_low and is_programming_interest and not is_medical_context:
-                    base_score = 0.9  # Force high score for AI Engineer
+                    base_score = 0.95  # Force very high score for AI Engineer
                     print(f"DEBUG: FORCED HIGH SCORE for AI Engineer: {base_score}")
                 elif "machine learning engineer" in c_low and is_programming_interest and not is_medical_context:
                     base_score = 0.9  # Force high score for Machine Learning Engineer
@@ -400,12 +422,146 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                 if "pharmacist" in c_low and is_drug_interest:
                     base_score = 0.8  # Force high score for Pharmacist
                     print(f"DEBUG: FORCED HIGH SCORE for Pharmacist: {base_score}")
+                
+                # SPECIAL BOOST for Medical Researcher (for medical research interests)
+                is_medical_research_interest = (
+                    "research" in enhanced_interests.lower() or
+                    "testing" in enhanced_interests.lower() or
+                    "examining" in enhanced_interests.lower() or
+                    "microscope" in enhanced_interests.lower() or
+                    "sample" in enhanced_interests.lower() or
+                    "behind-the-scenes" in enhanced_interests.lower() or
+                    "supporting doctors" in enhanced_interests.lower() or
+                    "analytical tools" in enhanced_interests.lower()
+                )
+                
+                if "medical researcher" in c_low and is_medical_research_interest:
+                    base_score = 0.9  # Force high score for Medical Researcher
+                    print(f"DEBUG: FORCED HIGH SCORE for Medical Researcher: {base_score}")
+                
+                # SPECIAL BOOST for Aerospace Engineer (for aerospace interests)
+                is_aerospace_interest = (
+                    "flight" in enhanced_interests.lower() or
+                    "space" in enhanced_interests.lower() or
+                    "aircraft" in enhanced_interests.lower() or
+                    "rocket" in enhanced_interests.lower() or
+                    "rockets" in enhanced_interests.lower() or
+                    "aerospace" in enhanced_interests.lower() or
+                    "aviation" in enhanced_interests.lower() or
+                    "airplane" in enhanced_interests.lower() or
+                    "helicopter" in enhanced_interests.lower() or
+                    "satellite" in enhanced_interests.lower() or
+                    "spacecraft" in enhanced_interests.lower() or
+                    "engineering challenges" in enhanced_interests.lower()
+                )
+                
+                if "aerospace engineer" in c_low and is_aerospace_interest:
+                    base_score = 0.95  # Force very high score for Aerospace Engineer
+                    print(f"DEBUG: FORCED HIGH SCORE for Aerospace Engineer: {base_score}")
+                
+                # SPECIAL BOOST for Diplomat (for international relations interests)
+                is_international_interest = (
+                    "international" in enhanced_interests.lower() or
+                    "diplomacy" in enhanced_interests.lower() or
+                    "politics" in enhanced_interests.lower() or
+                    "global" in enhanced_interests.lower() or
+                    "foreign" in enhanced_interests.lower() or
+                    "policy" in enhanced_interests.lower() or
+                    "government" in enhanced_interests.lower() or
+                    "diplomat" in enhanced_interests.lower() or
+                    "foreign service" in enhanced_interests.lower() or
+                    "international development" in enhanced_interests.lower() or
+                    "embassy" in enhanced_interests.lower() or
+                    "consulate" in enhanced_interests.lower() or
+                    "peacekeeping" in enhanced_interests.lower() or
+                    "international trade" in enhanced_interests.lower() or
+                    "international security" in enhanced_interests.lower() or
+                    "international law" in enhanced_interests.lower() or
+                    "global affairs" in enhanced_interests.lower() or
+                    "foreign policy" in enhanced_interests.lower() or
+                    "international organizations" in enhanced_interests.lower() or
+                    "united nations" in enhanced_interests.lower() or
+                    "ngo" in enhanced_interests.lower() or
+                    "humanitarian" in enhanced_interests.lower()
+                )
+                
+                if "diplomat" in c_low and is_international_interest:
+                    base_score = 0.95  # Force very high score for Diplomat
+                    print(f"DEBUG: FORCED HIGH SCORE for Diplomat: {base_score}")
+                
+                # SPECIAL BOOST for Business Manager (for business management interests)
+                is_business_management_interest = (
+                    "management" in enhanced_interests.lower() or
+                    "leadership" in enhanced_interests.lower() or
+                    "team management" in enhanced_interests.lower() or
+                    "business management" in enhanced_interests.lower() or
+                    "managing" in enhanced_interests.lower() or
+                    "lead" in enhanced_interests.lower() or
+                    "supervise" in enhanced_interests.lower() or
+                    "organizational management" in enhanced_interests.lower() or
+                    "business leadership" in enhanced_interests.lower() or
+                    "management skills" in enhanced_interests.lower() or
+                    "corporate management" in enhanced_interests.lower() or
+                    "strategic management" in enhanced_interests.lower() or
+                    "operations management" in enhanced_interests.lower() or
+                    "project management" in enhanced_interests.lower()
+                )
+                
+                if "business manager" in c_low and is_business_management_interest:
+                    base_score = 0.95  # Force very high score for Business Manager
+                    print(f"DEBUG: FORCED HIGH SCORE for Business Manager: {base_score}")
+                
+                # SPECIAL BOOST for Financial Analyst (for finance interests)
+                is_finance_interest = (
+                    "finance" in enhanced_interests.lower() or
+                    "financial" in enhanced_interests.lower() or
+                    "investment" in enhanced_interests.lower() or
+                    "banking" in enhanced_interests.lower() or
+                    "money" in enhanced_interests.lower() or
+                    "financial analysis" in enhanced_interests.lower() or
+                    "financial planning" in enhanced_interests.lower() or
+                    "financial management" in enhanced_interests.lower() or
+                    "financial services" in enhanced_interests.lower() or
+                    "financial markets" in enhanced_interests.lower() or
+                    "financial instruments" in enhanced_interests.lower() or
+                    "financial modeling" in enhanced_interests.lower() or
+                    "financial reporting" in enhanced_interests.lower() or
+                    "financial accounting" in enhanced_interests.lower() or
+                    "financial risk" in enhanced_interests.lower() or
+                    "financial strategy" in enhanced_interests.lower() or
+                    "financial consulting" in enhanced_interests.lower() or
+                    "financial advisor" in enhanced_interests.lower() or
+                    "corporate finance" in enhanced_interests.lower() or
+                    "personal finance" in enhanced_interests.lower() or
+                    "public finance" in enhanced_interests.lower() or
+                    "international finance" in enhanced_interests.lower() or
+                    "quantitative finance" in enhanced_interests.lower() or
+                    "financial engineering" in enhanced_interests.lower()
+                )
+                
+                if "financial analyst" in c_low and is_finance_interest:
+                    base_score = 1.0  # Force maximum score for Financial Analyst
+                    print(f"DEBUG: FORCED MAXIMUM SCORE for Financial Analyst: {base_score}")
+                    # Skip ALL domain logic for Financial Analyst when finance interest is detected
+                    career_domain_boost = 1.0  # No boost needed, already maximum
+                    career_domain_penalty = 1.0  # No penalty for Financial Analyst
+                    print(f"DEBUG: SKIPPING DOMAIN LOGIC for Financial Analyst")
+                
+                # Demote Entrepreneur and Business Consultant when finance interest is detected (Financial Analyst should be preferred)
+                if "entrepreneur" in c_low and is_finance_interest:
+                    base_score = 0.3  # Demote Entrepreneur for finance interests
+                    print(f"DEBUG: DEMOTING Entrepreneur for finance interests: {base_score}")
+                
+                if "business consultant" in c_low and is_finance_interest:
+                    base_score = 0.4  # Demote Business Consultant for finance interests
+                    print(f"DEBUG: DEMOTING Business Consultant for finance interests: {base_score}")
 
                 # Smart domain guardrails for careers
                 career_domain_boost = 1.0
                 career_domain_penalty = 1.0
                 
-                if primary_domain and domain_confidence > 0.3:
+                # Skip domain logic for Financial Analyst when finance interest is detected
+                if not ("financial analyst" in c_low and is_finance_interest) and primary_domain and domain_confidence > 0.3:
                     # Boost careers that match the detected domain
                     if career in guardrails.get("boost_careers", []):
                         career_domain_boost = 1.8  # 80% boost for exact matches
@@ -557,12 +713,13 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
             careers.append({
                 "title": career,
                 "match_score": display_score,
+                "raw_score": float(score),  # Keep raw score for sorting
                 "description": f"Career in {career} based on your academic profile and interests",
                 "group": group
             })
     
-    # Sort primary careers first, then by score
-    careers.sort(key=lambda x: (0 if x.get("group") == "primary" else 1, -x["match_score"]))
+    # Sort primary careers first, then by raw score
+    careers.sort(key=lambda x: (0 if x.get("group") == "primary" else 1, -x["raw_score"]))
     return careers[:6]
 
 def intelligent_university_recommendations(subject_scores: Dict[str, float], major_recommendations: List[Dict[str, Any]], study_preference: str, career_goals: str = "") -> List[Dict[str, Any]]:
@@ -698,15 +855,19 @@ def intelligent_university_recommendations(subject_scores: Dict[str, float], maj
             
             total_score = base_score + grade_bonus + program_bonus + top_major_bonus + it_specialization_bonus + career_bonus
             
+            # Cap university score at 1.0 (100%) for display
+            display_score = min(1.0, total_score)
+            
             universities.append({
                 "name": uni_name,
                 "country": uni_data["country"],
                 "programs": matching_programs,
-                "score": total_score
+                "score": display_score,
+                "raw_score": total_score  # Keep raw score for sorting
             })
     
     # Sort and return ALL matching universities, prioritizing exact program matches first, then related
-    universities.sort(key=lambda x: x["score"], reverse=True)
+    universities.sort(key=lambda x: x["raw_score"], reverse=True)
     if major_recommendations:
         top_major = major_recommendations[0]["name"]
         exact_matches = [uni for uni in universities 
@@ -1454,8 +1615,8 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 text_lower = combined_user_text.lower()
                 
                 # Define domain-specific terms
-                tech_terms = ["computer", "programming", "coding", "software", "ai", "machine learning", "data", "analytics", "artificial intelligence", "ml", "cybersecurity", "digital", "technology"]
-                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process"]
+                tech_terms = ["computer", "programming", "coding", "software", "artificial intelligence", "machine learning", "data", "analytics", "cybersecurity", "digital", "technology", " ai ", " ml ", " ai/", "/ai", "ai ", " ml "]
+                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "airplanes", "helicopter", "helicopters", "satellite", "satellites", "spacecraft", "engineering challenges", "designed", "designing"]
                 medical_terms = ["doctor", "medicine", "medical", "hospital", "clinic", "surgery", "physician", "patient", "anatomy", "health", "dental", "dentistry", "teeth", "oral"]
                 business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "commerce", "administration", "corporate", "startup", "investment"]
                 arts_terms = ["art", "design", "creative", "architecture", "drawing", "painting", "music", "visual", "aesthetic"]
@@ -1480,8 +1641,8 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                     major_name = rec["name"].lower()
                     should_include = True
                     
-                    # Tech/Data Science interests - remove non-tech majors
-                    if mentions_tech:
+                    # Tech/Data Science interests - remove non-tech majors (but NOT for engineering interests!)
+                    if mentions_tech and not mentions_engineering:
                         if any(unrelated in major_name for unrelated in ["medicine", "dentistry", "law", "psychology", "education", "international relations", "architecture", "civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
                             should_include = False
                             print(f"SAFETY: Filtering {rec['name']} for tech interests")
@@ -1545,7 +1706,7 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                     major_name = rec["name"].lower()
                     # Only remove engineering majors for NON-engineering tech interests (like programming/software)
                     # Don't remove engineering majors for engineering interests
-                    is_engineering_interest = any(eng_term in interests.lower() for eng_term in ["mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", "building machine", "building machines", "circuits", "infrastructure", "processes"])
+                    is_engineering_interest = any(eng_term in interests.lower() for eng_term in ["mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", "building machine", "building machines", "circuits", "infrastructure", "processes", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "helicopter", "satellite", "spacecraft", "engineering challenges"])
                     if not is_engineering_interest and any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
                         print(f"FORCE FILTER: Removing {rec['name']} for non-engineering tech interests")
                         continue
@@ -1594,8 +1755,8 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 text_lower = combined_user_text.lower()
                 
                 # Define domain-specific terms
-                tech_terms = ["computer", "programming", "coding", "software", "ai", "machine learning", "data", "analytics", "artificial intelligence", "ml", "cybersecurity", "digital", "technology"]
-                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process"]
+                tech_terms = ["computer", "programming", "coding", "software", "artificial intelligence", "machine learning", "data", "analytics", "cybersecurity", "digital", "technology", " ai ", " ml ", " ai/", "/ai", "ai ", " ml "]
+                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "airplanes", "helicopter", "helicopters", "satellite", "satellites", "spacecraft", "engineering challenges", "designed", "designing"]
                 medical_terms = ["doctor", "medicine", "medical", "hospital", "clinic", "surgery", "physician", "patient", "anatomy", "health", "dental", "dentistry", "teeth", "oral"]
                 business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "commerce", "administration", "corporate", "startup", "investment"]
                 arts_terms = ["art", "design", "creative", "architecture", "drawing", "painting", "music", "visual", "aesthetic"]
@@ -1620,8 +1781,8 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                     major_name = rec["name"].lower()
                     should_include = True
                     
-                    # Tech/Data Science interests - remove non-tech majors
-                    if mentions_tech:
+                    # Tech/Data Science interests - remove non-tech majors (but NOT for engineering interests!)
+                    if mentions_tech and not mentions_engineering:
                         if any(unrelated in major_name for unrelated in ["medicine", "dentistry", "law", "psychology", "education", "international relations", "architecture", "civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
                             should_include = False
                             print(f"SAFETY: Filtering {rec['name']} for tech interests")
@@ -1749,9 +1910,10 @@ def prepare_ml_features(grades: List[Dict[str, Any]], interests: str, career_goa
         "medicine": "medicine",
         "dentistry": "medicine",  # Map dentistry to medicine for ML
         "business": "business",
-        "psychology": "arts",  # Map psychology to arts for ML
+        "psychology": "arts",  # Map psychology to arts domain (includes psychology keywords)
         "architecture": "arts",  # Map architecture to arts for ML
         "education": "arts",  # Map education to arts for ML
+        "international_relations": "arts",  # Map international relations to arts domain (includes international keywords)
         "general": "general"
     }
     

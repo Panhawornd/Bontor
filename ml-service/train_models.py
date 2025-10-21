@@ -48,7 +48,7 @@ class RecommendationTrainer:
             'medicine': ['doctor', 'medical', 'medicine', 'health', 'anatomy', 'patient', 'hospital', 'clinic', 'surgery', 'physician', 'dentist', 'dental'],
             'business': ['business', 'management', 'finance', 'marketing', 'entrepreneur', 'ceo', 'manager', 'corporate', 'startup', 'investment'],
             'technology': ['programming', 'coding', 'software', 'computer', 'tech', 'ai', 'data', 'machine learning', 'artificial intelligence', 'cybersecurity'],
-            'arts': ['art', 'design', 'creative', 'drawing', 'music', 'artistic', 'visual', 'architecture', 'architect', 'building design']
+            'arts': ['art', 'design', 'creative', 'drawing', 'music', 'artistic', 'visual', 'architecture', 'architect', 'building design', 'psychology', 'psychologist', 'mental', 'behavior', 'emotions', 'counseling', 'therapy', 'therapist', 'understanding people', 'listening', 'advice', 'mental wellbeing', 'human behavior', 'cognitive', 'psychological', 'international', 'diplomacy', 'politics', 'global', 'foreign', 'policy', 'government', 'diplomat', 'foreign service', 'international development', 'embassy', 'consulate', 'peacekeeping', 'international trade', 'international security', 'international law', 'global affairs', 'foreign policy', 'international organizations', 'united nations', 'ngo', 'humanitarian']
         }
     
     def detect_domain(self, text: str) -> str:

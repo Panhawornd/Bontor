@@ -351,8 +351,8 @@ def detect_primary_domain(text: str) -> Dict[str, Any]:
     max_score = domain_scores[primary_domain]
     
     # Calculate confidence based on score and keyword specificity
-    # Special boost for mechanical engineering with "building machine" keywords
-    if primary_domain == "mechanical_engineering" and any(kw in text_lower for kw in ["building machine", "building machines", "constructing machine"]):
+    # Special boost for mechanical engineering with "building machine" keywords (but not for "building intelligent systems")
+    if primary_domain == "mechanical_engineering" and any(kw in text_lower for kw in ["building machine", "building machines", "constructing machine"]) and not any(kw in text_lower for kw in ["intelligent systems", "ai", "artificial intelligence", "machine learning", "data analysis"]):
         confidence = 0.9  # High confidence for building machine input
     else:
         confidence = min(1.0, max_score / 8)  # More generous confidence calculation
@@ -376,10 +376,10 @@ def get_domain_guardrails(primary_domain: str) -> Dict[str, Any]:
         },
         "mechanical_engineering": {
             "boost_majors": ["Mechanical Engineering"],
-            "boost_careers": ["Mechanical Engineer", "Robotics Engineer", "Manufacturing Engineer", "Industrial Engineer", "Automation Engineer"],
+            "boost_careers": ["Mechanical Engineer", "Robotics Engineer", "Manufacturing Engineer", "Industrial Engineer", "Automation Engineer", "Aerospace Engineer"],
             "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law"],
             "demote_careers": ["Architect", "Business Manager", "Doctor", "Lawyer"],
-            "required_keywords": ["mechanical", "machine", "mechanism", "manufacturing", "building machine", "building machines"]
+            "required_keywords": ["mechanical", "machine", "mechanism", "manufacturing", "building machine", "building machines", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "airplanes", "helicopter", "helicopters", "satellite", "satellites", "spacecraft", "engineering challenges", "designed", "designing"]
         },
         "civil_engineering": {
             "boost_majors": ["Civil Engineering"],
@@ -443,6 +443,27 @@ def get_domain_guardrails(primary_domain: str) -> Dict[str, Any]:
             "demote_majors": ["Engineering", "Architecture", "Medicine"],
             "demote_careers": ["Engineer", "Architect", "Doctor", "Civil Engineer"],
             "required_keywords": ["psychology", "psychologist", "mental", "behavior"]
+        },
+        "international_relations": {
+            "boost_majors": ["International Relations"],
+            "boost_careers": ["Diplomat", "Policy Analyst", "International Consultant", "Foreign Service Officer", "International Development Specialist", "Global Affairs Analyst", "International Trade Specialist", "Peacekeeping Officer"],
+            "demote_majors": ["Engineering", "Architecture", "Medicine"],
+            "demote_careers": ["Engineer", "Architect", "Doctor", "Civil Engineer"],
+            "required_keywords": ["international", "diplomacy", "politics", "global", "foreign", "policy", "government", "diplomat", "foreign service", "international development", "embassy", "consulate", "peacekeeping", "international trade", "international security", "international law", "global affairs", "foreign policy", "international organizations", "united nations", "ngo", "humanitarian"]
+        },
+        "education": {
+            "boost_majors": ["Education"],
+            "boost_careers": ["Teacher", "Principal", "Educational Consultant", "Curriculum Developer", "University Professor", "Special Education Teacher", "Educational Technology Specialist", "School Counselor", "Training and Development Manager"],
+            "demote_majors": ["Engineering", "Architecture", "Medicine"],
+            "demote_careers": ["Engineer", "Architect", "Doctor", "Civil Engineer"],
+            "required_keywords": ["teaching", "education", "teacher", "school", "learning", "students", "classroom", "teach", "mentor", "guide", "educator", "professor", "principal", "curriculum", "educational technology", "special education", "early childhood education", "educational administration", "educational policy", "teacher training", "educational research", "academic", "pedagogy", "instructional design", "educational leadership", "school counselor", "educational consultant"]
+        },
+        "psychology": {
+            "boost_majors": ["Psychology"],
+            "boost_careers": ["Psychologist", "Counselor", "Therapist", "Researcher", "School Psychologist", "Forensic Psychologist", "Sports Psychologist", "Industrial Psychologist", "Mental Health Counselor"],
+            "demote_majors": ["Engineering", "Architecture", "Medicine"],
+            "demote_careers": ["Engineer", "Architect", "Doctor", "Civil Engineer"],
+            "required_keywords": ["psychology", "mental", "behavior", "counseling", "therapy", "human", "mind", "helping people", "help people", "mental health", "support", "care", "psychologist", "counselor", "therapist", "clinical psychology", "cognitive psychology", "social psychology", "developmental psychology", "forensic psychology", "sports psychology", "industrial psychology", "mental health counselor", "psychological research", "behavioral analysis", "psychological assessment", "psychological treatment", "psychological therapy", "psychological degree", "psychological career"]
         }
     }
     

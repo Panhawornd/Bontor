@@ -85,5 +85,23 @@ MAJOR_DATABASE = {
         "required_subjects": ["english", "history"],
         "description": "Study of legal systems, jurisprudence, and legal practice",
         "career_paths": ["Lawyer", "Judge", "Legal Advisor", "Prosecutor", "Legal Researcher", "Corporate Counsel", "Public Defender", "Legal Consultant", "Criminal Defense Attorney", "Family Lawyer", "Environmental Lawyer", "Intellectual Property Lawyer"]
+    },
+    "Pharmacy": {
+        "keywords": ["pharmacy", "pharmacist", "medication", "drug", "medicine", "pharmaceutical", "prescription", "pharmacology", "pharmaceuticals", "drug development", "medication management", "pharmaceutical research", "drug safety", "pharmaceutical industry", "pharmacy practice", "clinical pharmacy", "pharmaceutical chemistry", "pharmaceutical technology", "pharmaceutical manufacturing", "pharmaceutical sales", "pharmaceutical marketing", "pharmaceutical regulation", "pharmaceutical quality", "pharmaceutical analysis", "pharmaceutical degree", "pharmaceutical career", "pharmaceutical profession"],
+        "required_subjects": ["biology", "chemistry", "math"],
+        "description": "Study of medications, drug development, and pharmaceutical care",
+        "career_paths": ["Pharmacist", "Pharmaceutical Researcher", "Clinical Pharmacist", "Pharmaceutical Sales Representative", "Pharmaceutical Marketing Manager", "Pharmaceutical Quality Assurance Manager", "Pharmaceutical Regulatory Affairs Specialist", "Pharmaceutical Manufacturing Manager", "Pharmaceutical Consultant", "Pharmaceutical Analyst"]
+    },
+    "Business Management": {
+        "keywords": ["business management", "management", "leadership", "team management", "organizational management", "business leadership", "management skills", "management degree", "management career", "management profession", "business administration", "corporate management", "strategic management", "operations management", "project management", "human resource management", "financial management", "marketing management", "management consulting", "management training", "management development", "management strategy", "management planning", "management decision", "management control", "management coordination", "management supervision", "management direction", "management guidance", "management oversight"],
+        "required_subjects": ["math", "english"],
+        "description": "Study of business management, leadership, and organizational behavior",
+        "career_paths": ["Business Manager", "Operations Manager", "Project Manager", "Team Leader", "Department Manager", "General Manager", "Management Consultant", "Business Analyst", "Management Trainee", "Executive Manager"]
+    },
+    "Finance": {
+        "keywords": ["finance", "financial", "investment", "banking", "financial analysis", "financial planning", "financial management", "financial services", "financial markets", "financial instruments", "financial modeling", "financial reporting", "financial accounting", "financial risk", "financial strategy", "financial consulting", "financial advisor", "financial analyst", "financial manager", "financial controller", "financial director", "financial executive", "financial degree", "financial career", "financial profession", "corporate finance", "personal finance", "public finance", "international finance", "quantitative finance", "financial engineering"],
+        "required_subjects": ["math", "english"],
+        "description": "Study of financial systems, investment, and financial management",
+        "career_paths": ["Financial Analyst", "Investment Banker", "Financial Advisor", "Financial Manager", "Financial Controller", "Investment Manager", "Risk Manager", "Financial Consultant", "Corporate Finance Manager", "Portfolio Manager"]
     }
 }

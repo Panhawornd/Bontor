@@ -25,12 +25,18 @@ export async function POST(req: Request) {
           console.error('Auth error:', authError)
         }
 
-    // Call ML service
+    // Call ML service with timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+    
     const res = await fetch(`${fastapiUrl}/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      signal: controller.signal,
     })
+    
+    clearTimeout(timeoutId)
 
     if (!res.ok) {
       const text = await res.text()
@@ -106,6 +112,9 @@ export async function POST(req: Request) {
     return NextResponse.json(data)
   } catch (err) {
     console.error('Analyze API error:', err)
+    if (err instanceof Error && err.name === 'AbortError') {
+      return NextResponse.json({ error: 'Request timeout - ML service took too long to respond' }, { status: 504 })
+    }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

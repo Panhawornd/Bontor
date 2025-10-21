@@ -77,7 +77,7 @@ async def startup_event():
             print("ML University classifier loaded")
         
         # Load domain-specific models
-        domains = ['engineering', 'medicine', 'business', 'technology', 'arts']
+        domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts']
         for domain in domains:
             model_path = f"models/{domain}_classifier.pkl"
             if os.path.exists(model_path):
@@ -140,6 +140,11 @@ async def analyze(req: AnalyzeRequest):
     user_preferences["locationPreference"] = "local"
 
     # Use hybrid recommendations (ML + rule-based)
+    print(f"DEBUG: Calling hybrid_major_recommendations with:")
+    print(f"  subject_scores: {subject_scores}")
+    print(f"  interest_text: '{req.interest_text}'")
+    print(f"  career_goals: '{req.career_goals or ''}'")
+    
     majors = hybrid_major_recommendations(
         subject_scores, 
         req.interest_text, 
@@ -149,46 +154,10 @@ async def analyze(req: AnalyzeRequest):
         domain_models
     )
     
-    # IMMEDIATE SAFETY FILTER - Remove unrelated majors based on interests
-    print(f"DEBUG: Original majors count: {len(majors) if majors else 0}")
-    if majors:
-        interests_lower = req.interest_text.lower()
-        print(f"DEBUG: Interest text: {req.interest_text}")
-        print(f"DEBUG: Interest text lower: {interests_lower}")
-        filtered_majors = []
-        
-        for major in majors:
-            major_name = major["name"].lower()
-            should_include = True
-            
-            # COMPREHENSIVE SAFETY FILTER - Remove unrelated majors based on interests
-            
-            # Tech/AI/ML interests - remove engineering and health majors
-            if any(term in interests_lower for term in ["machine learning", "ai", "artificial intelligence", "data science", "programming", "computer"]):
-                print(f"DEBUG: Found tech terms in interests")
-                if any(unrelated in major_name for unrelated in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering", "medicine", "psychology", "education"]):
-                    should_include = False
-                    print(f"IMMEDIATE FILTER: Removing {major['name']} for tech interests")
-            
-            # Business interests - remove engineering and health majors
-            elif any(term in interests_lower for term in ["business", "finance", "management", "commerce", "entrepreneur"]):
-                print(f"DEBUG: Found business terms in interests")
-                if any(unrelated in major_name for unrelated in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering", "medicine", "psychology"]):
-                    should_include = False
-                    print(f"IMMEDIATE FILTER: Removing {major['name']} for business interests")
-            
-            # Engineering interests - remove health and arts majors
-            elif any(term in interests_lower for term in ["engineering", "civil", "mechanical", "electrical", "chemical"]):
-                print(f"DEBUG: Found engineering terms in interests")
-                if any(unrelated in major_name for unrelated in ["medicine", "psychology", "education", "arts", "fine arts"]):
-                    should_include = False
-                    print(f"IMMEDIATE FILTER: Removing {major['name']} for engineering interests")
-            
-            if should_include:
-                filtered_majors.append(major)
-        
-        print(f"DEBUG: Filtered majors count: {len(filtered_majors)}")
-        majors = filtered_majors
+    print(f"DEBUG: hybrid_major_recommendations returned {len(majors) if majors else 0} majors")
+    
+    # The recommendation function already has proper filtering, so we don't need additional filtering here
+    print(f"DEBUG: Using original majors without additional filtering: {len(majors) if majors else 0}")
     careers = intelligent_career_recommendations(majors, req.interest_text, req.interest_text)
     universities = intelligent_university_recommendations(subject_scores, majors, "local", req.career_goals or "")
     skill_gaps = generate_skill_gaps(subject_scores, majors)
@@ -338,7 +307,7 @@ async def train_models():
                 print("ML University classifier reloaded")
             
             # Reload domain-specific models
-            domains = ['engineering', 'medicine', 'business', 'technology', 'arts']
+            domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts']
             for domain in domains:
                 model_path = f"models/{domain}_classifier.pkl"
                 if os.path.exists(model_path):

@@ -148,8 +148,15 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         passes_gate = exact_keyword_hit or (text_similarity >= strict_gate) or (skill_score >= 0.75) or (zs_score >= 0.35)
         
         # Business-specific filtering: Remove unrelated majors for business users
-        if primary_domain == "business" or any(keyword in combined_user_text.lower() for keyword in ["business", "finance", "management", "commerce", "entrepreneur"]):
-            # Skip engineering majors for business users
+        # Only apply this filtering if the user explicitly mentions business keywords AND is not in an engineering domain
+        is_business_interest = (
+            primary_domain == "business" or 
+            any(keyword in combined_user_text.lower() for keyword in ["business", "finance", "management", "commerce", "entrepreneur"])
+        )
+        is_engineering_interest = primary_domain in ["mechanical_engineering", "electrical_engineering", "civil_engineering", "chemical_engineering"]
+        
+        if is_business_interest and not is_engineering_interest:
+            # Skip engineering majors for business users (but not for engineering users)
             if any(eng_keyword in major_name.lower() for eng_keyword in ["engineering", "civil", "mechanical", "electrical", "chemical"]):
                 continue
             # Skip health majors for business users
@@ -183,6 +190,10 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         )
         
         final_score = base_score * domain_boost * domain_penalty
+        
+        # Debug output for engineering majors
+        if "Engineering" in major_name:
+            pass  # Debug output removed for production
 
         # Domain disambiguation (Medicine vs Dentistry)
         try:
@@ -216,6 +227,7 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         if passes_gate and final_score > 0.05:
             # Cap the score at 1.0 (100%) to prevent >100% display
             capped_score = min(1.0, final_score)
+            # Major added to recommendations
             recommendations.append({
                 "name": major_name,
                 "score": capped_score,
@@ -265,37 +277,38 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
         major_weight = 1.0 - (i * 0.1)  # Higher weight for top majors (1.0, 0.9, 0.8, etc.)
         
         for career in major["career_paths"]:
-            if career not in career_scores:
+            career_title = career.get("title", career) if isinstance(career, dict) else career
+            if career_title not in career_scores:
                 # Create comprehensive career keywords for better matching
                 career_keywords = [
-                    career.lower(),
-                    career.lower().replace(" ", ""),
-                    career.lower().replace(" ", "_"),
-                    career.lower().replace(" ", "-")
+                    career_title.lower(),
+                    career_title.lower().replace(" ", ""),
+                    career_title.lower().replace(" ", "_"),
+                    career_title.lower().replace(" ", "-")
                 ]
                 
                 # Add related terms for electrical/mechanical careers FIRST (most specific)
-                if "electrical" in career.lower() or "electronics" in career.lower():
+                if "electrical" in career_title.lower() or "electronics" in career_title.lower():
                     career_keywords.extend(["electrical", "electronics", "circuit", "power", "signal", "embedded"])
-                elif "mechanical" in career.lower():
+                elif "mechanical" in career_title.lower():
                     career_keywords.extend(["mechanical", "machine", "mechanic", "manufacturing", "industrial"])
-                elif "civil" in career.lower():
+                elif "civil" in career_title.lower():
                     career_keywords.extend(["civil", "infrastructure", "construction", "structural"])
                 # Add related terms for software careers
-                elif "software" in career.lower() or "developer" in career.lower():
+                elif "software" in career_title.lower() or "developer" in career_title.lower():
                     career_keywords.extend(["software", "programming", "coding", "developer", "programmer"])
-                elif "data" in career.lower():
+                elif "data" in career_title.lower():
                     career_keywords.extend(["data", "analytics", "statistics", "analysis"])
-                elif "ai" in career.lower() or "artificial" in career.lower():
+                elif "ai" in career_title.lower() or "artificial" in career_title.lower():
                     career_keywords.extend(["ai", "artificial intelligence", "machine learning", "ml"])
-                elif "cyber" in career.lower() or "security" in career.lower():
+                elif "cyber" in career_title.lower() or "security" in career_title.lower():
                     career_keywords.extend(["cybersecurity", "security", "hacking", "protection"])
                 
                 text_similarity = enhanced_calculate_text_similarity(enhanced_interests, career_keywords)
 
                 # Domain boost if interests explicitly mention domain matching the career title
                 domain_boost = 1.0
-                c_low = career.lower()
+                c_low = career_title.lower()
                 print(f"DEBUG: Career '{career}' (lower: '{c_low}') - Target domains: {target_domains}")
                 if target_domains:
                     if ("electrical" in c_low and "electrical_engineering" in target_domains) or ("electronics" in c_low and "electrical_engineering" in target_domains):
@@ -334,15 +347,59 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                         domain_boost = 1.15
 
                 # Weighted score with domain boost
-                base_score = (major["score"] * major_weight * 0.8) + (text_similarity * 0.2)
+                base_score = (major.get("match_score", 0.5) * major_weight * 0.8) + (text_similarity * 0.2)
                 
-                # SPECIAL BOOST for Software Engineer and AI Engineer
-                if "software engineer" in c_low:
-                    base_score = max(base_score, 0.8)  # Minimum 0.8 for Software Engineer
-                    print(f"DEBUG: Special boost applied to Software Engineer: {base_score}")
-                elif "ai engineer" in c_low:
-                    base_score = max(base_score, 0.8)  # Minimum 0.8 for AI Engineer
-                    print(f"DEBUG: Special boost applied to AI Engineer: {base_score}")
+                # SPECIAL BOOST for Software Engineer and AI Engineer (ONLY for programming/ML interests)
+                # Check for explicit programming/tech keywords and exclude medical contexts
+                is_programming_interest = (
+                    "programming" in enhanced_interests.lower() or 
+                    "software" in enhanced_interests.lower() or 
+                    "coding" in enhanced_interests.lower() or 
+                    "program" in enhanced_interests.lower() or 
+                    "code" in enhanced_interests.lower() or
+                    "computer" in enhanced_interests.lower() or
+                    "tech" in enhanced_interests.lower()
+                )
+                
+                # Exclude medical contexts
+                is_medical_context = (
+                    "medical" in enhanced_interests.lower() or
+                    "doctor" in enhanced_interests.lower() or
+                    "patient" in enhanced_interests.lower() or
+                    "hospital" in enhanced_interests.lower() or
+                    "clinical" in enhanced_interests.lower() or
+                    "microscope" in enhanced_interests.lower() or
+                    "sample" in enhanced_interests.lower()
+                )
+                
+                if "software engineer" in c_low and is_programming_interest and not is_medical_context:
+                    base_score = 0.9  # Force high score for Software Engineer
+                    print(f"DEBUG: FORCED HIGH SCORE for Software Engineer: {base_score}")
+                elif "ai engineer" in c_low and is_programming_interest and not is_medical_context:
+                    base_score = 0.9  # Force high score for AI Engineer
+                    print(f"DEBUG: FORCED HIGH SCORE for AI Engineer: {base_score}")
+                elif "machine learning engineer" in c_low and is_programming_interest and not is_medical_context:
+                    base_score = 0.9  # Force high score for Machine Learning Engineer
+                    print(f"DEBUG: FORCED HIGH SCORE for Machine Learning Engineer: {base_score}")
+                # Block inappropriate tech careers for medical contexts
+                elif is_medical_context and ("software engineer" in c_low or "ai engineer" in c_low or "machine learning engineer" in c_low):
+                    base_score = 0.1  # Force low score for tech careers in medical contexts
+                    print(f"DEBUG: BLOCKING TECH CAREER for medical context: {career_title}")
+                
+                # SPECIAL BOOST for Pharmacist (for drug/medicine interests)
+                is_drug_interest = (
+                    "medicine" in enhanced_interests.lower() or
+                    "drug" in enhanced_interests.lower() or
+                    "pharmaceutical" in enhanced_interests.lower() or
+                    "pharmacy" in enhanced_interests.lower() or
+                    "medication" in enhanced_interests.lower() or
+                    "made and tested" in enhanced_interests.lower() or
+                    "new drugs" in enhanced_interests.lower()
+                )
+                
+                if "pharmacist" in c_low and is_drug_interest:
+                    base_score = 0.8  # Force high score for Pharmacist
+                    print(f"DEBUG: FORCED HIGH SCORE for Pharmacist: {base_score}")
 
                 # Smart domain guardrails for careers
                 career_domain_boost = 1.0
@@ -390,29 +447,29 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                     elif "architect" in c_low or "architecture" in c_low:
                         civil_arch_factor = 0.93
 
-                career_scores[career] = base_score * domain_boost * cross_domain_penalty * civil_arch_factor * career_domain_boost * career_domain_penalty
+                career_scores[career_title] = base_score * domain_boost * cross_domain_penalty * civil_arch_factor * career_domain_boost * career_domain_penalty
             else:
                 # If career appears in multiple majors, take the higher score
                 career_keywords = [
-                    career.lower(),
-                    career.lower().replace(" ", ""),
-                    career.lower().replace(" ", "_"),
-                    career.lower().replace(" ", "-")
+                    career_title.lower(),
+                    career_title.lower().replace(" ", ""),
+                    career_title.lower().replace(" ", "_"),
+                    career_title.lower().replace(" ", "-")
                 ]
                 
                 # Add related terms for software careers
-                if "software" in career.lower() or "engineer" in career.lower() or "developer" in career.lower():
+                if "software" in career_title.lower() or "engineer" in career_title.lower() or "developer" in career_title.lower():
                     career_keywords.extend(["software", "programming", "coding", "developer", "engineer", "programmer"])
-                elif "data" in career.lower():
+                elif "data" in career_title.lower():
                     career_keywords.extend(["data", "analytics", "statistics", "analysis"])
-                elif "ai" in career.lower() or "artificial" in career.lower():
+                elif "ai" in career_title.lower() or "artificial" in career_title.lower():
                     career_keywords.extend(["ai", "artificial intelligence", "machine learning", "ml"])
-                elif "cyber" in career.lower() or "security" in career.lower():
+                elif "cyber" in career_title.lower() or "security" in career_title.lower():
                     career_keywords.extend(["cybersecurity", "security", "hacking", "protection"])
                 
                 text_similarity = enhanced_calculate_text_similarity(enhanced_interests, career_keywords)
                 domain_boost = 1.0
-                c_low = career.lower()
+                c_low = career_title.lower()
                 if target_domains:
                     if ("electrical" in c_low and "electrical" in target_domains) or ("electronics" in c_low and "electrical" in target_domains):
                         domain_boost = 1.25
@@ -457,13 +514,13 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
             # Aggressive filtering for mechanical engineering inputs
             original_interests_l = (original_interests or interests or "").lower()
             if ("building machine" in original_interests_l or "building machines" in original_interests_l or "constructing machine" in original_interests_l):
-                c_low = career.lower()
+                c_low = career_title.lower()
                 print(f"BUILDING MACHINE DETECTED: Checking career {career}")
                 # Only allow mechanical engineering related careers
                 if not any(k in c_low for k in ["mechanical", "robotics", "manufacturing", "industrial", "automation", "machine", "engineer"]):
                     print(f"REJECTING non-mechanical career: {career}")
                     continue  # Skip non-mechanical careers completely
-            c_low = career.lower()
+            c_low = career_title.lower()
             group = "related"
             if target_domains:
                 if ("electrical" in c_low and "electrical" in target_domains) or ("electronics" in c_low and "electrical" in target_domains):
@@ -480,7 +537,7 @@ def intelligent_career_recommendations(major_recommendations: List[Dict[str, Any
                     group = "primary"
                 elif ("data" in c_low and "data" in target_domains) or ("scientist" in c_low and "data" in target_domains):
                     group = "primary"
-                elif ("doctor" in c_low and "medical" in target_domains) or ("medical" in c_low and "medical" in target_domains):
+                elif ("doctor" in c_low and "medical" in target_domains) or ("medical" in c_low and "medical" in target_domains) or ("pharmacist" in c_low and "medical" in target_domains):
                     group = "primary"
                 elif ("psychologist" in c_low and "psychology" in target_domains) or ("psychology" in c_low and "psychology" in target_domains):
                     group = "primary"
@@ -556,7 +613,7 @@ def intelligent_university_recommendations(subject_scores: Dict[str, float], maj
                 # Only include if they have business programs
                 if not any("business" in prog.lower() or "management" in prog.lower() or "commerce" in prog.lower() 
                           for prog in uni_data["programs"]):
-                  continue
+                 continue
         
         # Find matching programs - focus only on TOP major for better relevance
         matching_programs = []
@@ -1486,9 +1543,11 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 filtered_final = []
                 for rec in ml_recommendations[:5]:
                     major_name = rec["name"].lower()
-                    # Remove engineering majors for tech interests
-                    if any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
-                        print(f"FORCE FILTER: Removing {rec['name']} for tech interests")
+                    # Only remove engineering majors for NON-engineering tech interests (like programming/software)
+                    # Don't remove engineering majors for engineering interests
+                    is_engineering_interest = any(eng_term in interests.lower() for eng_term in ["mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", "building machine", "building machines", "circuits", "infrastructure", "processes"])
+                    if not is_engineering_interest and any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
+                        print(f"FORCE FILTER: Removing {rec['name']} for non-engineering tech interests")
                         continue
                     filtered_final.append(rec)
                 return filtered_final
@@ -1624,9 +1683,12 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 filtered_final = []
                 for rec in ml_recommendations[:5]:
                     major_name = rec["name"].lower()
-                    # Remove engineering majors for tech interests
-                    if any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
-                        print(f"FORCE FILTER: Removing {rec['name']} for tech interests")
+                    # Only remove engineering majors for NON-engineering interests
+                    detected_domain = detect_primary_domain(f"{interests} {career_goals}").get("domain", "general")
+                    is_engineering_interest = any(eng in detected_domain for eng in ["mechanical_engineering", "electrical_engineering", "civil_engineering", "chemical_engineering"])
+                    
+                    if not is_engineering_interest and any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
+                        print(f"FORCE FILTER: Removing {rec['name']} for non-engineering interests")
                         continue
                     filtered_final.append(rec)
                 return filtered_final
@@ -1675,7 +1737,26 @@ def prepare_ml_features(grades: List[Dict[str, Any]], interests: str, career_goa
     # Domain detection features
     from .text_processing import detect_primary_domain
     detected_domain = detect_primary_domain(combined_text).get("domain", "general")
-    domain_features = [1 if domain == detected_domain else 0 for domain in ['engineering', 'medicine', 'business', 'technology', 'arts', 'general']]
+    
+    # Map current domains to training domains
+    domain_mapping = {
+        "electrical_engineering": "electrical_engineering",
+        "mechanical_engineering": "mechanical_engineering", 
+        "civil_engineering": "civil_engineering",
+        "chemical_engineering": "chemical_engineering",
+        "software_engineering": "technology",
+        "data_science": "technology",
+        "medicine": "medicine",
+        "dentistry": "medicine",  # Map dentistry to medicine for ML
+        "business": "business",
+        "psychology": "arts",  # Map psychology to arts for ML
+        "architecture": "arts",  # Map architecture to arts for ML
+        "education": "arts",  # Map education to arts for ML
+        "general": "general"
+    }
+    
+    mapped_domain = domain_mapping.get(detected_domain, "general")
+    domain_features = [1 if domain == mapped_domain else 0 for domain in ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts', 'general']]
     
     # Study preference (always local)
     study_features = [1, 0, 0]  # local, abroad, both

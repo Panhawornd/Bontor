@@ -370,29 +370,29 @@ def get_domain_guardrails(primary_domain: str) -> Dict[str, Any]:
         "electrical_engineering": {
             "boost_majors": ["Electrical Engineering"],
             "boost_careers": ["Electrical Engineer", "Electronics Engineer", "Power Systems Engineer"],
-            "demote_majors": ["Architecture", "Business Administration", "Civil Engineering", "Chemical Engineering"],
-            "demote_careers": ["Architect", "Business Manager", "Civil Engineer", "Chemical Engineer"],
+            "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law"],
+            "demote_careers": ["Architect", "Business Manager", "Doctor", "Lawyer"],
             "required_keywords": ["electrical", "electric", "circuit", "power", "electronics"]
         },
         "mechanical_engineering": {
             "boost_majors": ["Mechanical Engineering"],
             "boost_careers": ["Mechanical Engineer", "Robotics Engineer", "Manufacturing Engineer", "Industrial Engineer", "Automation Engineer"],
-            "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law", "Electrical Engineering", "Civil Engineering", "Chemical Engineering"],
-            "demote_careers": ["Architect", "Business Manager", "Civil Engineer", "Chemical Engineer", "Doctor", "Lawyer", "Software Engineer"],
+            "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law"],
+            "demote_careers": ["Architect", "Business Manager", "Doctor", "Lawyer"],
             "required_keywords": ["mechanical", "machine", "mechanism", "manufacturing", "building machine", "building machines"]
         },
         "civil_engineering": {
             "boost_majors": ["Civil Engineering"],
             "boost_careers": ["Civil Engineer", "Structural Engineer", "Construction Manager"],
-            "demote_majors": ["Architecture", "Business Administration", "Electrical Engineering", "Mechanical Engineering", "Chemical Engineering"],
-            "demote_careers": ["Architect", "Business Manager", "Electrical Engineer", "Chemical Engineer"],
+            "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law"],
+            "demote_careers": ["Architect", "Business Manager", "Doctor", "Lawyer"],
             "required_keywords": ["civil", "infrastructure", "bridge", "road", "construction"]
         },
         "chemical_engineering": {
             "boost_majors": ["Chemical Engineering"],
             "boost_careers": ["Chemical Engineer", "Process Engineer", "Materials Engineer"],
-            "demote_majors": ["Architecture", "Business Administration", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering"],
-            "demote_careers": ["Architect", "Business Manager", "Civil Engineer", "Electrical Engineer"],
+            "demote_majors": ["Architecture", "Business Administration", "Medicine", "Law"],
+            "demote_careers": ["Architect", "Business Manager", "Doctor", "Lawyer"],
             "required_keywords": ["chemical", "chemistry", "process", "reaction"]
         },
         "software_engineering": {

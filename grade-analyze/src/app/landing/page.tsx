@@ -141,9 +141,9 @@ export default function LandingPage() {
             className="text-center max-w-5xl mx-auto"
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-8"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -152,19 +152,35 @@ export default function LandingPage() {
               </span>
             </motion.div>
             
-            <h1 className="text-6xl md:text-8xl text-white tracking-tight leading-none" style={{ marginBottom: '3rem' }}>
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+              className="text-6xl md:text-8xl text-white tracking-tight leading-none" 
+              style={{ marginBottom: '3rem' }}
+            >
               Your future starts
               <br />
               <span className="text-white">
                 with insight
               </span>
-            </h1>
+            </motion.h1>
             
-            <p className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
+            >
               Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
-            </p>
+            </motion.p>
             
-            <div className="flex justify-center items-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+              className="flex justify-center items-center"
+            >
               <Button
                 onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
                 size="lg"
@@ -173,7 +189,7 @@ export default function LandingPage() {
                 {hasToken ? 'Start Analysis' : 'Get Started'}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </div>
+            </motion.div>
           </motion.div>
           
           {/* Hero Visual - Bento Grid */}

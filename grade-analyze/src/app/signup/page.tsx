@@ -76,7 +76,7 @@ export default function Signup() {
                   src="/image/Bontor-logo.png" 
                   alt="Bontor" 
                   style={{ 
-                    height: '40px',
+                    height: '23px',
                     width: 'auto'
                   }}
                 />

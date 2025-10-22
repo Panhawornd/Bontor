@@ -262,7 +262,7 @@ export default function LandingPage() {
         style={{ 
           top: "calc(82vh - 80px)",
           bottom: 0,
-          background: "linear-gradient(135deg, #000000 0%, #0a0a0a 25%, #1a1a1a 50%, #0a0a0a 75%, #000000 100%)"
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
         }}
       />
 

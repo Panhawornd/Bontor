@@ -27,7 +27,7 @@ export default function Home() {
       justifyContent: 'center', 
       alignItems: 'center', 
       minHeight: '100vh',
-      background: 'var(--bg-primary)',
+      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
       padding: '40px 20px'
     }}>
       <div style={{

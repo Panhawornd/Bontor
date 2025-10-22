@@ -32,7 +32,7 @@ export default function Results() {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        background: 'var(--bg-primary)',
+        background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
         color: 'var(--text-primary)',
         display: 'flex',
         flexDirection: 'column',
@@ -97,8 +97,7 @@ export default function Results() {
           right: 0,
           bottom: 0,
           background: `
-            radial-gradient(circle at 20% 50%, rgba(220, 53, 69, 0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(220, 53, 69, 0.05) 0%, transparent 50%)
+            radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)
           `,
           zIndex: -1
         }} />
@@ -158,7 +157,7 @@ export default function Results() {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #000000 0%, #0a0a0a 25%, #1a1a1a 50%, #0a0a0a 75%, #000000 100%)',
+      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
       color: 'var(--text-primary)',
       position: 'relative'
     }}>

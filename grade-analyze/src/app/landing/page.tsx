@@ -5,9 +5,14 @@ import { useState, useEffect } from 'react'
 import Button from "@/components/ui/Button";
 import { Brain, TrendingUp, Target, Shield, CheckCircle2, BarChart3, Globe, Zap, ArrowRight, Award } from "lucide-react";
 import { motion } from "framer-motion";
+import Lottie from "lottie-react";
 
 export default function LandingPage() {
   const router = useRouter()
+  const [aiAnimation, setAiAnimation] = useState(null)
+  const [bacIIAnimation, setBacIIAnimation] = useState(null)
+  const [nextStepAnimation, setNextStepAnimation] = useState(null)
+  const [securityAnimation, setSecurityAnimation] = useState(null)
   const [hasToken, setHasToken] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -20,6 +25,27 @@ export default function LandingPage() {
     } else {
       setHasToken(false)
     }
+
+    // Load Lottie animations
+    fetch('/lottie/AI.json')
+      .then(res => res.json())
+      .then(data => setAiAnimation(data))
+      .catch(err => console.error('Failed to load AI animation:', err))
+
+    fetch('/lottie/BacII-student.json')
+      .then(res => res.json())
+      .then(data => setBacIIAnimation(data))
+      .catch(err => console.error('Failed to load BacII animation:', err))
+
+    fetch('/lottie/Next-step.json')
+      .then(res => res.json())
+      .then(data => setNextStepAnimation(data))
+      .catch(err => console.error('Failed to load NextStep animation:', err))
+
+    fetch('/lottie/Security.json')
+      .then(res => res.json())
+      .then(data => setSecurityAnimation(data))
+      .catch(err => console.error('Failed to load Security animation:', err))
   }, [])
 
   const handleGetStarted = () => {
@@ -292,22 +318,26 @@ export default function LandingPage() {
               {
                 icon: Brain,
                 title: "AI-Powered Insights",
-                description: "Personalized majors, careers, and universities tailored to your profile"
+                description: "Personalized majors, careers, and universities tailored to your profile",
+                lottie: aiAnimation
               },
               {
                 icon: TrendingUp,
                 title: "Built for BacII",
-                description: "Subject max scores, normalization, and Cambodian educational context"
+                description: "Subject max scores, normalization, and Cambodian educational context",
+                lottie: bacIIAnimation
               },
               {
                 icon: Target,
                 title: "Actionable Next Steps",
-                description: "Clear skill gaps and how to improve with specific suggestions"
+                description: "Clear skill gaps and how to improve with specific suggestions",
+                lottie: nextStepAnimation
               },
               {
                 icon: Shield,
                 title: "Private & Secure",
-                description: "Your data, your control. All analysis happens locally"
+                description: "Your data, your control. All analysis happens locally",
+                lottie: securityAnimation
               }
             ].map((benefit, idx) => (
               <motion.div
@@ -319,12 +349,22 @@ export default function LandingPage() {
                 className="group"
               >
                 <div className="relative h-full p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors overflow-hidden">
-                  <div className="relative">
+                  <div className="relative flex flex-col h-full">
                     <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                       <benefit.icon className="w-5 h-5 text-blue-500" />
                     </div>
                     <h3 className="text-white" style={{ marginBottom: '1rem' }}>{benefit.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">{benefit.description}</p>
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{benefit.description}</p>
+                    {benefit.lottie && (
+                      <div className="mt-auto flex justify-center items-center">
+                        <Lottie 
+                          animationData={benefit.lottie}
+                          loop={true}
+                          autoplay={true}
+                          style={{ width: '100%', maxWidth: 300, height: 'auto' }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>

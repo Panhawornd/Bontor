@@ -32,11 +32,10 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
   const validateGrade = (subject: string, value: string): string => {
     const subjDef = SUBJECTS.find(s => s.id === subject)
     const maxScore = subjDef?.maxScore ?? 100
-    const s = (value || '').trim().toUpperCase()
-    const LETTER_MAP: Record<string, number> = { A: 95, B: 85, C: 75, D: 65, E: 55 }
+    const s = (value || '').trim()
     if (!s) return ''
-    const asNumber = LETTER_MAP[s] ?? parseFloat(s)
-    if (isNaN(asNumber)) return 'Enter A–E or a valid number'
+    const asNumber = parseFloat(s)
+    if (isNaN(asNumber)) return 'Enter a valid number'
     if (asNumber < 0 || asNumber > maxScore) return `Must be between 0 and ${maxScore}`
     return ''
   }
@@ -50,13 +49,12 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate and normalize inputs: allow A-E letters or numbers within each subject's max
+    // Validate and normalize inputs: convert numeric strings to numbers
     const normalizedGrades = Object.entries(grades).map(([subject, score]) => {
       const subjDef = SUBJECTS.find(s => s.id === subject)
       const maxScore = subjDef?.maxScore ?? 100
-      const s = (score || '').trim().toUpperCase()
-      const LETTER_MAP: Record<string, number> = { A: 95, B: 85, C: 75, D: 65, E: 55 }
-      const asNumber = LETTER_MAP[s] ?? parseFloat(s)
+      const s = (score || '').trim()
+      const asNumber = parseFloat(s)
       const value = isNaN(asNumber) ? 0 : asNumber
       const clamped = Math.min(Math.max(value, 0), maxScore)
       return { subject, score: clamped }
@@ -74,9 +72,8 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
   const isFormValid = Object.entries(grades).every(([id, val]) => {
     const subj = SUBJECTS.find(s => s.id === id)
     if (!subj) return false
-    const s = (val || '').trim().toUpperCase()
-    const LETTER_MAP: Record<string, number> = { A: 95, B: 85, C: 75, D: 65, E: 55 }
-    const asNumber = LETTER_MAP[s] ?? parseFloat(s)
+    const s = (val || '').trim()
+    const asNumber = parseFloat(s)
     if (isNaN(asNumber)) return false
     return asNumber >= 0 && asNumber <= subj.maxScore
   }) && interestText.trim().length > 0
@@ -100,7 +97,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontSize: '14px',
               margin: 0
             }}>
-              Enter your grades (A, B, C, D, E, or percentage 0-{Math.max(...SUBJECTS.map(s => s.maxScore))})
+              Enter your numeric scores (0-{Math.max(...SUBJECTS.map(s => s.maxScore))})
             </p>
           </div>
           
@@ -129,7 +126,9 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
                 </label>
                 <input
                   type="text"
-                  placeholder={`Ex, A or ${subject.maxScore}`}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder={`Enter score (0-${subject.maxScore})`}
                   className="input-field"
                   value={grades[subject.id] || ''}
                   onChange={(e) => handleGradeChange(subject.id, e.target.value)}
@@ -202,7 +201,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I want to become a software engineer and work for a tech company. I'm also interested in starting my own business..."
+            placeholder="I want to become a software engineer and work for a tech company..."
             value={careerGoals}
             onChange={(e) => setCareerGoals(e.target.value)}
           />

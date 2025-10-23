@@ -11,7 +11,7 @@ import psycopg2
 import json
 
 from .models.pydantic_models import Grade, AnalyzeRequest, Recommendation
-from .utils.constants import LETTER_MAP, SUBJECT_MAX_SCORES
+from .utils.constants import SUBJECT_MAX_SCORES
 from .utils.recommendations import (
     hybrid_major_recommendations, 
     intelligent_career_recommendations,
@@ -77,7 +77,7 @@ async def startup_event():
             print("ML University classifier loaded")
         
         # Load domain-specific models
-        domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts']
+        domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts', 'design']
         for domain in domains:
             model_path = f"models/{domain}_classifier.pkl"
             if os.path.exists(model_path):
@@ -94,13 +94,11 @@ async def startup_event():
 
 
 def to_percentage(score: float | str) -> float:
+    """Convert score to float, only accepting numeric values"""
     if isinstance(score, (int, float)):
         return float(score)
-    s = str(score).strip().upper()
-    if s in LETTER_MAP:
-        return float(LETTER_MAP[s])
     try:
-        return float(s)
+        return float(str(score).strip())
     except ValueError:
         return 0.0
 
@@ -307,7 +305,7 @@ async def train_models():
                 print("ML University classifier reloaded")
             
             # Reload domain-specific models
-            domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts']
+            domains = ['electrical_engineering', 'mechanical_engineering', 'civil_engineering', 'chemical_engineering', 'medicine', 'business', 'technology', 'arts', 'design']
             for domain in domains:
                 model_path = f"models/{domain}_classifier.pkl"
                 if os.path.exists(model_path):

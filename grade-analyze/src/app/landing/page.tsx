@@ -390,7 +390,7 @@ export default function LandingPage() {
       </section>
 
       {/* Simple Divider */}
-      <div className="relative h-16 flex items-center justify-center">
+      <div className="relative h-15 flex items-center justify-center">
         <div className="w-64 h-px bg-gradient-to-r from-transparent via-gray-400/60 to-transparent shadow-[0_0_8px_rgba(156,163,175,0.3)]" />
       </div>
 
@@ -417,7 +417,7 @@ export default function LandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {/* Connecting Line */}
-            <div className="hidden md:block absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#2a2a2a] to-transparent" />
+            <div className="hidden md:block absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(179,179,179,0.3)] to-transparent" />
             
             {[
               {

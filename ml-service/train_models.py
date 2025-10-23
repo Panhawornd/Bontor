@@ -33,7 +33,8 @@ class RecommendationTrainer:
             'medicine': None,
             'business': None,
             'technology': None,
-            'arts': None
+            'arts': None,
+            'design': None  # New domain for UX/UI and Graphic Design
         }
         
         # Model evaluation metrics
@@ -48,7 +49,8 @@ class RecommendationTrainer:
             'medicine': ['doctor', 'medical', 'medicine', 'health', 'anatomy', 'patient', 'hospital', 'clinic', 'surgery', 'physician', 'dentist', 'dental'],
             'business': ['business', 'management', 'finance', 'marketing', 'entrepreneur', 'ceo', 'manager', 'corporate', 'startup', 'investment'],
             'technology': ['programming', 'coding', 'software', 'computer', 'tech', 'ai', 'data', 'machine learning', 'artificial intelligence', 'cybersecurity'],
-            'arts': ['art', 'design', 'creative', 'drawing', 'music', 'artistic', 'visual', 'architecture', 'architect', 'building design', 'psychology', 'psychologist', 'mental', 'behavior', 'emotions', 'counseling', 'therapy', 'therapist', 'understanding people', 'listening', 'advice', 'mental wellbeing', 'human behavior', 'cognitive', 'psychological', 'international', 'diplomacy', 'politics', 'global', 'foreign', 'policy', 'government', 'diplomat', 'foreign service', 'international development', 'embassy', 'consulate', 'peacekeeping', 'international trade', 'international security', 'international law', 'global affairs', 'foreign policy', 'international organizations', 'united nations', 'ngo', 'humanitarian']
+            'design': ['ux', 'ui', 'user experience', 'user interface', 'wireframe', 'prototype', 'figma', 'adobe xd', 'sketch', 'usability', 'interaction design', 'product design', 'graphic design', 'visual design', 'logo', 'branding', 'photoshop', 'illustrator', 'indesign', 'typography', 'layout', 'poster', 'graphic designer', 'ux designer', 'ui designer'],  # New design domain
+            'arts': ['art', 'creative', 'drawing', 'music', 'artistic', 'architecture', 'architect', 'building design', 'psychology', 'psychologist', 'mental', 'behavior', 'emotions', 'counseling', 'therapy', 'therapist', 'understanding people', 'listening', 'advice', 'mental wellbeing', 'human behavior', 'cognitive', 'psychological', 'international', 'diplomacy', 'politics', 'global', 'foreign', 'policy', 'government', 'diplomat', 'foreign service', 'international development', 'embassy', 'consulate', 'peacekeeping', 'international trade', 'international security', 'international law', 'global affairs', 'foreign policy', 'international organizations', 'united nations', 'ngo', 'humanitarian']
         }
     
     def detect_domain(self, text: str) -> str:
@@ -162,7 +164,7 @@ class RecommendationTrainer:
         """Create sample training data for demonstration"""
         import random
         
-        majors = ["Computer Science", "Medicine", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Business Administration", "Data Science", "Psychology", "Education", "International Relations", "Law", "Architecture", "Dentistry"]
+        majors = ["Computer Science", "Medicine", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Chemical Engineering", "Business Administration", "Data Science", "Psychology", "Education", "International Relations", "Law", "Architecture", "Dentistry", "UX/UI Design", "Graphic Design"]
         
         # More diverse and realistic interest samples
         interests_by_major = {
@@ -473,6 +475,50 @@ class RecommendationTrainer:
                 "I'm interested in endodontics and root canal treatment",
                 "I want to work in dental research and oral health studies",
                 "I love working with dental materials and restoration techniques"
+            ],
+            "UX/UI Design": [
+                "I love designing user interfaces and creating digital experiences",
+                "I want to become a UX designer and work on user experience",
+                "I'm passionate about wireframing and prototyping with Figma",
+                "I enjoy creating intuitive interfaces for mobile apps and websites",
+                "I want to work in product design and user research",
+                "I'm fascinated by usability testing and user feedback",
+                "I love working with Adobe XD and Sketch for interface design",
+                "I want to create beautiful and functional user experiences",
+                "I'm interested in interaction design and user flows",
+                "I want to become a product designer at a tech company",
+                "I love conducting user research and understanding user needs",
+                "I want to design mobile apps and responsive web interfaces",
+                "I'm passionate about accessibility and inclusive design",
+                "I love creating design systems and UI component libraries",
+                "I want to work on UX strategy and information architecture",
+                "I'm fascinated by human-computer interaction and psychology",
+                "I love prototyping interactive designs and animations",
+                "I want to specialize in web design and digital products",
+                "I'm interested in UX writing and microcopy",
+                "I want to work at startups designing innovative digital products"
+            ],
+            "Graphic Design": [
+                "I love creating visual designs and brand identities",
+                "I want to become a graphic designer and work with brands",
+                "I'm passionate about logo design and branding projects",
+                "I enjoy working with Photoshop and Illustrator for design work",
+                "I want to create posters, flyers, and marketing materials",
+                "I'm fascinated by typography and layout design",
+                "I love working with colors, fonts, and visual compositions",
+                "I want to design brand identities and corporate branding",
+                "I'm interested in print design and publishing",
+                "I want to become a brand designer and create visual systems",
+                "I love working on packaging design and product branding",
+                "I want to design social media graphics and digital content",
+                "I'm passionate about illustration and creative artwork",
+                "I love creating visual content for advertising campaigns",
+                "I want to work in creative agencies as an art director",
+                "I'm fascinated by motion graphics and animation",
+                "I love designing editorial layouts for magazines and books",
+                "I want to specialize in brand strategy and visual identity",
+                "I'm interested in infographic design and data visualization",
+                "I want to work as a freelance designer and creative director"
             ]
         }
         
@@ -490,7 +536,9 @@ class RecommendationTrainer:
             "International Relations": ["Diplomat", "Policy Analyst", "International Consultant", "Government Official", "NGO Worker", "Foreign Service Officer", "International Development Specialist", "Global Affairs Analyst", "International Trade Specialist", "Peacekeeping Officer"],
             "Law": ["Lawyer", "Judge", "Legal Advisor", "Prosecutor", "Legal Researcher", "Corporate Counsel", "Criminal Defense Attorney", "Family Lawyer", "Environmental Lawyer", "Intellectual Property Lawyer"],
             "Architecture": ["Architect", "Urban Planner", "Interior Designer", "Construction Manager", "Landscape Architect", "Project Architect", "Sustainable Design Specialist", "Historic Preservation Architect", "Commercial Architect", "Residential Architect"],
-            "Dentistry": ["Dentist", "Orthodontist", "Oral Surgeon", "Dental Hygienist", "Dental Assistant", "Periodontist", "Endodontist", "Prosthodontist", "Pediatric Dentist", "Cosmetic Dentist"]
+            "Dentistry": ["Dentist", "Orthodontist", "Oral Surgeon", "Dental Hygienist", "Dental Assistant", "Periodontist", "Endodontist", "Prosthodontist", "Pediatric Dentist", "Cosmetic Dentist"],
+            "UX/UI Design": ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Interaction Designer", "User Experience Architect", "UX Strategist", "Digital Product Designer", "Mobile App Designer", "Web Designer"],
+            "Graphic Design": ["Graphic Designer", "Brand Designer", "Visual Designer", "Art Director", "Creative Director", "Logo Designer", "Marketing Designer", "Print Designer", "Packaging Designer", "Motion Graphics Designer"]
         }
         
         

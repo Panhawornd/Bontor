@@ -1,14 +1,6 @@
 """
 Constants and configuration values
 """
-LETTER_MAP = {
-    "A": 95,
-    "B": 85,
-    "C": 75,
-    "D": 65,
-    "E": 55,
-}
-
 SCIENCE_SUBJECTS = {"math", "physics", "chemistry", "biology"}
 LANG_SUBJECTS = {"khmer", "english"}
 SOCIAL_SUBJECTS = {"history"}
@@ -45,6 +37,7 @@ DOMAIN_KEYWORDS = {
     "business": ["business", "entrepreneur", "management", "finance", "marketing", "administration", "commerce", "corporate", "startup", "investment", "business strategy", "business management", "leadership", "team management", "organizational management", "business leadership", "management skills", "management degree", "management career", "management profession", "corporate management", "strategic management", "operations management", "project management", "human resource management", "financial management", "marketing management", "management consulting", "management training", "management development", "management strategy", "management planning", "management decision", "management control", "management coordination", "management supervision", "management direction", "management guidance", "management oversight", "financial", "financial markets", "money", "banking", "financial analysis", "financial planning", "financial management", "financial services", "financial markets", "financial instruments", "financial modeling", "financial reporting", "financial accounting", "financial risk", "financial strategy", "financial consulting", "financial advisor", "financial analyst", "financial manager", "financial controller", "financial director", "financial executive", "financial degree", "financial career", "financial profession", "corporate finance", "personal finance", "public finance", "international finance", "quantitative finance", "financial engineering"],
     
     # Design Domains
+    "design": ["ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "sketch", "usability", "interaction design", "product design", "graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "layout", "poster", "graphic designer", "ux designer", "ui designer", "brand designer", "visual designer", "art director", "creative director", "design", "designer", "creative design", "digital design", "web design", "app design", "mobile design"],
     "architecture": ["architecture", "architect", "building design", "buildings", "sustainable", "green", "cad", "drawing", "blueprint", "creative", "visual", "space", "urban planning", "interior design", "landscape architecture", "real estate", "housing", "skyscraper", "monument", "facade", "floor plan", "architectural design", "structural design"],
     
     # Education

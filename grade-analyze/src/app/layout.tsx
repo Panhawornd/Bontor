@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bontor - AI-Powered Career Guidance for Cambodian BacII Students",
+  title: "Bontor - AI-Powered Majorand Career Guidance for Cambodian BacII Students",
   description: "AI-powered career guidance and university recommendations for Cambodian BacII students",
 };
 

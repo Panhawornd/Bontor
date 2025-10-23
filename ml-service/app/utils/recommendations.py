@@ -121,6 +121,10 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         print("Applying business-specific filtering to remove unrelated majors")
 
     for major_name, major_data in MAJOR_DATABASE.items():
+        # DEBUG: Print every major being evaluated
+        if major_name in ["Graphic Design", "UX/UI Design"]:
+            print(f"DEBUG: ===== Evaluating major '{major_name}' =====")
+        
         # Skills
         skill_score = calculate_subject_match_score(subject_scores, major_data["required_subjects"])
 
@@ -146,6 +150,21 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
 
         strict_gate = 0.2 if (goals_text or (interests_text and len(interests_text) >= 20)) else 0.15
         passes_gate = exact_keyword_hit or (text_similarity >= strict_gate) or (skill_score >= 0.75) or (zs_score >= 0.35)
+        
+        # SPECIAL GATE OVERRIDE for design majors - force pass if design keywords detected
+        is_graphic_design_interest = any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "poster"])
+        is_uxui_design_interest = any(keyword in combined_user_text.lower() for keyword in ["ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "usability"])
+        
+        if major_name == "Graphic Design":
+            print(f"DEBUG: Graphic Design - is_graphic_design_interest={is_graphic_design_interest}, passes_gate={passes_gate}, text='{combined_user_text[:100]}'")
+        
+        if major_name == "Graphic Design" and is_graphic_design_interest:
+            passes_gate = True
+            print(f"DEBUG: FORCED GATE PASS for Graphic Design (detected graphic design keywords)")
+        
+        if major_name == "UX/UI Design" and is_uxui_design_interest:
+            passes_gate = True
+            print(f"DEBUG: FORCED GATE PASS for UX/UI Design (detected UX/UI keywords)")
         
         # Business-specific filtering: Remove unrelated majors for business users
         # Only apply this filtering if the user explicitly mentions business keywords AND is not in an engineering domain
@@ -206,6 +225,16 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         if major_name == "Finance" and any(keyword in combined_user_text.lower() for keyword in ["finance", "financial", "investment", "banking", "money", "financial analysis", "financial planning", "financial management"]):
             final_score = max(final_score, 0.9)  # Force high score for Finance
             print(f"DEBUG: FORCED HIGH SCORE for Finance: {final_score}")
+        
+        # UX/UI Design boost for interface/UX design interests
+        if major_name == "UX/UI Design" and any(keyword in combined_user_text.lower() for keyword in ["ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "sketch", "usability", "interaction design", "product design"]):
+            final_score = max(final_score, 0.85)  # Force high score for UX/UI Design
+            print(f"DEBUG: FORCED HIGH SCORE for UX/UI Design: {final_score}")
+        
+        # Graphic Design boost for visual/graphic design interests
+        if major_name == "Graphic Design" and any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "poster", "graphic designer", "design"]):
+            final_score = max(final_score, 0.95)  # Force high score for Graphic Design (increased from 0.85)
+            print(f"DEBUG: FORCED HIGH SCORE for Graphic Design: {final_score}")
         
         # Debug output for engineering majors
         if "Engineering" in major_name:
@@ -1706,7 +1735,13 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                     major_name = rec["name"].lower()
                     # Only remove engineering majors for NON-engineering tech interests (like programming/software)
                     # Don't remove engineering majors for engineering interests
-                    is_engineering_interest = any(eng_term in interests.lower() for eng_term in ["mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", "building machine", "building machines", "circuits", "infrastructure", "processes", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "helicopter", "satellite", "spacecraft", "engineering challenges"])
+                    is_engineering_interest = any(eng_term in interests.lower() for eng_term in [
+                        "mechanical engineering", "electrical engineering", "civil engineering", "chemical engineering", 
+                        "building machine", "building machines", "building circuit", "building circuits", "building electrical",
+                        "circuits", "circuit", "electronic", "electronics", "electrical",
+                        "infrastructure", "processes", "flight", "space", "aircraft", "rocket", "rockets", 
+                        "aerospace", "aviation", "airplane", "helicopter", "satellite", "spacecraft", "engineering challenges"
+                    ])
                     if not is_engineering_interest and any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
                         print(f"FORCE FILTER: Removing {rec['name']} for non-engineering tech interests")
                         continue
@@ -1846,7 +1881,13 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                     major_name = rec["name"].lower()
                     # Only remove engineering majors for NON-engineering interests
                     detected_domain = detect_primary_domain(f"{interests} {career_goals}").get("domain", "general")
-                    is_engineering_interest = any(eng in detected_domain for eng in ["mechanical_engineering", "electrical_engineering", "civil_engineering", "chemical_engineering"])
+                    is_engineering_interest = (
+                        any(eng in detected_domain for eng in ["mechanical_engineering", "electrical_engineering", "civil_engineering", "chemical_engineering"]) or
+                        any(eng_term in interests.lower() for eng_term in [
+                            "building circuit", "building circuits", "building electrical", "building machine", "building machines",
+                            "circuit", "circuits", "electronic", "electronics", "electrical"
+                        ])
+                    )
                     
                     if not is_engineering_interest and any(eng in major_name for eng in ["civil engineering", "mechanical engineering", "electrical engineering", "chemical engineering"]):
                         print(f"FORCE FILTER: Removing {rec['name']} for non-engineering interests")

@@ -5,7 +5,7 @@ import re
 import difflib
 import numpy as np
 from typing import List, Dict, Any
-from .constants import LETTER_MAP, KHMER_TO_ENGLISH, DOMAIN_KEYWORDS
+from .constants import KHMER_TO_ENGLISH, DOMAIN_KEYWORDS
 
 # Import ML models (will be initialized in main.py)
 sentence_model = None
@@ -464,6 +464,20 @@ def get_domain_guardrails(primary_domain: str) -> Dict[str, Any]:
             "demote_majors": ["Engineering", "Architecture", "Medicine"],
             "demote_careers": ["Engineer", "Architect", "Doctor", "Civil Engineer"],
             "required_keywords": ["psychology", "mental", "behavior", "counseling", "therapy", "human", "mind", "helping people", "help people", "mental health", "support", "care", "psychologist", "counselor", "therapist", "clinical psychology", "cognitive psychology", "social psychology", "developmental psychology", "forensic psychology", "sports psychology", "industrial psychology", "mental health counselor", "psychological research", "behavioral analysis", "psychological assessment", "psychological treatment", "psychological therapy", "psychological degree", "psychological career"]
+        },
+        "design": {
+            "boost_majors": ["UX/UI Design", "Graphic Design"],
+            "boost_careers": ["UX Designer", "UI Designer", "Product Designer", "Graphic Designer", "Brand Designer", "Visual Designer", "Art Director", "Creative Director"],
+            "demote_majors": ["Engineering", "Medicine", "Law", "Business Administration"],
+            "demote_careers": ["Engineer", "Doctor", "Lawyer", "Business Manager"],
+            "required_keywords": ["design", "ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "graphic", "visual", "logo", "branding", "photoshop", "illustrator", "typography", "creative"]
+        },
+        "arts": {
+            "boost_majors": ["Architecture", "Psychology", "International Relations", "Education"],
+            "boost_careers": ["Architect", "Psychologist", "Teacher", "Diplomat"],
+            "demote_majors": ["Engineering", "Medicine", "Computer Science"],
+            "demote_careers": ["Engineer", "Doctor", "Software Engineer"],
+            "required_keywords": ["architecture", "art", "creative", "psychology", "education", "teaching", "international"]
         }
     }
     

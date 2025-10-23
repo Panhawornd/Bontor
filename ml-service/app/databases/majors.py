@@ -103,5 +103,17 @@ MAJOR_DATABASE = {
         "required_subjects": ["math", "english"],
         "description": "Study of financial systems, investment, and financial management",
         "career_paths": ["Financial Analyst", "Investment Banker", "Financial Advisor", "Financial Manager", "Financial Controller", "Investment Manager", "Risk Manager", "Financial Consultant", "Corporate Finance Manager", "Portfolio Manager"]
+    },
+    "UX/UI Design": {
+        "keywords": ["ux", "ui", "user experience", "user interface", "ux design", "ui design", "ux/ui", "interface design", "user experience design", "user interface design", "interaction design", "product design", "digital design", "web design", "app design", "mobile design", "wireframe", "wireframing", "prototype", "prototyping", "user flow", "user journey", "usability", "usability testing", "user research", "user testing", "figma", "sketch", "adobe xd", "invision", "design system", "design thinking", "human-centered design", "user-centered design", "visual design", "information architecture", "ux research", "ux researcher", "ui designer", "ux designer", "product designer", "interaction designer", "experience designer", "design tools", "design software", "user personas", "empathy map", "user story", "design sprint", "a/b testing", "heuristic evaluation", "accessibility", "responsive design", "mobile-first", "design patterns", "micro-interactions", "user flows", "journey mapping", "design portfolio"],
+        "required_subjects": ["english", "math"],
+        "description": "Design of user interfaces and experiences for digital products, focusing on usability and user satisfaction",
+        "career_paths": ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Interaction Designer", "UX/UI Designer", "Digital Product Designer", "Experience Designer", "Design Lead", "UX Strategist"]
+    },
+    "Graphic Design": {
+        "keywords": ["graphic design", "graphic designer", "visual design", "visual designer", "design", "designer", "creative design", "branding", "brand identity", "logo", "logo design", "poster", "poster design", "illustration", "illustrator", "photoshop", "adobe creative suite", "adobe illustrator", "adobe photoshop", "adobe indesign", "typography", "typeface", "font design", "color theory", "layout", "layout design", "composition", "visual communication", "print design", "digital design", "marketing design", "advertising design", "social media design", "graphics", "visual content", "creative", "art direction", "creative direction", "design portfolio", "vector graphics", "raster graphics", "image editing", "photo editing", "design principles", "design elements", "visual hierarchy", "brand guidelines", "style guide", "mockup", "packaging design", "editorial design", "publication design", "infographic", "icon design", "web graphics", "digital graphics", "visual identity", "corporate identity"],
+        "required_subjects": ["english", "history"],
+        "description": "Visual communication and design for print and digital media, including branding, marketing materials, and digital graphics",
+        "career_paths": ["Graphic Designer", "Brand Designer", "Visual Designer", "Art Director", "Creative Director", "Marketing Designer", "Illustrator", "Digital Designer", "Print Designer", "Packaging Designer"]
     }
 }

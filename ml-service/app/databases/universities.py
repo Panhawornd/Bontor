@@ -6,13 +6,13 @@ UNIVERSITY_DATABASE = {
     "Cambodia Academy of Digital Technology (CADT)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Computer Science", "Digital Technology", "Artificial Intelligence", "Data Science", "Cybersecurity", "Digital Business", "Telecommunications and Networking"],
+        "programs": ["Computer Science", "Digital Technology", "Artificial Intelligence", "Data Science", "Cybersecurity", "Digital Business", "Telecommunications and Networking", "UX/UI Design", "Digital Design"],
         "requirements": {"min_grade": 75, "preferred_subjects": ["math", "english"]}
     },
     "Royal University of Phnom Penh (RUPP)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Computer Science", "Mathematics", "Physics", "Chemistry", "Biology", "Business Administration", "Information Technology", "Social Sciences", "Foreign Languages", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering"],
+        "programs": ["Computer Science", "Mathematics", "Physics", "Chemistry", "Biology", "Business Administration", "Information Technology", "Social Sciences", "Foreign Languages", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Graphic Design"],
         "requirements": {"min_grade": 70, "preferred_subjects": ["math", "english"]}
     },
     "Institute of Technology of Cambodia (ITC)": {
@@ -48,13 +48,13 @@ UNIVERSITY_DATABASE = {
     "University of Cambodia (UC)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Business Administration", "Information Technology", "International Relations", "Law", "Media Studies", "Education", "Computer Science"],
+        "programs": ["Business Administration", "Information Technology", "International Relations", "Law", "Media Studies", "Education", "Computer Science", "Graphic Design"],
         "requirements": {"min_grade": 65, "preferred_subjects": ["math", "english"]}
     },
     "American University of Phnom Penh (AUPP)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Business Administration", "Law", "Information Technology", "Civil Engineering", "Global Affairs", "Computer Science", "International Business"],
+        "programs": ["Business Administration", "Law", "Information Technology", "Civil Engineering", "Global Affairs", "Computer Science", "International Business", "Graphic Design", "Digital Media"],
         "requirements": {"min_grade": 75, "preferred_subjects": ["math", "english"]}
     },
     "National University of Management (NUM)": {
@@ -66,7 +66,7 @@ UNIVERSITY_DATABASE = {
     "Royal University of Fine Arts (RUFA)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Fine Arts", "Architecture", "Archaeology", "Cultural Heritage", "Music", "Dance", "Traditional Arts", "Design"],
+        "programs": ["Fine Arts", "Architecture", "Archaeology", "Cultural Heritage", "Music", "Dance", "Traditional Arts", "Design", "Graphic Design", "UX/UI Design", "Visual Design"],
         "requirements": {"min_grade": 60, "preferred_subjects": ["english"]}
     },
     "University of Health Sciences (UHS)": {
@@ -84,7 +84,7 @@ UNIVERSITY_DATABASE = {
     "Paragon International University (Paragon.U)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Business Administration", "International Relations", "Data Science", "Computer Science", "Civil Engineering", "Architecture", "Information Technology"],
+        "programs": ["Business Administration", "International Relations", "Data Science", "Computer Science", "Civil Engineering", "Architecture", "Information Technology", "UX/UI Design", "Digital Design"],
         "requirements": {"min_grade": 70, "preferred_subjects": ["math", "english"]}
     },
     "University of Puthisastra (UP)": {
@@ -96,7 +96,7 @@ UNIVERSITY_DATABASE = {
     "National Polytechnic Institute of Cambodia (NPIC)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Information Technology", "Engineering", "Multimedia", "Electronics", "Computer Science", "Technical Programs"],
+        "programs": ["Information Technology", "Engineering", "Multimedia", "Electronics", "Computer Science", "Technical Programs", "Graphic Design", "Digital Media Design"],
         "requirements": {"min_grade": 70, "preferred_subjects": ["math", "physics"]}
     },
 }

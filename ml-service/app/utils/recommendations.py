@@ -112,6 +112,18 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
     domain_confidence = domain_info.get("confidence", 0.0)
     guardrails = get_domain_guardrails(primary_domain) if primary_domain else {}
     
+    # Special handling for ambiguous "design" input
+    is_ambiguous_design = (
+        len(combined_user_text.strip().split()) <= 5 and  # Very short text
+        "design" in combined_user_text.lower() and
+        not any(specific in combined_user_text.lower() for specific in ["graphic", "ux", "ui", "logo", "branding", "photoshop", "figma", "building", "architecture", "infrastructure", "software", "web", "app", "code"])
+    )
+    
+    if is_ambiguous_design:
+        print("DETECTED AMBIGUOUS 'design' - will boost all design-related majors")
+        primary_domain = None  # Disable domain filtering for ambiguous case
+        domain_confidence = 0.0
+    
     print(f"Detected domain: {primary_domain} (confidence: {domain_confidence:.2f})")
     if primary_domain:
         print(f"Applying guardrails: boost {guardrails.get('boost_majors', [])}, demote {guardrails.get('demote_majors', [])}")
@@ -141,30 +153,71 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         desc = f"{major_name}. {major_data.get('description', '')}"
         desc_alignment = enhanced_calculate_text_similarity(combined_user_text, [desc]) if combined_user_text else 0.0
 
-        # Relevance gate
+        # Strict relevance gate - only recommend if there's actual interest/relevance
         try:
             interests_clean = enhanced_preprocess_text(interests_text.lower()) if interests_text else ""
             exact_keyword_hit = any(kw.lower() in interests_clean for kw in major_data["keywords"])
         except Exception:
             exact_keyword_hit = False
 
-        strict_gate = 0.2 if (goals_text or (interests_text and len(interests_text) >= 20)) else 0.15
-        passes_gate = exact_keyword_hit or (text_similarity >= strict_gate) or (skill_score >= 0.75) or (zs_score >= 0.35)
+        # STRICTER GATE: Require meaningful interest alignment, not just good grades
+        # High skill scores alone shouldn't pass the gate
+        # BUT: Be more lenient for very short inputs (< 5 words)
+        is_very_short = len(interests_text.split()) < 5 if interests_text else True
         
-        # SPECIAL GATE OVERRIDE for design majors - force pass if design keywords detected
-        is_graphic_design_interest = any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "poster"])
-        is_uxui_design_interest = any(keyword in combined_user_text.lower() for keyword in ["ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "usability"])
+        if is_very_short:
+            # Lower thresholds for very short inputs
+            has_interest_signal = (
+                exact_keyword_hit or 
+                text_similarity >= 0.20 or
+                zs_score >= 0.30 or
+                desc_alignment >= 0.20
+            )
+        else:
+            # Higher thresholds for longer, more detailed inputs
+            has_interest_signal = (
+                exact_keyword_hit or 
+                text_similarity >= 0.25 or
+                zs_score >= 0.4 or
+                desc_alignment >= 0.25
+            )
+        
+        # Only allow high skill score bypass if there's SOME interest signal
+        skill_bypass = skill_score >= 0.85 and (text_similarity >= 0.10 or zs_score >= 0.15)
+        
+        passes_gate = has_interest_signal or skill_bypass
+        
+        # SPECIAL GATE OVERRIDE for design majors - force pass if SPECIFIC design keywords detected
+        # More strict criteria: only force pass if there are SPECIFIC tools or explicit mentions
+        is_graphic_design_interest = any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "poster", "graphic designer"])
+        is_uxui_design_interest = any(keyword in combined_user_text.lower() for keyword in ["ux design", "ui design", "user experience design", "user interface design", "wireframe", "prototype", "figma", "adobe xd", "sketch app", "ux designer", "ui designer"])
+        
+        # Only force pass for design majors if there's a STRONG signal (not just "design")
+        # BUT: Actively reject design majors if user clearly wants something else
+        is_clearly_non_digital_design = any(keyword in combined_user_text.lower() for keyword in [
+            "circuit", "electronic", "electrical", "machine", "mechanical", "engine", 
+            "software", "coding", "programming", "algorithm", "database",
+            "bridge", "road", "infrastructure", "construction", "structural",
+            "medicine", "doctor", "patient", "hospital", "clinic",
+            "business", "management", "entrepreneur", "finance", "investment",
+            "building", "buildings", "architect", "architecture", "architectural"  # Architecture-related
+        ])
         
         if major_name == "Graphic Design":
-            print(f"DEBUG: Graphic Design - is_graphic_design_interest={is_graphic_design_interest}, passes_gate={passes_gate}, text='{combined_user_text[:100]}'")
+            if is_graphic_design_interest:
+                passes_gate = True
+                print(f"DEBUG: FORCED GATE PASS for Graphic Design (detected specific graphic design keywords)")
+            elif is_clearly_non_digital_design and not is_ambiguous_design:
+                passes_gate = False
+                print(f"DEBUG: REJECTED Graphic Design (user wants something else)")
         
-        if major_name == "Graphic Design" and is_graphic_design_interest:
-            passes_gate = True
-            print(f"DEBUG: FORCED GATE PASS for Graphic Design (detected graphic design keywords)")
-        
-        if major_name == "UX/UI Design" and is_uxui_design_interest:
-            passes_gate = True
-            print(f"DEBUG: FORCED GATE PASS for UX/UI Design (detected UX/UI keywords)")
+        if major_name == "UX/UI Design":
+            if is_uxui_design_interest:
+                passes_gate = True
+                print(f"DEBUG: FORCED GATE PASS for UX/UI Design (detected specific UX/UI keywords)")
+            elif is_clearly_non_digital_design and not is_ambiguous_design:
+                passes_gate = False
+                print(f"DEBUG: REJECTED UX/UI Design (user wants something else)")
         
         # Business-specific filtering: Remove unrelated majors for business users
         # Only apply this filtering if the user explicitly mentions business keywords AND is not in an engineering domain
@@ -185,9 +238,24 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
             if any(arts_keyword in major_name.lower() for arts_keyword in ["arts", "fine arts", "architecture"]) and not any(arts_mention in combined_user_text.lower() for arts_mention in ["art", "design", "creative", "architecture"]):
                 continue
 
-        # Domain guardrail adjustments
+        # Domain guardrail adjustments with mixed interest awareness
         domain_boost = 1.0
         domain_penalty = 1.0
+        
+        # Check if user has mixed interests (multiple domains mentioned)
+        from .text_processing import detect_primary_domain
+        all_domain_info = detect_primary_domain(combined_user_text)
+        all_domain_scores = all_domain_info.get("all_scores", {})
+        has_mixed_interests = len([score for score in all_domain_scores.values() if score >= 2]) > 1
+        
+        # Check if this major matches one of the secondary domains
+        major_matches_secondary_domain = False
+        for domain, score in all_domain_scores.items():
+            if score >= 2 and domain != primary_domain:
+                secondary_guardrails = get_domain_guardrails(domain)
+                if major_name in secondary_guardrails.get("boost_majors", []):
+                    major_matches_secondary_domain = True
+                    break
         
         if primary_domain and domain_confidence > 0.3:  # Only apply if confident
             # Boost majors that match the detected domain
@@ -196,9 +264,17 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
                 print(f"Boosting {major_name} for domain {primary_domain}")
             
             # Demote majors that don't match the detected domain
+            # BUT: If user has mixed interests and major matches secondary domain, don't demote
             elif major_name in guardrails.get("demote_majors", []):
-                domain_penalty = 0.3  # 70% penalty
-                print(f"Demoting {major_name} for domain {primary_domain}")
+                if has_mixed_interests and major_matches_secondary_domain:
+                    # Don't demote if major matches a secondary domain
+                    print(f"NOT demoting {major_name} for domain {primary_domain} (matches secondary interest)")
+                elif has_mixed_interests:
+                    domain_penalty = 0.7  # Only 30% penalty for mixed interests
+                    print(f"Soft demoting {major_name} for domain {primary_domain} (mixed interests)")
+                else:
+                    domain_penalty = 0.3  # 70% penalty for single-domain users
+                    print(f"Demoting {major_name} for domain {primary_domain}")
 
         # Final score with domain adjustments
         base_score = (
@@ -210,31 +286,38 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
         
         final_score = base_score * domain_boost * domain_penalty
         
-        # SPECIAL BOOSTS for specific majors based on interests
+        # SMART BOOSTS for specific majors based on interests (not forced overrides)
+        # Only boost if already has reasonable base score
+        
+        # Ambiguous "design" boost - boost all design-related majors
+        if is_ambiguous_design and major_name in ["UX/UI Design", "Graphic Design", "Architecture"]:
+            final_score = min(1.0, final_score * 1.4)  # 40% boost for ambiguous design
+            print(f"DEBUG: BOOSTED {major_name} for ambiguous design: {final_score}")
+        
         # Pharmacy boost for drug/medicine interests
-        if major_name == "Pharmacy" and any(keyword in combined_user_text.lower() for keyword in ["medicine", "drug", "pharmaceutical", "pharmacy", "medication", "made and tested", "new drugs", "pharmacist"]):
-            final_score = max(final_score, 0.9)  # Force high score for Pharmacy
-            print(f"DEBUG: FORCED HIGH SCORE for Pharmacy: {final_score}")
+        if major_name == "Pharmacy" and base_score > 0.3 and any(keyword in combined_user_text.lower() for keyword in ["pharmacy", "pharmacist", "pharmaceutical", "medication", "new drugs", "drug development"]):
+            final_score = min(1.0, final_score * 1.2)  # 20% boost
+            print(f"DEBUG: BOOSTED Pharmacy: {final_score}")
         
         # Business Management boost for management interests
-        if major_name == "Business Management" and any(keyword in combined_user_text.lower() for keyword in ["management", "leadership", "team management", "business management", "managing", "lead", "supervise"]):
-            final_score = max(final_score, 0.9)  # Force high score for Business Management
-            print(f"DEBUG: FORCED HIGH SCORE for Business Management: {final_score}")
+        if major_name == "Business Management" and base_score > 0.3 and any(keyword in combined_user_text.lower() for keyword in ["business management", "team management", "managing teams", "lead teams", "leadership"]):
+            final_score = min(1.0, final_score * 1.2)  # 20% boost
+            print(f"DEBUG: BOOSTED Business Management: {final_score}")
         
         # Finance boost for financial interests
-        if major_name == "Finance" and any(keyword in combined_user_text.lower() for keyword in ["finance", "financial", "investment", "banking", "money", "financial analysis", "financial planning", "financial management"]):
-            final_score = max(final_score, 0.9)  # Force high score for Finance
-            print(f"DEBUG: FORCED HIGH SCORE for Finance: {final_score}")
+        if major_name == "Finance" and base_score > 0.3 and any(keyword in combined_user_text.lower() for keyword in ["finance", "financial", "investment", "banking", "financial analysis", "financial planning"]):
+            final_score = min(1.0, final_score * 1.2)  # 20% boost
+            print(f"DEBUG: BOOSTED Finance: {final_score}")
         
-        # UX/UI Design boost for interface/UX design interests
-        if major_name == "UX/UI Design" and any(keyword in combined_user_text.lower() for keyword in ["ux", "ui", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "sketch", "usability", "interaction design", "product design"]):
-            final_score = max(final_score, 0.85)  # Force high score for UX/UI Design
-            print(f"DEBUG: FORCED HIGH SCORE for UX/UI Design: {final_score}")
+        # UX/UI Design boost for interface/UX design interests (SPECIFIC keywords only)
+        if major_name == "UX/UI Design" and base_score > 0.3 and any(keyword in combined_user_text.lower() for keyword in ["ux design", "ui design", "user experience", "user interface", "wireframe", "prototype", "figma", "adobe xd", "sketch app", "ux designer", "ui designer"]):
+            final_score = min(1.0, final_score * 1.3)  # 30% boost (stronger for specific tools)
+            print(f"DEBUG: BOOSTED UX/UI Design: {final_score}")
         
-        # Graphic Design boost for visual/graphic design interests
-        if major_name == "Graphic Design" and any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo", "branding", "photoshop", "illustrator", "indesign", "typography", "poster", "graphic designer", "design"]):
-            final_score = max(final_score, 0.95)  # Force high score for Graphic Design (increased from 0.85)
-            print(f"DEBUG: FORCED HIGH SCORE for Graphic Design: {final_score}")
+        # Graphic Design boost for visual/graphic design interests (SPECIFIC keywords only)
+        if major_name == "Graphic Design" and base_score > 0.3 and any(keyword in combined_user_text.lower() for keyword in ["graphic design", "visual design", "logo design", "branding design", "photoshop", "illustrator", "indesign", "typography", "poster design", "graphic designer"]):
+            final_score = min(1.0, final_score * 1.3)  # 30% boost (stronger for specific tools)
+            print(f"DEBUG: BOOSTED Graphic Design: {final_score}")
         
         # Debug output for engineering majors
         if "Engineering" in major_name:
@@ -269,7 +352,18 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
                 print(f"REJECTING non-Engineering major: {major_name}")
                 passes_gate = False
 
-        if passes_gate and final_score > 0.05:
+        # STRICTER THRESHOLD: Only recommend if score is meaningful
+        # This ensures we only show truly relevant majors, not just "passable" ones
+        # BUT: Lower threshold if we have strong domain detection and keyword matches
+        has_strong_domain = primary_domain and domain_confidence > 0.4
+        has_exact_keywords = exact_keyword_hit
+        
+        if has_strong_domain and has_exact_keywords:
+            min_score_threshold = 0.25  # Lower threshold for strong matches
+        else:
+            min_score_threshold = 0.30  # Standard threshold
+        
+        if passes_gate and final_score >= min_score_threshold:
             # Cap the score at 1.0 (100%) to prevent >100% display
             print(f"DEBUG: {major_name} - final_score: {final_score:.3f}")
             capped_score = min(1.0, final_score)
@@ -288,6 +382,8 @@ def intelligent_major_recommendations(subject_scores: Dict[str, float], interest
                     "weights": {"α": ALPHA, "β": BETA, "γ": GAMMA, "δ": DELTA}
                 }
             })
+        elif passes_gate and final_score < min_score_threshold:
+            print(f"DEBUG: {major_name} FILTERED OUT - score too low ({final_score:.3f} < {min_score_threshold})")
 
     recommendations.sort(key=lambda x: x["raw_score"], reverse=True)
     return recommendations[:5]
@@ -832,7 +928,7 @@ def intelligent_university_recommendations(subject_scores: Dict[str, float], maj
                 "Psychology": ["psychology", "behavioral", "mental health", "counseling"],
                 "Education": ["education", "teaching", "pedagogy", "learning"],
                 "International Relations": ["international", "relations", "diplomacy", "policy"],
-                "Architecture": ["architecture", "design", "construction", "planning"],
+                "Architecture": ["architecture", "architectural", "urban planning", "landscape"],
                 "Dentistry": ["dental", "dentistry", "oral", "orthodontics"],
                 "Law": ["law", "legal", "jurisprudence", "legal system", "justice", "court", "legal practice"]
             }
@@ -1644,13 +1740,13 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 text_lower = combined_user_text.lower()
                 
                 # Define domain-specific terms
-                tech_terms = ["computer", "programming", "coding", "software", "artificial intelligence", "machine learning", "data", "analytics", "cybersecurity", "digital", "technology", " ai ", " ml ", " ai/", "/ai", "ai ", " ml "]
-                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "airplanes", "helicopter", "helicopters", "satellite", "satellites", "spacecraft", "engineering challenges", "designed", "designing"]
-                medical_terms = ["doctor", "medicine", "medical", "hospital", "clinic", "surgery", "physician", "patient", "anatomy", "health", "dental", "dentistry", "teeth", "oral"]
-                business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "commerce", "administration", "corporate", "startup", "investment"]
-                arts_terms = ["art", "design", "creative", "architecture", "drawing", "painting", "music", "visual", "aesthetic"]
-                law_terms = ["law", "legal", "lawyer", "justice", "court", "rights", "legal system", "jurisprudence", "advocate", "attorney"]
-                education_terms = ["teaching", "education", "teacher", "school", "learning", "students", "classroom", "teach", "mentor", "guide", "educator"]
+                tech_terms = ["computer science", "programming", "coding", "software", " ai ", "machine learning", "app development", "backend", "frontend", " api ", "database", "cybersecurity", "app", "apps", "website", "websites", "web development", "mobile app"]
+                engineering_terms = ["electrical engineering", "circuit", "power systems", "mechanical engineering", "manufacturing", "civil engineering", "infrastructure", "chemical engineering", "aerospace", "aircraft"]
+                medical_terms = ["doctor", "medicine", "medical", "hospital", "physician", "surgery", "patient", "healthcare", "dentist", "dental"]
+                business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "corporate", "investment", "commerce"]
+                arts_terms = ["graphic design", "visual design", "ux design", "ui design", "wireframe", "figma", "architecture", "architect", "building", "painting", "music"]
+                law_terms = ["law", "legal", "lawyer", "justice", "court", "attorney"]
+                education_terms = ["teaching", "teacher", "education", "classroom", "educator", "professor"]
                 
                 # Detect what domains the user is interested in
                 mentions_tech = any(t in text_lower for t in tech_terms)
@@ -1746,6 +1842,127 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                         print(f"FORCE FILTER: Removing {rec['name']} for non-engineering tech interests")
                         continue
                     filtered_final.append(rec)
+                
+                # APPLY SCORE BOOSTS for specific majors
+                cs_keywords = ["programming", "coding", "software", "app", "apps", "backend", "frontend", " api ", "database", "developer", "code", "website", "websites"]
+                build_keywords = ["built", "build", "building", "developed", "programmed", "created", "creating"]
+                architecture_keywords = ["building design", "buildings", "structures", "residential", "commercial building", "floor plan", "blueprint", "architect"]
+                
+                combined_lower = combined_user_text.lower()
+                
+                # Check if this is architecture context (buildings, not software)
+                is_architecture_context = any(keyword in combined_lower for keyword in architecture_keywords)
+                
+                for rec in filtered_final:
+                    if rec["name"] == "Computer Science":
+                        cs_match = any(keyword in combined_lower for keyword in cs_keywords)
+                        build_match = any(keyword in combined_lower for keyword in build_keywords)
+                        
+                        # Don't boost CS if it's architecture context
+                        if not is_architecture_context:
+                            # EDGE CASE: Database/API boost (highest priority)
+                            if ("database" in combined_lower or "databases" in combined_lower) and ("api" in combined_lower or "apis" in combined_lower):
+                                rec["score"] = max(rec["score"], 0.70)
+                                print(f"DEBUG: CS database/API boost - new score: {rec['score']}")
+                            elif cs_match and build_match:
+                                # Strong boost when both development keywords and build keywords appear
+                                rec["score"] = max(rec["score"], 0.75)
+                                print(f"DEBUG: Computer Science STRONG boost applied (build context) - new score: {rec['score']}")
+                            elif cs_match:
+                                rec["score"] = max(rec["score"], 0.55)
+                                print(f"DEBUG: Computer Science boost applied - new score: {rec['score']}")
+                        else:
+                            print(f"DEBUG: Skipping CS boost - architecture context detected")
+                    
+                    # Boost Architecture when architecture context is detected
+                    elif rec["name"] == "Architecture" and is_architecture_context:
+                        rec["score"] = max(rec["score"], 0.65)
+                        print(f"DEBUG: Architecture boost applied (architecture context) - new score: {rec['score']}")
+                    
+                    # UX/UI Design boosts
+                    elif rec["name"] == "UX/UI Design":
+                        # EDGE CASE: UI design boost (check for singular and plural)
+                        if "user interface" in combined_lower or "designing ui" in combined_lower or "design ui" in combined_lower:
+                            rec["score"] = max(rec["score"], 0.95)
+                            print(f"DEBUG: UX/UI interface boost - new score: {rec['score']}")
+                    
+                    # Graphic Design boosts
+                    elif rec["name"] == "Graphic Design":
+                        # Visual design edge case
+                        if "visual design" in combined_lower or ("photoshop" in combined_lower and "design" in combined_lower):
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Graphic visual design boost - new score: {rec['score']}")
+                        # Logo/branding edge case
+                        elif "logo" in combined_lower or "brand identity" in combined_lower or "branding" in combined_lower:
+                            rec["score"] = max(rec["score"], 0.75)
+                            print(f"DEBUG: Graphic logo/branding boost - new score: {rec['score']}")
+                    
+                    # Civil Engineering boosts
+                    elif rec["name"] == "Civil Engineering":
+                        # EDGE CASE: Bridges/roads boost (check for singular and plural)
+                        if (("bridge" in combined_lower or "bridges" in combined_lower) or ("road" in combined_lower or "roads" in combined_lower)) and not is_architecture_context:
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Civil Engineering bridges/roads boost - new score: {rec['score']}")
+                    
+                    # Finance boosts
+                    elif rec["name"] == "Finance":
+                        # Finance/investment edge case
+                        if "finance" in combined_lower or "investment" in combined_lower or "financial" in combined_lower:
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Finance boost - new score: {rec['score']}")
+                    
+                    # Penalize UX/UI when development/build keywords appear (designers don't BUILD apps, developers do)
+                    if rec["name"] == "UX/UI Design":
+                        build_match = any(keyword in combined_lower for keyword in build_keywords)
+                        
+                        # Don't penalize UX/UI if it's architecture context
+                        if is_architecture_context:
+                            continue
+                        
+                        if build_match:
+                            rec["score"] = rec["score"] * 0.7  # 30% penalty
+                            print(f"DEBUG: UX/UI Design penalty applied (build context) - new score: {rec['score']}")
+                
+                # FORCE ADD Computer Science if tech/build keywords present but CS not in results
+                cs_in_results = any(rec["name"] == "Computer Science" for rec in filtered_final)
+                cs_match_global = any(keyword in combined_lower for keyword in cs_keywords)
+                build_match_global = any(keyword in combined_lower for keyword in build_keywords)
+                
+                # Only force add if NOT architecture context
+                if not cs_in_results and (cs_match_global or build_match_global) and not is_architecture_context:
+                    print(f"DEBUG: FORCE ADDING Computer Science (detected app/web/build keywords but CS not in ML predictions)")
+                    from ..databases.majors import MAJOR_DATABASE
+                    cs_data = MAJOR_DATABASE.get("Computer Science", {})
+                    cs_score = 0.75 if (cs_match_global and build_match_global) else 0.55
+                    filtered_final.append({
+                        "name": "Computer Science",
+                        "score": cs_score,
+                        "description": cs_data.get("description", ""),
+                        "career_paths": cs_data.get("career_paths", []),
+                        "source": "ML",
+                        "confidence": 0.0
+                    })
+                
+                # FORCE ADD Finance if finance/investment keywords present but Finance not in results
+                finance_in_results = any(rec["name"] == "Finance" for rec in filtered_final)
+                finance_keywords = ["finance", "investment", "financial", "banking", "portfolio", "stock"]
+                finance_match_global = any(keyword in combined_lower for keyword in finance_keywords)
+                
+                if not finance_in_results and finance_match_global:
+                    print(f"DEBUG: FORCE ADDING Finance (detected finance/investment keywords but Finance not in ML predictions)")
+                    from ..databases.majors import MAJOR_DATABASE
+                    finance_data = MAJOR_DATABASE.get("Finance", {})
+                    filtered_final.append({
+                        "name": "Finance",
+                        "score": 0.70,
+                        "description": finance_data.get("description", ""),
+                        "career_paths": finance_data.get("career_paths", []),
+                        "source": "ML",
+                        "confidence": 0.0
+                    })
+                
+                # Re-sort after boosts
+                filtered_final.sort(key=lambda x: x["score"], reverse=True)
                 return filtered_final
             else:
                 print(f"Domain model confidence low ({top_conf:.3f}) or no valid recommendations; trying general model")
@@ -1790,13 +2007,13 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                 text_lower = combined_user_text.lower()
                 
                 # Define domain-specific terms
-                tech_terms = ["computer", "programming", "coding", "software", "artificial intelligence", "machine learning", "data", "analytics", "cybersecurity", "digital", "technology", " ai ", " ml ", " ai/", "/ai", "ai ", " ml "]
-                engineering_terms = ["electrical", "electronic", "electronics", "circuit", "power", "signal", "embedded", "mechanical", "machine", "mechanic", "manufacturing", "civil", "infrastructure", "construction", "chemical", "process", "flight", "space", "aircraft", "rocket", "rockets", "aerospace", "aviation", "airplane", "airplanes", "helicopter", "helicopters", "satellite", "satellites", "spacecraft", "engineering challenges", "designed", "designing"]
-                medical_terms = ["doctor", "medicine", "medical", "hospital", "clinic", "surgery", "physician", "patient", "anatomy", "health", "dental", "dentistry", "teeth", "oral"]
-                business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "commerce", "administration", "corporate", "startup", "investment"]
-                arts_terms = ["art", "design", "creative", "architecture", "drawing", "painting", "music", "visual", "aesthetic"]
-                law_terms = ["law", "legal", "lawyer", "justice", "court", "rights", "legal system", "jurisprudence", "advocate", "attorney"]
-                education_terms = ["teaching", "education", "teacher", "school", "learning", "students", "classroom", "teach", "mentor", "guide", "educator"]
+                tech_terms = ["computer science", "programming", "coding", "software", " ai ", "machine learning", "app development", "backend", "frontend", " api ", "database", "cybersecurity", "app", "apps", "website", "websites", "web development", "mobile app"]
+                engineering_terms = ["electrical engineering", "circuit", "power systems", "mechanical engineering", "manufacturing", "civil engineering", "infrastructure", "chemical engineering", "aerospace", "aircraft"]
+                medical_terms = ["doctor", "medicine", "medical", "hospital", "physician", "surgery", "patient", "healthcare", "dentist", "dental"]
+                business_terms = ["business", "management", "finance", "marketing", "entrepreneur", "corporate", "investment", "commerce"]
+                arts_terms = ["graphic design", "visual design", "ux design", "ui design", "wireframe", "figma", "architecture", "architect", "building", "painting", "music"]
+                law_terms = ["law", "legal", "lawyer", "justice", "court", "attorney"]
+                education_terms = ["teaching", "teacher", "education", "classroom", "educator", "professor"]
                 
                 # Detect what domains the user is interested in
                 mentions_tech = any(t in text_lower for t in tech_terms)
@@ -1893,6 +2110,126 @@ def hybrid_major_recommendations(subject_scores: Dict[str, float], interests: st
                         print(f"FORCE FILTER: Removing {rec['name']} for non-engineering interests")
                         continue
                     filtered_final.append(rec)
+                
+                # APPLY SCORE BOOSTS for specific majors
+                cs_keywords = ["programming", "coding", "software", "app", "apps", "backend", "frontend", " api ", "database", "developer", "code", "website", "websites"]
+                build_keywords = ["built", "build", "building", "developed", "programmed", "created", "creating"]
+                architecture_keywords = ["building design", "buildings", "structures", "residential", "commercial building", "floor plan", "blueprint", "architect"]
+                combined_text = f"{interests} {career_goals}".lower()
+                
+                # Check if this is architecture context (buildings, not software)
+                is_architecture_context = any(keyword in combined_text for keyword in architecture_keywords)
+                
+                for rec in filtered_final:
+                    if rec["name"] == "Computer Science":
+                        cs_match = any(keyword in combined_text for keyword in cs_keywords)
+                        build_match = any(keyword in combined_text for keyword in build_keywords)
+                        
+                        # Don't boost CS if it's architecture context
+                        if not is_architecture_context:
+                            # EDGE CASE: Database/API boost (highest priority)
+                            if ("database" in combined_text or "databases" in combined_text) and ("api" in combined_text or "apis" in combined_text):
+                                rec["score"] = max(rec["score"], 0.70)
+                                print(f"DEBUG: CS database/API boost - new score: {rec['score']}")
+                            elif cs_match and build_match:
+                                # Strong boost when both development keywords and build keywords appear
+                                rec["score"] = max(rec["score"], 0.75)
+                                print(f"DEBUG: Computer Science STRONG boost applied (build context) - new score: {rec['score']}")
+                            elif cs_match:
+                                rec["score"] = max(rec["score"], 0.55)
+                                print(f"DEBUG: Computer Science boost applied - new score: {rec['score']}")
+                        else:
+                            print(f"DEBUG: Skipping CS boost - architecture context detected")
+                    
+                    # Boost Architecture when architecture context is detected
+                    elif rec["name"] == "Architecture" and is_architecture_context:
+                        rec["score"] = max(rec["score"], 0.65)
+                        print(f"DEBUG: Architecture boost applied (architecture context) - new score: {rec['score']}")
+                    
+                    # UX/UI Design boosts
+                    elif rec["name"] == "UX/UI Design":
+                        # EDGE CASE: UI design boost (check for singular and plural)
+                        if "user interface" in combined_text or "designing ui" in combined_text or "design ui" in combined_text:
+                            rec["score"] = max(rec["score"], 0.95)
+                            print(f"DEBUG: UX/UI interface boost - new score: {rec['score']}")
+                    
+                    # Graphic Design boosts
+                    elif rec["name"] == "Graphic Design":
+                        # Visual design edge case
+                        if "visual design" in combined_text or ("photoshop" in combined_text and "design" in combined_text):
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Graphic visual design boost - new score: {rec['score']}")
+                        # Logo/branding edge case
+                        elif "logo" in combined_text or "brand identity" in combined_text or "branding" in combined_text:
+                            rec["score"] = max(rec["score"], 0.75)
+                            print(f"DEBUG: Graphic logo/branding boost - new score: {rec['score']}")
+                    
+                    # Civil Engineering boosts
+                    elif rec["name"] == "Civil Engineering":
+                        # EDGE CASE: Bridges/roads boost (check for singular and plural)
+                        if (("bridge" in combined_text or "bridges" in combined_text) or ("road" in combined_text or "roads" in combined_text)) and not is_architecture_context:
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Civil Engineering bridges/roads boost - new score: {rec['score']}")
+                    
+                    # Finance boosts
+                    elif rec["name"] == "Finance":
+                        # Finance/investment edge case
+                        if "finance" in combined_text or "investment" in combined_text or "financial" in combined_text:
+                            rec["score"] = max(rec["score"], 0.70)
+                            print(f"DEBUG: Finance boost - new score: {rec['score']}")
+                    
+                    # Penalize UX/UI when development/build keywords appear (designers don't BUILD apps, developers do)
+                    if rec["name"] == "UX/UI Design":
+                        build_match = any(keyword in combined_text for keyword in build_keywords)
+                        
+                        # Don't penalize UX/UI if it's architecture context
+                        if is_architecture_context:
+                            continue
+                        
+                        if build_match:
+                            rec["score"] = rec["score"] * 0.7  # 30% penalty
+                            print(f"DEBUG: UX/UI Design penalty applied (build context) - new score: {rec['score']}")
+                
+                # FORCE ADD Computer Science if tech/build keywords present but CS not in results
+                cs_in_results = any(rec["name"] == "Computer Science" for rec in filtered_final)
+                cs_match_global = any(keyword in combined_text for keyword in cs_keywords)
+                build_match_global = any(keyword in combined_text for keyword in build_keywords)
+                
+                # Only force add if NOT architecture context
+                if not cs_in_results and (cs_match_global or build_match_global) and not is_architecture_context:
+                    print(f"DEBUG: FORCE ADDING Computer Science (detected app/web/build keywords but CS not in ML predictions)")
+                    from ..databases.majors import MAJOR_DATABASE
+                    cs_data = MAJOR_DATABASE.get("Computer Science", {})
+                    cs_score = 0.75 if (cs_match_global and build_match_global) else 0.55
+                    filtered_final.append({
+                        "name": "Computer Science",
+                        "score": cs_score,
+                        "description": cs_data.get("description", ""),
+                        "career_paths": cs_data.get("career_paths", []),
+                        "source": "ML",
+                        "confidence": 0.0
+                    })
+                
+                # FORCE ADD Finance if finance/investment keywords present but Finance not in results
+                finance_in_results = any(rec["name"] == "Finance" for rec in filtered_final)
+                finance_keywords = ["finance", "investment", "financial", "banking", "portfolio", "stock"]
+                finance_match_global = any(keyword in combined_text for keyword in finance_keywords)
+                
+                if not finance_in_results and finance_match_global:
+                    print(f"DEBUG: FORCE ADDING Finance (detected finance/investment keywords but Finance not in ML predictions)")
+                    from ..databases.majors import MAJOR_DATABASE
+                    finance_data = MAJOR_DATABASE.get("Finance", {})
+                    filtered_final.append({
+                        "name": "Finance",
+                        "score": 0.70,
+                        "description": finance_data.get("description", ""),
+                        "career_paths": finance_data.get("career_paths", []),
+                        "source": "ML",
+                        "confidence": 0.0
+                    })
+                
+                # Re-sort after boosts
+                filtered_final.sort(key=lambda x: x["score"], reverse=True)
                 return filtered_final
             else:
                 print(f"ML confidence low ({top_conf:.3f}); blending with rule-based")

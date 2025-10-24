@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
 import GradeInputForm from '@/components/GradeInputForm'
+import RecommendationDashboard from '@/components/RecommendationDashboard'
+import { AnalysisResult } from '@/types'
 
 interface GradeAnalysisData {
   grades: Array<{ subject: string; score: number }>
@@ -16,6 +18,7 @@ export default function InputPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<{ name: string; email?: string } | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -73,8 +76,8 @@ export default function InputPage() {
         throw new Error('Failed to analyze data')
       }
       const result = await response.json()
+      setAnalysisResult(result)
       sessionStorage.setItem('analysisResult', JSON.stringify(result))
-      router.push('/results')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -137,24 +140,12 @@ export default function InputPage() {
 
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh', 
       background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
-      position: 'relative'
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
-      {/* Animated background */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: `
-          radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-          radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%)
-        `,
-        zIndex: -1
-      }} />
 
       {/* Header */}
       <header style={{ 
@@ -198,117 +189,111 @@ export default function InputPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section style={{ 
-        padding: '80px 24px',
-        textAlign: 'center',
-        position: 'relative'
-      }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ 
-            fontSize: 'clamp(2rem, 4vw, 3rem)', 
-            fontWeight: '700', 
-            marginBottom: '24px',
-            background: 'var(--gradient-primary)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            lineHeight: 1.5
-          }}>
-            AI-Powered Career Intelligence
-          </h2>
-          <p style={{ 
-            fontSize: '20px', 
-            color: 'var(--text-secondary)', 
-            marginBottom: '12px',
-            fontWeight: '500'
-          }}>
-            Cambodian BacII Edition
-          </p>
-          <p style={{ 
-            color: 'var(--text-muted)', 
-            fontSize: '18px',
-            lineHeight: 1.6,
-            maxWidth: '600px',
-            margin: '0 auto'
-          }}>
-            Discover your ideal majors, careers, and universities with advanced AI analysis of your academic profile and interests.
-          </p>
-        </div>
-      </section>
 
-      {/* Main Content */}
-      <main style={{ 
-        maxWidth: '1200px', 
-        margin: '0 auto', 
-        padding: '0 24px 80px'
-      }}>
-        {error && (
-        <div style={{
-          background: 'rgba(220, 53, 69, 0.1)', 
-          border: '1px solid var(--accent-error)', 
-          borderRadius: '12px', 
-          padding: '20px', 
-          marginBottom: '32px',
-          color: 'var(--accent-error)',
+        {/* Main Content */}
+        <main style={{ 
+          padding: '0',
+          flex: 1,
+          overflow: 'hidden',
           display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
+          flexDirection: 'column'
         }}>
-          <div style={{
-            width: '20px',
-            height: '20px',
-            borderRadius: '50%',
-            background: 'var(--accent-error)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white'
-          }}>
-            <X size={12} />
-          </div>
-          <span>{error}</span>
-        </div>
-        )}
-
-        <div className="card" style={{
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border-primary)',
-          borderRadius: '16px',
-          padding: '40px',
-          boxShadow: 'var(--shadow-primary)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: 'var(--gradient-primary)'
-          }} />
-          
-          <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-            <h3 style={{ 
-              fontSize: '24px', 
-              fontWeight: '600', 
-              marginBottom: '8px',
-              color: 'var(--text-primary)'
+          {error && (
+            <div style={{
+              background: 'rgba(220, 53, 69, 0.1)', 
+              border: '1px solid var(--accent-error)', 
+              borderRadius: '12px', 
+              padding: '20px', 
+              marginBottom: '32px',
+              color: 'var(--accent-error)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              position: 'absolute',
+              top: '20px',
+              left: '20px',
+              right: '20px',
+              zIndex: 10
             }}>
-              Analyze Your Academic Profile
-            </h3>
-            <p style={{ 
-              color: 'var(--text-secondary)',
-              fontSize: '16px'
-            }}>
-              Enter your grades and interests to get personalized recommendations
-            </p>
-          </div>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                background: 'var(--accent-error)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white'
+              }}>
+                <X size={12} />
+              </div>
+              <span>{error}</span>
+            </div>
+          )}
 
-          <GradeInputForm onSubmit={handleSubmit} loading={loading} />
-        </div>
-      </main>
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0" style={{ flex: 1, height: '100%' }}>
+            {/* Left Column - Recommendations (landing gradient) - Hidden on mobile until analysis */}
+            <div 
+              className={`min-h-full overflow-y-auto ${analysisResult ? 'block' : 'hidden lg:block'}`}
+              style={{
+                background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
+              }}
+            >
+              {analysisResult ? (
+                <div className="p-6">
+                  <div className="mb-6 text-center">
+                    <h3 className="text-xl font-bold text-white mb-2">
+                      Your AI Recommendations
+                    </h3>
+                    <p className="text-gray-300">
+                      Personalized insights based on your profile
+                    </p>
+                  </div>
+                  <RecommendationDashboard data={analysisResult} />
+                  <button 
+                    onClick={() => setAnalysisResult(null)}
+                    className="lg:hidden mt-8 w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+                  >
+                    Back to Input Form
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full p-6">
+                  <div className="text-center">
+                    <div className="w-20 h-20  flex items-center justify-center mx-auto mb-2 ">
+                      <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                      Ready for Analysis
+                    </h3>
+                    <p className="text-gray-300 max-w-sm mt-2">
+                      Fill out the form on the right to get your personalized career recommendations and academic insights.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Input Form - Hidden on mobile after analysis */}
+            <div className={`bg-[#111111] border-l border-[#1f1f1f] min-h-full overflow-y-auto ${analysisResult ? 'hidden lg:block' : 'block'}`}>
+              <div className="p-8">
+                <div className="mb-8 text-center">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    Academic Profile Analysis
+                  </h3>
+                  <p className="text-gray-300">
+                    Enter your grades and interests to get personalized recommendations
+                  </p>
+                </div>
+                
+                <GradeInputForm onSubmit={handleSubmit} loading={loading} />
+              </div>
+            </div>
+          </div>
+        </main>
     </div>
   )
 }

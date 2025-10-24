@@ -97,7 +97,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontSize: '14px',
               margin: 0
             }}>
-              Enter your numeric scores (0-{Math.max(...SUBJECTS.map(s => s.maxScore))})
+              Enter your BacII scores 
             </p>
           </div>
           

@@ -129,12 +129,7 @@ export default function Login() {
           <p style={{ color: '#cccccc' }}>Sign in to your account to continue</p>
         </div>
 
-        <div style={{
-          backgroundColor: '#111111',
-          border: '1px solid #333333',
-          borderRadius: '8px',
-          padding: '32px'
-        }}>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-lg p-8 hover:border-[#2a2a2a] transition-colors">
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {error && (
               <div style={{

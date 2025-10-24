@@ -35,7 +35,7 @@ export default function PerformanceChart({ subjects }: PerformanceChartProps) {
 
   const options = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
       y: { beginAtZero: true, max: 100 },
@@ -43,7 +43,7 @@ export default function PerformanceChart({ subjects }: PerformanceChartProps) {
   }
 
   return (
-    <div className="h-64">
+    <div style={{ width: '100%', height: '100%' }}>
       <Bar data={data} options={options} />
     </div>
   )

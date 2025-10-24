@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Ensure no black space */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* Clean Black Theme */
 :root {
   --bg-primary: #000000;
@@ -220,6 +227,125 @@ h4 { font-size: 1.25rem; }
   
   .grid-2-col {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile-only fixes for RecommendationDashboard */
+@media (max-width: 768px) {
+  /* Main dashboard container */
+  .rec-dashboard-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    gap: 20px !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Charts grid - transparent wrapper */
+  .rec-charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    width: 100% !important;
+    padding: 0 2px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Chart cards - match section inner content cards */
+  .rec-chart-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 20px !important;
+    height: 350px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-primary) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Chart card headers */
+  .rec-chart-card h3 {
+    font-size: 18px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* All other grids in dashboard */
+  .rec-dashboard-container > div > div[style*="display: 'grid'"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  
+  /* Section cards */
+  .rec-dashboard-container > div {
+    padding: 20px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Section cards inner content */
+  .rec-dashboard-container > div > div[style*="padding: '32px'"] {
+    padding: 20px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Individual cards inside sections */
+  .rec-dashboard-container div[style*="padding: '24px'"],
+  .rec-dashboard-container div[style*="padding: '20px'"] {
+    padding: 14px !important;
+    margin: 12px !important;
+  }
+  
+  /* All inner cards - more space */
+  .rec-major-card,
+  .rec-career-card,
+  .rec-university-card,
+  .rec-skill-card {
+    padding: 20px !important;
+    margin: 6px !important;
+  }
+  
+  /* Increase font sizes for mobile readability */
+  .rec-dashboard-container h2 {
+    font-size: 20px !important;
+    margin-bottom: 20px !important;
+    margin-top: 2px !important;
+    padding-top: 2px !important;
+    margin-left: 15px !important;
+  }
+  
+  .rec-dashboard-container h3 {
+    font-size: 16px !important;
+  }
+  
+  .rec-dashboard-container p {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+  
+  .rec-dashboard-container span {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* Match badges and source badges - smaller on mobile (must be after general span rule) */
+  .rec-dashboard-container .rec-match-badge {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .rec-dashboard-container .rec-source-badge {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
   }
 }
 

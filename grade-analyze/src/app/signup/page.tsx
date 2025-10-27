@@ -161,10 +161,10 @@ export default function Signup() {
             {error && (
               <div style={{
                 padding: '16px',
-                backgroundColor: '#2a1a1a',
-                border: '1px solid #cc0000',
+                backgroundColor: '#1a1111',
+                border: '1px solid #666666',
                 borderRadius: '8px',
-                color: '#ff6666',
+                color: '#ffffff',
                 fontSize: '14px',
                 opacity: isErrorVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease-out'

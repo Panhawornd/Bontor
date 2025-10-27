@@ -13,6 +13,10 @@ export default function LandingPage() {
   const [bacIIAnimation, setBacIIAnimation] = useState(null)
   const [nextStepAnimation, setNextStepAnimation] = useState(null)
   const [securityAnimation, setSecurityAnimation] = useState(null)
+  const [subjectAnalysisAnimation, setSubjectAnalysisAnimation] = useState(null)
+  const [recommendationEngineAnimation, setRecommendationEngineAnimation] = useState(null)
+  const [skillDevelopmentAnimation, setSkillDevelopmentAnimation] = useState(null)
+  const [cambodiaAnimation, setCambodiaAnimation] = useState(null)
   const [hasToken, setHasToken] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -46,6 +50,26 @@ export default function LandingPage() {
       .then(res => res.json())
       .then(data => setSecurityAnimation(data))
       .catch(err => console.error('Failed to load Security animation:', err))
+
+    fetch('/lottie/Subject-analysis.json')
+      .then(res => res.json())
+      .then(data => setSubjectAnalysisAnimation(data))
+      .catch(err => console.error('Failed to load Subject-analysis animation:', err))
+
+    fetch('/lottie/Recommendation-engine.json')
+      .then(res => res.json())
+      .then(data => setRecommendationEngineAnimation(data))
+      .catch(err => console.error('Failed to load Recommendation-engine animation:', err))
+
+    fetch('/lottie/Skill-development.json')
+      .then(res => res.json())
+      .then(data => setSkillDevelopmentAnimation(data))
+      .catch(err => console.error('Failed to load Skill-development animation:', err))
+
+    fetch('/lottie/Cambodia.json')
+      .then(res => res.json())
+      .then(data => setCambodiaAnimation(data))
+      .catch(err => console.error('Failed to load Cambodia animation:', err))
   }, [])
 
   const handleGetStarted = () => {
@@ -134,16 +158,16 @@ export default function LandingPage() {
           style={{ height: "calc(82vh - 80px)" }}
         />
         <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-5xl mx-auto"
-          >
+          <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              style={{ 
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitFontSmoothing: 'antialiased'
+              }}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-8"
             >
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -153,11 +177,16 @@ export default function LandingPage() {
             </motion.div>
             
             <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-              className="text-6xl md:text-8xl text-white tracking-tight leading-none" 
-              style={{ marginBottom: '3rem' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              style={{ 
+                marginBottom: '3rem',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitFontSmoothing: 'antialiased'
+              }}
+              className="text-6xl md:text-8xl text-white tracking-tight leading-none"
             >
               Your future starts
               <br />
@@ -167,18 +196,27 @@ export default function LandingPage() {
             </motion.h1>
             
             <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              style={{ 
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
+                WebkitFontSmoothing: 'antialiased'
+              }}
               className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
             </motion.p>
             
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              style={{ 
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden'
+              }}
               className="flex justify-center items-center"
             >
               <Button
@@ -190,21 +228,20 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </motion.div>
-          </motion.div>
+          </div>
           
           {/* Hero Visual - Bento Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-24 relative"
-          >
+          <div className="mt-24 relative" style={{ perspective: '1000px' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-6xl mx-auto">
               {/* Large Card */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                style={{ 
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
               >
                 <div className="relative">
@@ -237,9 +274,13 @@ export default function LandingPage() {
 
               {/* Small Card 1 */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+                style={{ 
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
               >
                 <div className="relative">
@@ -251,9 +292,13 @@ export default function LandingPage() {
 
               {/* Small Card 2 */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                style={{ 
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
               >
                 <div className="relative">
@@ -265,9 +310,13 @@ export default function LandingPage() {
 
               {/* Wide Card */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                style={{ 
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
+                }}
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
               >
                 <div className="relative h-full flex items-center justify-center">
@@ -288,7 +337,7 @@ export default function LandingPage() {
                 </div>
               </motion.div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -512,13 +561,25 @@ export default function LandingPage() {
                 <p className="text-gray-500 text-sm leading-relaxed mb-6">
                   See your strengths across Math, Physics, Chemistry, Biology, Khmer, English, and History with detailed performance breakdowns and insights.
                 </p>
-                <div className="mt-auto space-y-2">
-                  {['Mathematics: Strong', 'Physics: Moderate', 'English: Strong'].map((item, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      <span className="text-sm text-gray-600">{item}</span>
+                <div className="mt-auto flex flex-col gap-4">
+                  <div className="space-y-2">
+                    {['Mathematics: Strong', 'Physics: Moderate', 'English: Strong'].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {subjectAnalysisAnimation && (
+                    <div className="flex items-center justify-center">
+                      <Lottie 
+                        animationData={subjectAnalysisAnimation}
+                        loop={true}
+                        autoplay={true}
+                        style={{ width: '350px', height: '350px' }}
+                      />
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -531,14 +592,24 @@ export default function LandingPage() {
               transition={{ delay: 0.2 }}
               className="md:col-span-2 relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
-              <div className="relative">
+              <div className="relative h-full flex flex-col">
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <Award className="w-5 h-5 text-blue-500" />
                 </div>
                 <h3 className="text-white" style={{ marginBottom: '1rem' }}>Recommendation Engine</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Get majors, careers, and universities with match scores and detailed breakdowns
                 </p>
+                {recommendationEngineAnimation && (
+                  <div className="mt-auto flex justify-center items-center">
+                    <Lottie 
+                      animationData={recommendationEngineAnimation}
+                      loop={true}
+                      autoplay={true}
+                      style={{ width: '100%', maxWidth: 150, height: 'auto' }}
+                    />
+                  </div>
+                )}
               </div>
             </motion.div>
             
@@ -550,14 +621,24 @@ export default function LandingPage() {
               transition={{ delay: 0.3 }}
               className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
-              <div className="relative">
+              <div className="relative h-full flex flex-col">
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <TrendingUp className="w-5 h-5 text-blue-500" />
                 </div>
                 <h3 className="text-white" style={{ marginBottom: '1rem' }}>Skill Development</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Current vs target levels with improvement plans
                 </p>
+                {skillDevelopmentAnimation && (
+                  <div className="mt-auto flex justify-center items-center">
+                    <Lottie 
+                      animationData={skillDevelopmentAnimation}
+                      loop={true}
+                      autoplay={true}
+                      style={{ width: '100%', maxWidth: 220, height: 'auto' }}
+                    />
+                  </div>
+                )}
               </div>
             </motion.div>
             
@@ -569,14 +650,24 @@ export default function LandingPage() {
               transition={{ delay: 0.4 }}
               className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
-              <div className="relative">
+              <div className="relative h-full flex flex-col">
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <Globe className="w-5 h-5 text-blue-500" />
                 </div>
                 <h3 className="text-white" style={{ marginBottom: '1rem' }}>Cambodia Focused</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Specialized recommendations for Cambodian universities
                 </p>
+                {cambodiaAnimation && (
+                  <div className="mt-auto flex justify-center items-center">
+                    <Lottie 
+                      animationData={cambodiaAnimation}
+                      loop={true}
+                      autoplay={true}
+                      style={{ width: '100%', maxWidth: 150, height: 'auto' }}
+                    />
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>

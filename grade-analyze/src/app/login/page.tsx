@@ -15,11 +15,13 @@ export default function Login() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isErrorVisible, setIsErrorVisible] = useState(true)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setIsErrorVisible(true)
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -34,9 +36,19 @@ export default function Login() {
       } else {
         const data = await response.json()
         setError(data.error || 'Login failed')
+        setIsErrorVisible(true)
+        setTimeout(() => {
+          setIsErrorVisible(false)
+          setTimeout(() => setError(''), 300)
+        }, 5000)
       }
     } catch (err) {
       setError('Something went wrong. Please try again.')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(''), 300)
+      }, 5000)
     } finally {
       setLoading(false)
     }
@@ -138,7 +150,9 @@ export default function Login() {
                 border: '1px solid #666666',
                 borderRadius: '8px',
                 color: '#ffffff',
-                fontSize: '14px'
+                fontSize: '14px',
+                opacity: isErrorVisible ? 1 : 0,
+                transition: 'opacity 0.3s ease-out'
               }}>
                 {error}
               </div>

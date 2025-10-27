@@ -19,6 +19,7 @@ export default function InputPage() {
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<{ name: string; email?: string } | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
+  const [isErrorVisible, setIsErrorVisible] = useState(true)
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -64,6 +65,7 @@ export default function InputPage() {
   const handleSubmit = async (data: GradeAnalysisData) => {
     setLoading(true)
     setError(null)
+    setIsErrorVisible(true)
     try {
         const response = await fetch('/api/analyze', {
           method: 'POST',
@@ -80,6 +82,11 @@ export default function InputPage() {
       sessionStorage.setItem('analysisResult', JSON.stringify(result))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(null), 300)
+      }, 5000)
     } finally {
       setLoading(false)
     }
@@ -210,10 +217,14 @@ export default function InputPage() {
               alignItems: 'center',
               gap: '12px',
               position: 'absolute',
-              top: '20px',
-              left: '20px',
-              right: '20px',
-              zIndex: 10
+              top: '80px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '400px',
+              maxWidth: '90vw',
+              zIndex: 200,
+              opacity: isErrorVisible ? 1 : 0,
+              transition: 'opacity 0.3s ease-out'
             }}>
               <div style={{
                 width: '20px',
@@ -241,7 +252,7 @@ export default function InputPage() {
               }}
             >
               {analysisResult ? (
-                <div className="p-6">
+                <div className="p-8">
                   <div className="mb-6 text-center">
                     <h3 className="text-xl font-bold text-white mb-2">
                       Your AI Recommendations
@@ -259,7 +270,7 @@ export default function InputPage() {
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full p-6">
+                <div className="flex items-center justify-center h-full p-8">
                   <div className="text-center">
                     <div className="w-20 h-20  flex items-center justify-center mx-auto mb-2 ">
                       <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

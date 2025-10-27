@@ -17,14 +17,21 @@ export default function Signup() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isErrorVisible, setIsErrorVisible] = useState(true)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setIsErrorVisible(true)
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(''), 300)
+      }, 5000)
       setLoading(false)
       return
     }
@@ -45,9 +52,19 @@ export default function Signup() {
       } else {
         const data = await response.json()
         setError(data.error || 'Signup failed')
+        setIsErrorVisible(true)
+        setTimeout(() => {
+          setIsErrorVisible(false)
+          setTimeout(() => setError(''), 300)
+        }, 5000)
       }
     } catch (err) {
       setError('Something went wrong. Please try again.')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(''), 300)
+      }, 5000)
     } finally {
       setLoading(false)
     }
@@ -148,7 +165,9 @@ export default function Signup() {
                 border: '1px solid #cc0000',
                 borderRadius: '8px',
                 color: '#ff6666',
-                fontSize: '14px'
+                fontSize: '14px',
+                opacity: isErrorVisible ? 1 : 0,
+                transition: 'opacity 0.3s ease-out'
               }}>
                 {error}
               </div>

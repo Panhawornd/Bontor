@@ -235,17 +235,17 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
             }}
           >
             {loading ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '16px',
-                  height: '16px',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  borderTop: '2px solid white',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }} />
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <svg className="logo-spin" width="24" height="24" viewBox="-30 -30 201 233" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+                  <g>
+                    <path d="M110.464 0C127.032 0.000247877 140.464 13.4316 140.464 30V31.4922H92.9033V58.2891H49.9043V86.3154H0V30C0 13.4315 13.4315 1.61637e-06 30 0H110.464Z" fill="white"/>
+                  </g>
+                  <g>
+                    <path d="M30.5372 172.649C13.9687 172.67 0.453776 159.257 0.350835 142.689L0.341564 141.196L47.9011 141.134L47.7346 114.338L90.7336 114.282L90.5595 86.2549L140.464 86.1897L140.814 142.505C140.917 159.073 127.569 172.522 111 172.544L30.5372 172.649Z" fill="#3B82F6"/>
+                  </g>
+                </svg>
                 Analyzing Your Profile...
-              </div>
+              </span>
             ) : (
               'Analyze My Results'
             )}
@@ -253,12 +253,6 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </form>
   )
 }

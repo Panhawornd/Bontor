@@ -76,8 +76,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - image (public image files)
      * - lottie (public lottie animation files)
+     * - logo.svg (logo file)
      * - file.svg, globe.svg, next.svg, vercel.svg, window.svg (public assets)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|image|lottie|file.svg|globe.svg|next.svg|vercel.svg|window.svg).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|image|lottie|logo.svg|file.svg|globe.svg|next.svg|vercel.svg|window.svg).*)',
   ],
 }

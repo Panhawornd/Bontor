@@ -349,8 +349,16 @@ h4 { font-size: 1.25rem; }
   }
 }
 
-/* Loading spinner animation */
-@keyframes spin {
+
+
+/* Logo spin animation */
+@keyframes logoSpin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.logo-spin {
+  animation: logoSpin 0.8s linear infinite;
+}
+
+

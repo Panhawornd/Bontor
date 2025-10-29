@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import { Brain, TrendingUp, Target, Shield, CheckCircle2, BarChart3, Globe, Zap, ArrowRight, Award } from "lucide-react";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
+import InfiniteScroll from "@/components/InfiniteScroll";
 
 export default function LandingPage() {
   const router = useRouter()
@@ -255,17 +256,24 @@ export default function LandingPage() {
                     </div>
                   </div>
                   <div className="space-y-3">
-                    {[85, 92, 78].map((value, i) => (
-                      <div key={i} className="flex items-center gap-3">
+                    {[
+                      { value: 94, label: 'Recommendation Accuracy' },
+                      { value: 92, label: 'User Satisfaction' },
+                      { value: 95, label: 'University Match Success' }
+                    ].map((item, i) => (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-400">{item.label}</span>
+                          <span className="text-sm text-gray-500 w-12 text-right">{item.value}%</span>
+                        </div>
                         <div className="flex-1 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: `${value}%` }}
+                            animate={{ width: `${item.value}%` }}
                             transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
                             className="h-full bg-blue-500"
                           />
                         </div>
-                        <span className="text-sm text-gray-500 w-12">{value}%</span>
                       </div>
                     ))}
                   </div>
@@ -286,7 +294,7 @@ export default function LandingPage() {
                 <div className="relative">
                         <Zap className="w-8 h-8 text-blue-500 mb-4" />
                   <h4 className="text-white" style={{ marginBottom: '1rem' }}>Instant Insights</h4>
-                  <p className="text-sm text-gray-500">Real-time analysis in seconds</p>
+                  <p className="text-sm text-gray-500">Real-time analysis in seconds upload your grades and instantly see trends, strengths, and next‑step recommendations. Get subject-level breakdowns, targeted improvement tips, and suggested majors without waiting.</p>
                 </div>
               </motion.div>
 
@@ -341,10 +349,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Simple Divider */}
-      <div className="relative h-16 flex items-center justify-center z-20">
-        <div className="w-64 h-px bg-gradient-to-r from-transparent via-gray-400/60 to-transparent shadow-[0_0_8px_rgba(156,163,175,0.3)]" />
-      </div>
+      
       
 
       {/* Dark gradient background from hero to footer */}
@@ -438,10 +443,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Simple Divider */}
-      <div className="relative h-15 flex items-center justify-center">
-        <div className="w-64 h-px bg-gradient-to-r from-transparent via-gray-400/60 to-transparent shadow-[0_0_8px_rgba(156,163,175,0.3)]" />
-      </div>
+      
 
       {/* Three Steps Process */}
       <section className="py-32 relative">
@@ -511,6 +513,12 @@ export default function LandingPage() {
                   
                   <h3 className="text-white" style={{ marginBottom: '1rem' }}>{step.title}</h3>
                   <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
+                  {/* Image in bordered container */}
+                  <div className="mt-4 h-80 rounded-lg border border-[#2a2a2a] bg-transparent overflow-hidden">
+                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+                      {`Image ${idx + 1}`}
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -518,10 +526,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Simple Divider */}
-      <div className="relative h-15 flex items-center justify-center">
-        <div className="w-64 h-px bg-gradient-to-r from-transparent via-gray-400/60 to-transparent shadow-[0_0_8px_rgba(156,163,175,0.3)]" />
-      </div>
+      
 
       {/* Feature Highlights - Bento Grid */}
       <section className="py-32 relative">
@@ -669,6 +674,121 @@ export default function LandingPage() {
                   </div>
                 )}
               </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* University Showcase Section */}
+      <section className="py-32 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="text-center mb-20"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span className="text-sm text-gray-500">Partner Universities</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+              Top Cambodian Universities
+            </h2>
+            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+              Based on your recommended major, we match you with the best universities in Cambodia
+            </p>
+          </motion.div>
+
+          {/* 2 Column Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Description */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="space-y-6"
+            >
+              <div className="space-y-4">
+                <h3 className="text-3xl md:text-4xl text-white font-bold">
+                  Your Perfect University Match
+                </h3>
+                <p className="text-gray-400 text-lg leading-relaxed">
+                  Our AI-powered system analyzes your academic performance and career goals to recommend the most suitable universities for your chosen major. All partner institutions are accredited and recognized leaders in their fields.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg  bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 mt-1">
+                    <CheckCircle2 className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Accredited Programs</h4>
+                    <p className="text-gray-500 text-sm">All universities offer internationally recognized degrees and certifications</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg  bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 mt-1">
+                    <Award className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Specialized Excellence</h4>
+                    <p className="text-gray-500 text-sm">Each institution excels in specific fields matching your interests</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg  bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 mt-1">
+                    <Target className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-semibold mb-1">Career-Focused</h4>
+                    <p className="text-gray-500 text-sm">Strong industry connections and high graduate employment rates</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right Column - Infinite Scroll */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative mt-6"
+            >
+              <InfiniteScroll
+                items={[
+                  { content: <div className="text-white text-xs p-2">Cambodia Academy of Digital Technology (CADT)</div> },
+                  { content: <div className="text-white text-xs p-2">Royal University of Phnom Penh (RUPP)</div> },
+                  { content: <div className="text-white text-xs p-2">Institute of Technology of Cambodia (ITC)</div> },
+                  { content: <div className="text-white text-xs p-2">Phnom Penh International University (PPIU)</div> },
+                  { content: <div className="text-white text-xs p-2">Western University</div> },
+                  { content: <div className="text-white text-xs p-2">Royal University of Law and Economics (RULE)</div> },
+                  { content: <div className="text-white text-xs p-2">Build Bright University (BBU)</div> },
+                  { content: <div className="text-white text-xs p-2">University of Cambodia (UC)</div> },
+                  { content: <div className="text-white text-xs p-2">American University of Phnom Penh (AUPP)</div> },
+                  { content: <div className="text-white text-xs p-2">National University of Management (NUM)</div> },
+                  { content: <div className="text-white text-xs p-2">Royal University of Fine Arts (RUFA)</div> },
+                  { content: <div className="text-white text-xs p-2">University of Health Sciences (UHS)</div> },
+                  { content: <div className="text-white text-xs p-2">Paññāsāstra University of Cambodia (PUC)</div> },
+                  { content: <div className="text-white text-xs p-2">Paragon International University</div> },
+                  { content: <div className="text-white text-xs p-2">University of Puthisastra (UP)</div> },
+                  { content: <div className="text-white text-xs p-2">National Polytechnic Institute of Cambodia (NPIC)</div> },
+                ]}
+                isTilted={true}
+                tiltDirection="right"
+                autoplay={true}
+                autoplaySpeed={0.3}
+                autoplayDirection="down"
+                pauseOnHover={true}
+                itemMinHeight={80}
+                width="100%"
+                maxHeight="600px"
+              />
             </motion.div>
           </div>
         </div>

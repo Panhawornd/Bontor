@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.4.7",
     "framer-motion": "^12.23.22",
+    "gsap": "^3.13.0",
     "jsonwebtoken": "^9.0.2",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.545.0",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/gsap": "^1.20.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

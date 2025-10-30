@@ -782,7 +782,7 @@ export default function LandingPage() {
                 isTilted={true}
                 tiltDirection="right"
                 autoplay={true}
-                autoplaySpeed={0.3}
+                autoplaySpeed={2}
                 autoplayDirection="down"
                 pauseOnHover={true}
                 itemMinHeight={80}

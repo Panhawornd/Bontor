@@ -33,7 +33,7 @@ export default function InfiniteScroll({
   isTilted = false,
   tiltDirection = 'left',
   autoplay = false,
-  autoplaySpeed = 0.5,
+  autoplaySpeed = 0.6,
   autoplayDirection = 'down',
   pauseOnHover = false
 }: InfiniteScrollProps) {

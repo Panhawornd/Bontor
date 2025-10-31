@@ -6,12 +6,14 @@ import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor } from "lucide-react";
 import dynamic from 'next/dynamic';
+import Lottie from "lottie-react";
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
 export default function AboutPage() {
   const router = useRouter();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [confusionAnimation, setConfusionAnimation] = useState(null);
 
   useLayoutEffect(() => {
     // Scroll to top immediately before browser paints
@@ -24,6 +26,12 @@ export default function AboutPage() {
     const cookies = document.cookie;
     const hasAuthToken = cookies.includes('auth-token=');
     setHasToken(hasAuthToken);
+
+    // Load confusion Lottie animation
+    fetch('/lottie/confusion.json')
+      .then(res => res.json())
+      .then(data => setConfusionAnimation(data))
+      .catch(err => console.error('Error loading confusion animation:', err));
   }, []);
 
   const teamMembers = [
@@ -89,34 +97,6 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
     router.push('/login');
   };
 
-  const [isFirstSectionVisible, setIsFirstSectionVisible] = useState(false);
-  const [isSecondSectionVisible, setIsSecondSectionVisible] = useState(false);
-
-  useEffect(() => {
-    // Check if sections are already visible on mount (after scroll to top)
-    const checkVisibility = () => {
-      // First section
-      const firstSection = document.querySelector('[data-section="our-story"]');
-      if (firstSection) {
-        const rect = firstSection.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-        setIsFirstSectionVisible(isVisible);
-      }
-      
-      // Second section
-      const secondSection = document.querySelector('[data-section="after-bacii"]');
-      if (secondSection) {
-        const rect = secondSection.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-        setIsSecondSectionVisible(isVisible);
-      }
-    };
-    
-    // Check after scroll to top completes
-    const timeout = setTimeout(checkVisibility, 50);
-    
-    return () => clearTimeout(timeout);
-  }, []);
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
@@ -194,12 +174,12 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
       />
 
       {/* Our Story Section */}
-      <section className="pt-32 pb-24 relative z-10" data-section="our-story" style={{ willChange: 'auto' }}>
+      <section className="pt-32 pb-24 relative z-10" data-section="our-story">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal
             className="text-center mb-10"
-            immediatelyVisible={isFirstSectionVisible}
             rootMargin="-50px"
+            threshold={0.2}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -212,9 +192,9 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 
           <Reveal
             className="max-w-4xl mx-auto relative z-10 text-center"
-            immediatelyVisible={isFirstSectionVisible}
             delay={100}
             rootMargin="-50px"
+            threshold={0.2}
           >
             <div className="space-y-1 text-gray-400 text-lg leading-relaxed text-center">
               <p>
@@ -237,8 +217,8 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
           {/* Section Header */}
           <Reveal
             className="text-center mb-10"
-            immediatelyVisible={isSecondSectionVisible}
             rootMargin="-50px"
+            threshold={0.2}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -270,13 +250,16 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               translateY={true}
               rootMargin="-50px"
             >
-              {/* Confused sign image on the left */}
+              {/* Confusion Lottie animation on the left */}
               <div className="flex-shrink-0 flex items-center justify-center">
-                <img 
-                  src="/image/confusion-sign.png" 
-                  alt="Confused sign" 
-                  className="w-full max-w-md"
-                />
+                {confusionAnimation && (
+                  <Lottie
+                    animationData={confusionAnimation}
+                    loop={true}
+                    autoplay={true}
+                    style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
+                  />
+                )}
               </div>
 
               {/* Questions as bullet points on the right */}

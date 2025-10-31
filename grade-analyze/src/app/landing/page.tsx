@@ -260,7 +260,7 @@ export default function LandingPage() {
               {/* Small Card 1 */}
               <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
-                delay={500}
+                delay={400}
                 rootMargin="-100px"
                 threshold={0.2}
               >

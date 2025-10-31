@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor } from "lucide-react";
@@ -34,7 +34,9 @@ export default function AboutPage() {
       alignment: "left",
       description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`,
+      hasCustomImage: true,
+      imagePath: "/image/Panhawornd.png"
     },
     {
       name: "Deng Rithypanha",
@@ -386,6 +388,8 @@ type TeamMember = {
   icon: typeof Code;
   alignment: string;
   description: string;
+  hasCustomImage?: boolean;
+  imagePath?: string;
 };
 
 function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: number; imageOnLeft: boolean }) {
@@ -413,7 +417,7 @@ function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: num
                           fov={42}
                           onHoverChange={setIsHovered}
                         />
-                        {member.name === "Phan Panhawornd" && (
+                        {member.hasCustomImage && member.imagePath && (
                           <div
                             className="absolute overflow-hidden"
                             style={{ 
@@ -438,7 +442,7 @@ function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: num
                             }}
                           >
                             <img 
-                              src="/image/Panhawornd.png" 
+                              src={member.imagePath}
                               alt={member.name}
                               className="w-full h-full object-contain"
                               style={{ 

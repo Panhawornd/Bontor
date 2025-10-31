@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Button from "@/components/ui/Button";
+import Reveal from "@/components/Reveal";
 import { Brain, TrendingUp, Target, Shield, CheckCircle2, BarChart3, Globe, Zap, ArrowRight, Award } from "lucide-react";
-import { motion } from "framer-motion";
 import Lottie from "lottie-react";
 import InfiniteScroll from "@/components/InfiniteScroll";
 
@@ -160,65 +160,42 @@ export default function LandingPage() {
         />
         <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
           <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              style={{ 
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden',
-                WebkitFontSmoothing: 'antialiased'
-              }}
+            <Reveal
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-8"
+              rootMargin="-100px"
+              threshold={0.2}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-400">
                 AI-Powered Career Guidance for Cambodian Students
               </span>
-            </motion.div>
+            </Reveal>
             
-            <motion.h1 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              style={{ 
-                marginBottom: '3rem',
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden',
-                WebkitFontSmoothing: 'antialiased'
-              }}
-              className="text-6xl md:text-8xl text-white tracking-tight leading-none"
-            >
-              Your future starts
-              <br />
-              <span className="text-white">
-                with insight
-              </span>
-            </motion.h1>
+            <Reveal delay={100} rootMargin="-100px" threshold={0.2}>
+              <h1
+                className="text-6xl md:text-8xl text-white tracking-tight leading-none"
+                style={{ marginBottom: '3rem' }}
+              >
+                Your future starts
+                <br />
+                <span className="text-white">with insight</span>
+              </h1>
+            </Reveal>
             
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              style={{ 
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden',
-                WebkitFontSmoothing: 'antialiased'
-              }}
+            <Reveal
               className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
+              delay={200}
+              rootMargin="-100px"
+              threshold={0.2}
             >
               Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
-            </motion.p>
+            </Reveal>
             
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.45 }}
-              style={{ 
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden'
-              }}
+            <Reveal
               className="flex justify-center items-center"
+              delay={300}
+              rootMargin="-100px"
+              threshold={0.2}
             >
               <Button
                 onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
@@ -228,22 +205,18 @@ export default function LandingPage() {
                 {hasToken ? 'Start Analysis' : 'Get Started'}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </motion.div>
+            </Reveal>
           </div>
           
           {/* Hero Visual - Bento Grid */}
           <div className="mt-24 relative" style={{ perspective: '1000px' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-6xl mx-auto">
               {/* Large Card */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                style={{ 
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden'
-                }}
+              <Reveal
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
+                delay={400}
+                rootMargin="-100px"
+                threshold={0.2}
               >
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
@@ -267,65 +240,57 @@ export default function LandingPage() {
                           <span className="text-sm text-gray-500 w-12 text-right">{item.value}%</span>
                         </div>
                         <div className="flex-1 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${item.value}%` }}
-                            transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
-                            className="h-full bg-blue-500"
+                          <div
+                            className="h-full bg-blue-500 progress-bar-smooth"
+                            style={{
+                              '--target-width': `${item.value}%`,
+                              width: '0%',
+                              animation: `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${0.5 + i * 0.15}s forwards`,
+                              transformOrigin: 'left',
+                              willChange: 'width'
+                            } as React.CSSProperties & { '--target-width': string }}
                           />
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </Reveal>
 
               {/* Small Card 1 */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
-                style={{ 
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden'
-                }}
+              <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
+                delay={500}
+                rootMargin="-100px"
+                threshold={0.2}
               >
                 <div className="relative">
                         <Zap className="w-8 h-8 text-blue-500 mb-4" />
                   <h4 className="text-white" style={{ marginBottom: '1rem' }}>Instant Insights</h4>
                   <p className="text-sm text-gray-500">Real-time analysis in seconds upload your grades and instantly see trends, strengths, and next‑step recommendations. Get subject-level breakdowns, targeted improvement tips, and suggested majors without waiting.</p>
                 </div>
-              </motion.div>
+              </Reveal>
 
               {/* Small Card 2 */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.8 }}
-                style={{ 
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden'
-                }}
+              <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
+                delay={400}
+                rootMargin="-100px"
+                threshold={0.2}
               >
                 <div className="relative">
                         <Target className="w-8 h-8 text-blue-500 mb-4" />
                   <h4 className="text-white" style={{ marginBottom: '1rem' }}>92% Accuracy</h4>
                   <p className="text-sm text-gray-500">Average match rate</p>
                 </div>
-              </motion.div>
+              </Reveal>
 
               {/* Wide Card */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-                style={{ 
-                  transform: 'translateZ(0)',
-                  backfaceVisibility: 'hidden'
-                }}
+              <Reveal
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
+                delay={400}
+                rootMargin="-100px"
+                threshold={0.2}
               >
                 <div className="relative h-full flex items-center justify-center">
                   <div className="grid grid-cols-3 gap-25 justify-items-center">
@@ -343,7 +308,7 @@ export default function LandingPage() {
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </Reveal>
             </div>
           </div>
         </div>
@@ -365,12 +330,7 @@ export default function LandingPage() {
       {/* Key Benefits */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
+          <Reveal className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Features</span>
@@ -381,7 +341,7 @@ export default function LandingPage() {
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               Built specifically for Cambodian BacII students with cutting-edge AI technology
             </p>
-          </motion.div>
+          </Reveal>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
@@ -410,12 +370,10 @@ export default function LandingPage() {
                 lottie: securityAnimation
               }
             ].map((benefit, idx) => (
-              <motion.div
+              <Reveal
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
+                translateY={true}
+                delay={idx * 100}
                 className="group"
               >
                 <div className="relative h-full p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors overflow-hidden">
@@ -437,7 +395,7 @@ export default function LandingPage() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -448,12 +406,7 @@ export default function LandingPage() {
       {/* Three Steps Process */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6 relative">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
+          <Reveal className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Simple Process</span>
@@ -464,7 +417,7 @@ export default function LandingPage() {
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               From grades to guidance in minutes
             </p>
-          </motion.div>
+          </Reveal>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {/* Connecting Line */}
@@ -490,12 +443,10 @@ export default function LandingPage() {
                 icon: Target
               }
             ].map((step, idx) => (
-              <motion.div
+              <Reveal
                 key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.2 }}
+                translateY={true}
+                delay={idx * 200}
                 className="relative"
               >
                 <div className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group">
@@ -520,7 +471,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -531,12 +482,7 @@ export default function LandingPage() {
       {/* Feature Highlights - Bento Grid */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
+          <Reveal className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Comprehensive</span>
@@ -547,15 +493,13 @@ export default function LandingPage() {
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               Everything you need to make informed decisions about your future
             </p>
-          </motion.div>
+          </Reveal>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {/* Large Feature 1 */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
+            <Reveal
+              scale={true}
+              delay={100}
               className="md:col-span-2 md:row-span-2 relative p-8 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
               <div className="relative h-full flex flex-col">
@@ -587,14 +531,12 @@ export default function LandingPage() {
                   )}
                 </div>
               </div>
-            </motion.div>
+            </Reveal>
             
             {/* Small Feature 1 */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+            <Reveal
+              scale={true}
+              delay={200}
               className="md:col-span-2 relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
               <div className="relative h-full flex flex-col">
@@ -616,14 +558,12 @@ export default function LandingPage() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </Reveal>
             
             {/* Small Feature 2 */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
+            <Reveal
+              scale={true}
+              delay={300}
               className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
               <div className="relative h-full flex flex-col">
@@ -645,14 +585,12 @@ export default function LandingPage() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </Reveal>
             
             {/* Small Feature 3 */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
+            <Reveal
+              scale={true}
+              delay={400}
               className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group overflow-hidden"
             >
               <div className="relative h-full flex flex-col">
@@ -674,7 +612,7 @@ export default function LandingPage() {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -682,12 +620,7 @@ export default function LandingPage() {
       {/* University Showcase Section */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
+          <Reveal className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Partner Universities</span>
@@ -698,16 +631,13 @@ export default function LandingPage() {
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               Based on your recommended major, we match you with the best universities in Cambodia
             </p>
-          </motion.div>
+          </Reveal>
 
           {/* 2 Column Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Description */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+            <Reveal
+              translateX={-20}
               className="space-y-6"
             >
               <div className="space-y-4">
@@ -750,14 +680,11 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </Reveal>
 
             {/* Right Column - Infinite Scroll */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+            <Reveal
+              translateX={20}
               className="relative mt-6"
             >
               <InfiniteScroll
@@ -789,7 +716,7 @@ export default function LandingPage() {
                 width="100%"
                 maxHeight="600px"
               />
-            </motion.div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -797,11 +724,7 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-32 relative">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <Reveal translateY={true}>
             <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
               Ready to discover your path?
             </h2>
@@ -818,7 +741,7 @@ export default function LandingPage() {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 

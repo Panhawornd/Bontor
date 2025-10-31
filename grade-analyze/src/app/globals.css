@@ -361,4 +361,30 @@ h4 { font-size: 1.25rem; }
   animation: logoSpin 0.8s linear infinite;
 }
 
+/* Reveal animation - IntersectionObserver based */
+.reveal {
+  opacity: 0;
+  transform: translateY(var(--translate-y, 0)) translateX(var(--translate-x, 0)) scale(var(--scale, 1));
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0) translateX(0) scale(1);
+}
+
+/* Progress bar animation */
+@keyframes progressFill {
+  from {
+    width: 0;
+  }
+  to {
+    width: var(--target-width, 0%);
+  }
+}
+
+.progress-bar-smooth {
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 

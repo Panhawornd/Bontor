@@ -1,0 +1,183 @@
+# CodeRabbit Configuration
+# Security-focused code review settings for production readiness
+# Documentation: https://docs.coderabbit.ai
+
+# Review profile: assertive for comprehensive security checks
+review_profile: assertive
+
+# Language setting
+language: en
+
+# Path configurations
+paths:
+  include:
+    - grade-analyze/src/**
+    - ml-service/app/**
+    - grade-analyze/package.json
+    - ml-service/requirements.txt
+  exclude:
+    - grade-analyze/node_modules/**
+    - grade-analyze/.next/**
+    - ml-service/venv/**
+    - ml-service/__pycache__/**
+    - ml-service/models/*.pkl
+    - grade-analyze/tsconfig.tsbuildinfo
+    - "**/*.test.ts"
+    - "**/*.test.tsx"
+    - "**/*.spec.ts"
+    - "**/*.spec.tsx"
+    - "**/test_*.py"
+    - "**/*_test.py"
+
+# Review instructions - Security-focused guidelines
+review_instructions: |
+  ## Security Review Guidelines
+  
+  ### Critical Security Checks
+  1. **Authentication & Authorization**
+     - Verify all API endpoints require proper authentication
+     - Check for proper authorization checks before sensitive operations
+     - Ensure JWT tokens are validated and not hardcoded
+     - Verify password hashing uses bcrypt or similar secure methods
+  
+  2. **Input Validation**
+     - All user inputs must be validated and sanitized
+     - Check for SQL injection risks in database queries
+     - Verify XSS prevention in React components
+     - Ensure proper Zod schema validation for API routes
+  
+  3. **Secrets Management**
+     - Never hardcode passwords, API keys, or tokens
+     - Use environment variables for all sensitive data
+     - Check .env files are properly gitignored
+  
+  4. **Error Handling**
+     - Errors should not expose sensitive information
+     - Implement proper error logging without leaking stack traces
+     - Use appropriate HTTP status codes
+  
+  5. **CORS & Security Headers**
+     - Verify CORS is configured with specific origins, not wildcards
+     - Check security headers are properly set
+     - Ensure HTTPS is enforced in production
+  
+  6. **Dependency Security**
+     - Flag outdated dependencies with known vulnerabilities
+     - Verify package.json and requirements.txt dependencies are secure
+     - Check for deprecated packages
+  
+  7. **Database Security**
+     - Use parameterized queries to prevent SQL injection
+     - Verify Prisma queries are properly parameterized
+     - Check database connection strings use environment variables
+  
+  8. **API Security**
+     - Verify rate limiting is implemented
+     - Check request size limits
+     - Ensure proper authentication on all endpoints
+  
+  ### Code Quality for Production
+  - Type safety: Use TypeScript strict mode
+  - Error boundaries: Implement React error boundaries
+  - Async handling: Proper async/await error handling
+  - Memory leaks: Check for potential memory leaks
+  - Performance: Optimize database queries and API calls
+  
+  ### Best Practices
+  - Follow SOLID principles
+  - Keep functions small and focused
+  - Use meaningful variable names
+  - Implement proper logging (no console.log in production)
+  - Document complex logic
+
+# Path-based review instructions
+path_based_instructions:
+  # TypeScript/React files
+  - path: "grade-analyze/src/**/*.{ts,tsx}"
+    instructions: |
+      - Check for React security best practices
+      - Verify no dangerouslySetInnerHTML usage without sanitization
+      - Ensure proper TypeScript types are used
+      - Check for proper error boundaries
+      - Verify environment variables are used, not hardcoded values
+      - Check for XSS vulnerabilities in user-generated content
+  
+  # API routes
+  - path: "grade-analyze/src/app/api/**/*.ts"
+    instructions: |
+      - Verify authentication is required for all routes
+      - Check input validation using Zod schemas
+      - Ensure proper error handling without exposing sensitive data
+      - Verify database queries use Prisma parameterized queries
+      - Check for rate limiting implementation
+      - Ensure CORS is properly configured
+  
+  # Python ML service
+  - path: "ml-service/app/**/*.py"
+    instructions: |
+      - Check for proper input validation in Pydantic models
+      - Verify no hardcoded secrets or credentials
+      - Ensure proper error handling in FastAPI endpoints
+      - Check for SQL injection risks if using raw queries
+      - Verify environment variables for configuration
+      - Check type hints are used for type safety
+  
+  # Authentication files
+  - path: "grade-analyze/src/lib/auth.ts"
+    instructions: |
+      - Verify JWT tokens are properly signed and validated
+      - Check password hashing uses bcryptjs
+      - Ensure tokens expire properly
+      - Verify no secrets are hardcoded
+      - Check for proper error handling
+
+# Code guidelines
+code_guidelines:
+  - name: "No hardcoded secrets"
+    pattern: "(password|secret|key|token|api_key)\\s*[:=]\\s*['\"][^'\"]+['\"]"
+    severity: critical
+    message: "Hardcoded secrets detected. Use environment variables instead."
+  
+  - name: "SQL injection risk"
+    pattern: "(query|execute|raw)\\s*\\(.*\\$|query\\s*\\(.*\\+)"
+    severity: high
+    message: "Potential SQL injection. Use parameterized queries."
+  
+  - name: "XSS risk"
+    pattern: "dangerouslySetInnerHTML"
+    severity: high
+    message: "XSS vulnerability risk. Sanitize HTML before rendering."
+  
+  - name: "Missing input validation"
+    pattern: "req\\.(body|query|params)(?!.*zod|.*validate|.*parse)"
+    context: "route|api"
+    severity: medium
+    message: "Input validation missing. Use Zod schemas for validation."
+  
+  - name: "Error information leak"
+    pattern: "(res\\.send|res\\.json|throw).*\\.(message|stack|error)"
+    severity: medium
+    message: "Error may leak sensitive information. Sanitize error responses."
+
+# Pull request settings
+pull_request:
+  # Generate summary of review
+  summary: true
+  publish_summary: true
+  
+  # Auto-request review on security issues
+  auto_review_on_security: true
+  
+  # Comment settings
+  min_severity_for_comment: medium
+  
+  # Block merge on critical security issues (optional)
+  # Uncomment to block PRs with critical issues
+  # block_on_critical: true
+
+# Dependency scanning
+dependency_scanning:
+  enabled: true
+  check_vulnerabilities: true
+  check_outdated: true
+  security_advisories: true

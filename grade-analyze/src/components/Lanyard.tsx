@@ -51,10 +51,11 @@ function SimpleCard() {
       const targetRotation = hovered ? 0.1 : 0;
       const targetScale = hovered ? 1.05 : 1;
       
-      groupRef.current.rotation.y += (targetRotation - groupRef.current.rotation.y) * 0.1;
-      groupRef.current.scale.x += (targetScale - groupRef.current.scale.x) * 0.1;
-      groupRef.current.scale.y += (targetScale - groupRef.current.scale.y) * 0.1;
-      groupRef.current.scale.z += (targetScale - groupRef.current.scale.z) * 0.1;
+      groupRef.current.rotation.y += (targetRotation - groupRef.current.rotation.y) * 0.15;
+      const scaleLerp = 0.15;
+      groupRef.current.scale.x += (targetScale - groupRef.current.scale.x) * scaleLerp;
+      groupRef.current.scale.y += (targetScale - groupRef.current.scale.y) * scaleLerp;
+      groupRef.current.scale.z += (targetScale - groupRef.current.scale.z) * scaleLerp;
     }
   });
 
@@ -109,11 +110,13 @@ export default function Lanyard({
     <div className="relative z-0 w-full h-full" style={{ width: '100%', height: '100%' }}>
       <Canvas
         camera={{ position: position, fov: fov }}
-        gl={{ alpha: transparent }}
+        gl={{ alpha: transparent, powerPreference: 'high-performance', antialias: true }}
         onCreated={({ gl }) => {
           gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
         }}
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        dpr={[1, 2]}
+        performance={{ min: 0.8 }}
+        style={{ width: '100%', height: '100%', display: 'block', willChange: 'auto' }}
       >
         <ambientLight intensity={2} />
         <directionalLight position={[2, 2, 5]} intensity={1.5} />

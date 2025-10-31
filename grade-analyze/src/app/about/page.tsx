@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useLayoutEffect } from 'react';
 import Button from "@/components/ui/Button";
-import { motion } from "framer-motion";
-import { Brain, Code, Database, Monitor } from "lucide-react";
+import Reveal from "@/components/Reveal";
+import { Code, Database, Monitor } from "lucide-react";
 import dynamic from 'next/dynamic';
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
@@ -87,8 +87,37 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
     router.push('/login');
   };
 
+  const [isFirstSectionVisible, setIsFirstSectionVisible] = useState(false);
+  const [isSecondSectionVisible, setIsSecondSectionVisible] = useState(false);
+
+  useEffect(() => {
+    // Check if sections are already visible on mount (after scroll to top)
+    const checkVisibility = () => {
+      // First section
+      const firstSection = document.querySelector('[data-section="our-story"]');
+      if (firstSection) {
+        const rect = firstSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        setIsFirstSectionVisible(isVisible);
+      }
+      
+      // Second section
+      const secondSection = document.querySelector('[data-section="after-bacii"]');
+      if (secondSection) {
+        const rect = secondSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+        setIsSecondSectionVisible(isVisible);
+      }
+    };
+    
+    // Check after scroll to top completes
+    const timeout = setTimeout(checkVisibility, 50);
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen bg-black relative overflow-hidden" style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}>
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -148,8 +177,8 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
       </nav>
 
       {/* Subtle Gradient Orbs */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" style={{ willChange: 'auto', transform: 'translateZ(0)' }} />
+      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" style={{ willChange: 'auto', transform: 'translateZ(0)' }} />
 
       {/* Dark gradient background */}
       <div
@@ -157,18 +186,18 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
         style={{ 
           top: 0,
           bottom: 0,
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
+          background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
+          willChange: 'auto'
         }}
       />
 
       {/* Our Story Section */}
-      <section className="pt-32 pb-24 relative z-10">
+      <section className="pt-32 pb-24 relative z-10" data-section="our-story" style={{ willChange: 'auto' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+          <Reveal
             className="text-center mb-10"
+            immediatelyVisible={isFirstSectionVisible}
+            rootMargin="-50px"
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -177,13 +206,13 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             <h2 className="text-5xl md:text-6xl text-white mb-8">
               Who We Are
             </h2>
-          </motion.div>
+          </Reveal>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+          <Reveal
             className="max-w-4xl mx-auto relative z-10 text-center"
+            immediatelyVisible={isFirstSectionVisible}
+            delay={100}
+            rootMargin="-50px"
           >
             <div className="space-y-1 text-gray-400 text-lg leading-relaxed text-center">
               <p>
@@ -196,29 +225,106 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 Through AI-powered analysis and comprehensive guidance, we aim to bridge the gap between academic achievement and career decisions, helping every student make informed choices about their future.
               </p>
             </div>
-          </motion.div>
+          </Reveal>
         </div>
       </section>
 
-      {/*True After BacII Story*/}
-      <section className="py-32 relative z-10">
-        <div>
-          
+      {/* After BacII Story */}
+      <section className="py-32 relative z-10" data-section="after-bacii">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Header */}
+          <Reveal
+            className="text-center mb-10"
+            immediatelyVisible={isSecondSectionVisible}
+            rootMargin="-50px"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span className="text-sm text-gray-500">Our Journey</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl text-white mb-8">
+              After BacII
+            </h2>
+          </Reveal>
+
+          <div className="space-y-8">
+            {/* Main content */}
+            <Reveal
+              className="text-center max-w-4xl mx-auto"
+              delay={100}
+              rootMargin="-50px"
+            >
+              <p className="text-gray-400 text-lg leading-relaxed mb-6">
+                Finishing the BacII exam is one of the biggest milestones in a student's life but it also comes with uncertainty. Many students feel lost, unsure of what major to choose, which university to apply to, or what career path fits them best.
+              </p>
+              <p className="text-gray-300 text-lg leading-relaxed font-medium mb-6">
+                We've been there too. After completing our BacII exams, we faced the same questions:
+              </p>
+            </Reveal>
+
+            {/* Questions with image */}
+            <Reveal
+              className="flex flex-col md:flex-row items-center justify-center gap-6 max-w-5xl mx-auto"
+              translateY={true}
+              rootMargin="-50px"
+            >
+              {/* Confused sign image on the left */}
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <img 
+                  src="/image/confusion-sign.png" 
+                  alt="Confused sign" 
+                  className="w-full max-w-md"
+                />
+              </div>
+
+              {/* Questions as bullet points on the right */}
+              <div className="flex-1 flex items-center justify-center">
+                <ul className="space-y-4 text-left">
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-500 mt-1.5">•</span>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      What should I study next?
+                    </p>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-500 mt-1.5">•</span>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      Which major will match my interests and abilities?
+                    </p>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="text-blue-500 mt-1.5">•</span>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      What if I make the wrong choice?
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </Reveal>
+
+            {/* Closing content */}
+            <Reveal
+              className="text-center max-w-4xl mx-auto mt-12"
+              rootMargin="-50px"
+            >
+              <p className="text-gray-400 text-lg leading-relaxed mb-6">
+                That period of confusion and exploration inspired us to take action. Instead of letting others go through the same struggle alone, we created Bontor a platform built by students, for students.
+              </p>
+              <p className="text-gray-300 text-lg leading-relaxed font-medium">
+                Bontor exists to guide BacII graduates toward the future that fits them best. We use AI technology and personalized insights to turn uncertainty into clarity helping students discover the major, university, and career path that truly suits them.
+              </p>
+            </Reveal>
+          </div>
         </div>
-
-
-        
       </section>
 
 
       {/* Our Team Section - Zigzag Design */}
       <section className="py-32 relative z-10">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
+          <Reveal
             className="text-center mb-20"
+            threshold={0.2}
           >
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
@@ -230,7 +336,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               A passionate team of students building the future of career guidance
             </p>
-          </motion.div>
+          </Reveal>
 
           <div className="space-y-12">
             {teamMembers.map((member, idx) => {
@@ -238,13 +344,11 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               const imageOnLeft = idx % 2 === 0;
               
               return (
-                <motion.div
+                <Reveal
                   key={idx}
-                  initial={{ opacity: 0, x: imageOnLeft ? -50 : 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
                   className={`flex flex-col md:flex-row items-center ${imageOnLeft ? 'md:flex-row gap-8' : 'md:flex-row-reverse gap-6'}`}
+                  translateX={imageOnLeft ? -50 : 50}
+                  threshold={0.2}
                 >
                   {/* Profile Image Placeholder with Name and Role Below */}
                   <div className="flex-shrink-0 flex flex-col items-center" style={{ width: '320px' }}>
@@ -278,7 +382,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                       ))}
                     </p>
                   </div>
-                </motion.div>
+                </Reveal>
               );
             })}
           </div>

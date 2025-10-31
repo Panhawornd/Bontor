@@ -171,7 +171,7 @@ export default function LandingPage() {
               </span>
             </Reveal>
             
-            <Reveal delay={100} rootMargin="-100px" threshold={0.2}>
+            <Reveal rootMargin="-100px" threshold={0.2}>
               <h1
                 className="text-6xl md:text-8xl text-white tracking-tight leading-none"
                 style={{ marginBottom: '3rem' }}
@@ -184,7 +184,6 @@ export default function LandingPage() {
             
             <Reveal
               className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
-              delay={200}
               rootMargin="-100px"
               threshold={0.2}
             >
@@ -193,7 +192,6 @@ export default function LandingPage() {
             
             <Reveal
               className="flex justify-center items-center"
-              delay={300}
               rootMargin="-100px"
               threshold={0.2}
             >
@@ -214,7 +212,6 @@ export default function LandingPage() {
               {/* Large Card */}
               <Reveal
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
-                delay={400}
                 rootMargin="-100px"
                 threshold={0.2}
               >
@@ -245,7 +242,7 @@ export default function LandingPage() {
                             style={{
                               '--target-width': `${item.value}%`,
                               width: '0%',
-                              animation: `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${0.5 + i * 0.15}s forwards`,
+                              animation: `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${0.6+ i * 0.15}s forwards`,
                               transformOrigin: 'left',
                               willChange: 'width'
                             } as React.CSSProperties & { '--target-width': string }}
@@ -260,7 +257,6 @@ export default function LandingPage() {
               {/* Small Card 1 */}
               <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
-                delay={400}
                 rootMargin="-100px"
                 threshold={0.2}
               >
@@ -274,7 +270,6 @@ export default function LandingPage() {
               {/* Small Card 2 */}
               <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
-                delay={400}
                 rootMargin="-100px"
                 threshold={0.2}
               >
@@ -288,7 +283,6 @@ export default function LandingPage() {
               {/* Wide Card */}
               <Reveal
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
-                delay={400}
                 rootMargin="-100px"
                 threshold={0.2}
               >

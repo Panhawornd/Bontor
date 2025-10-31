@@ -20,11 +20,18 @@ interface LanyardProps {
   fov?: number;
   transparent?: boolean;
   scale?: number;
+  onHoverChange?: (hovered: boolean) => void;
 }
 
-function SimpleCard() {
+function SimpleCard({ onHoverChange }: { onHoverChange?: (hovered: boolean) => void }) {
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
+  
+  useEffect(() => {
+    if (onHoverChange) {
+      onHoverChange(hovered);
+    }
+  }, [hovered, onHoverChange]);
 
   // Create rounded rectangle shape with corner radius
   const cardShape = useMemo(() => {
@@ -32,6 +39,26 @@ function SimpleCard() {
     const width = 4;
     const height = 6;
     const radius = 0.3;
+    
+    shape.moveTo(-width / 2 + radius, -height / 2);
+    shape.lineTo(width / 2 - radius, -height / 2);
+    shape.quadraticCurveTo(width / 2, -height / 2, width / 2, -height / 2 + radius);
+    shape.lineTo(width / 2, height / 2 - radius);
+    shape.quadraticCurveTo(width / 2, height / 2, width / 2 - radius, height / 2);
+    shape.lineTo(-width / 2 + radius, height / 2);
+    shape.quadraticCurveTo(-width / 2, height / 2, -width / 2, height / 2 - radius);
+    shape.lineTo(-width / 2, -height / 2 + radius);
+    shape.quadraticCurveTo(-width / 2, -height / 2, -width / 2 + radius, -height / 2);
+    
+    return shape;
+  }, []);
+
+  // Create slightly larger shape for border
+  const borderShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    const width = 4.15;
+    const height = 6.15;
+    const radius = 0.35;
     
     shape.moveTo(-width / 2 + radius, -height / 2);
     shape.lineTo(width / 2 - radius, -height / 2);
@@ -59,41 +86,57 @@ function SimpleCard() {
     }
   });
 
+  const handlePointerEnter = () => {
+    setHovered(true);
+  };
+  
+  const handlePointerLeave = () => {
+    setHovered(false);
+  };
+  
   return (
     <group 
       ref={groupRef}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
     >
-      {/* White ID Card with rounded corners */}
-      <mesh position={[0, 0, 0]}>
+      {/* White border outline using a thicker shape behind */}
+      <mesh position={[0, 0, -0.02]} renderOrder={0}>
+        <extrudeGeometry args={[borderShape, { depth: 0.07, bevelEnabled: false }]} />
+        <meshStandardMaterial color="#ffffff" side={THREE.DoubleSide} />
+      </mesh>
+      {/* Gray-800 ID Card with rounded corners */}
+      <mesh position={[0, 0, 0.001]} renderOrder={2}>
         <extrudeGeometry args={[cardShape, { depth: 0.05, bevelEnabled: false }]} />
-        <meshStandardMaterial color="#ffffff" />
+        <meshBasicMaterial 
+          color="#1f2937"
+          toneMapped={false}
+        />
       </mesh>
       {/* Hole at top of card for lanyard hook - dark hole effect */}
       <mesh position={[0, 2.6, 0.025]}>
         <cylinderGeometry args={[0.25, 0.25, 0.15, 16]} />
         <meshStandardMaterial color="#000000" />
       </mesh>
-      {/* Orange lanyard strap at top */}
+      {/* Blue lanyard strap at top */}
       <mesh position={[0, 3.2, 0]}>
         <boxGeometry args={[0.4, 0.8, 0.03]} />
         <meshStandardMaterial color="#ffffff" />
       </mesh>
-      {/* Orange lanyard band extending up */}
+      {/* Blue lanyard band extending up */}
       <mesh position={[0, 4.4, 0]}>
         <boxGeometry args={[0.3, 2.5, 0.02]} />
-        <meshStandardMaterial color="#f97316" />
+        <meshStandardMaterial color="#3b82f6" />
       </mesh>
-      {/* Orange neckwear loop at the top */}
+      {/* Blue neckwear loop at the top */}
       <mesh position={[0, 6.2, 0]}>
         <torusGeometry args={[0.4, 0.15, 8, 16]} />
-        <meshStandardMaterial color="#f97316" />
+        <meshStandardMaterial color="#3b82f6" />
       </mesh>
-      {/* Orange neckwear strap behind the loop */}
+      {/* Blue neckwear strap behind the loop */}
       <mesh position={[0, 6.2, -0.2]}>
         <boxGeometry args={[1, 0.3, 0.05]} />
-        <meshStandardMaterial color="#f97316" />
+        <meshStandardMaterial color="#3b82f6" />
       </mesh>
     </group>
   );
@@ -104,7 +147,8 @@ export default function Lanyard({
   gravity = [0, -40, 0], 
   fov = 42, 
   transparent = true,
-  scale = 1 
+  scale = 1,
+  onHoverChange
 }: LanyardProps) {
   return (
     <div className="relative z-0 w-full h-full" style={{ width: '100%', height: '100%' }}>
@@ -118,9 +162,9 @@ export default function Lanyard({
         performance={{ min: 0.8 }}
         style={{ width: '100%', height: '100%', display: 'block', willChange: 'auto' }}
       >
-        <ambientLight intensity={2} />
-        <directionalLight position={[2, 2, 5]} intensity={1.5} />
-        <SimpleCard />
+        <ambientLight intensity={0.8} />
+        <directionalLight position={[2, 2, 5]} intensity={0.5} />
+        <SimpleCard onHoverChange={onHoverChange} />
       </Canvas>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor } from "lucide-react";
@@ -344,45 +344,12 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               const imageOnLeft = idx % 2 === 0;
               
               return (
-                <Reveal
+                <MemberCard 
                   key={idx}
-                  className={`flex flex-col md:flex-row items-center ${imageOnLeft ? 'md:flex-row gap-8' : 'md:flex-row-reverse gap-6'}`}
-                  translateX={imageOnLeft ? -50 : 50}
-                  threshold={0.2}
-                >
-                  {/* Profile Image Placeholder with Name and Role Below */}
-                  <div className="flex-shrink-0 flex flex-col items-center" style={{ width: '320px' }}>
-                    <div className="w-80 rounded-lg border border-[#2a2a2a] overflow-hidden flex flex-col items-center" style={{ width: '320px', backgroundColor: '#111111' }}>
-                      <div className="w-full h-72 rounded-lg overflow-hidden mb-[-4px] relative" style={{ width: '288px', height: '288px', marginTop: '4px', backgroundColor: 'transparent' }}>
-                        <Lanyard 
-                          position={[0, 0, 11]} 
-                          gravity={[0, -40, 0]} 
-                          fov={42}
-                        />
-                      </div>
-                      <div className="text-center pb-6 px-4">
-                        <h3 className="text-xl md:text-2xl text-white font-semibold mb-2 whitespace-nowrap">
-                          {member.name}
-                        </h3>
-                        <p className="text-gray-400 text-sm leading-relaxed">
-                          {member.role}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Description Content */}
-                  <div className="flex-1 text-left max-w-2xl">
-                    <p className="text-gray-400 text-lg leading-relaxed">
-                      {member.description.split('\n').map((line, lineIdx) => (
-                        <span key={lineIdx}>
-                          {line}
-                          {lineIdx < member.description.split('\n').length - 1 && <br />}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
-                </Reveal>
+                  member={member}
+                  idx={idx}
+                  imageOnLeft={imageOnLeft}
+                />
               );
             })}
           </div>
@@ -410,5 +377,101 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
         </div>
       </footer>
     </div>
+  );
+}
+
+type TeamMember = {
+  name: string;
+  role: string;
+  icon: typeof Code;
+  alignment: string;
+  description: string;
+};
+
+function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: number; imageOnLeft: boolean }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <Reveal
+      className={`flex flex-col md:flex-row items-center ${imageOnLeft ? 'md:flex-row gap-8' : 'md:flex-row-reverse gap-6'}`}
+      translateX={imageOnLeft ? -50 : 50}
+      threshold={0.2}
+    >
+      {/* Profile Image Placeholder with Name and Role Below */}
+      <div 
+        className="flex-shrink-0 flex flex-col items-center group" 
+        style={{ width: '320px' }}
+      >
+                    <div className="w-80 rounded-lg border border-[#2a2a2a] overflow-hidden flex flex-col items-center" style={{ width: '320px', backgroundColor: '#111111' }}>
+                      <div 
+                        className="w-full h-72 rounded-lg overflow-hidden mb-[-4px] relative group/card" 
+                        style={{ width: '288px', height: '288px', marginTop: '4px', backgroundColor: 'transparent' }}
+                      >
+                        <Lanyard 
+                          position={[0, 0, 11]} 
+                          gravity={[0, -40, 0]} 
+                          fov={42}
+                          onHoverChange={setIsHovered}
+                        />
+                        {member.name === "Phan Panhawornd" && (
+                          <div
+                            className="absolute overflow-hidden"
+                            style={{ 
+                              zIndex: 10, 
+                              pointerEvents: 'none',
+                              top: '67px',
+                              left: '56px',
+                              width: '180px',
+                              height: '180px',
+                              // Card center is at 144px, 144px in 288x288 container
+                              // Image top-left is at 56px, 66px, so card center relative to image is (144-56, 144-66) = (88px, 78px)
+                              // As percentage: (88/180 * 100, 78/180 * 100) = (48.89%, 43.33%)
+                              transformOrigin: '48.89% 43.33%',
+                              transform: isHovered ? 'perspective(1000px) rotateY(5.73deg) scale(1.05)' : 'perspective(1000px) rotateY(0deg) scale(1)',
+                              transition: 'transform 0.15s ease-out',
+                              transformStyle: 'preserve-3d',
+                              willChange: 'transform',
+                              // Card radius: 0.3 units / 4 units width = 7.5% of width
+                              // Image container: 180px, so radius = 180px * 0.075 = 13.5px ≈ 0.84375rem
+                              borderRadius: '0.84375rem',
+                              clipPath: 'inset(0 round 0.84375rem)'
+                            }}
+                          >
+                            <img 
+                              src="/image/Panhawornd.png" 
+                              alt={member.name}
+                              className="w-full h-full object-contain"
+                              style={{ 
+                                borderRadius: '0.84375rem',
+                                transform: 'translateZ(0)',
+                                display: 'block'
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center pb-6 px-4">
+                        <h3 className="text-xl md:text-2xl text-white font-semibold mb-2 whitespace-nowrap">
+                          {member.name}
+                        </h3>
+                        <p className="text-gray-400 text-sm leading-relaxed">
+                          {member.role}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+      {/* Description Content */}
+      <div className="flex-1 text-left max-w-2xl">
+        <p className="text-gray-400 text-lg leading-relaxed">
+          {member.description.split('\n').map((line: string, lineIdx: number) => (
+            <span key={lineIdx}>
+              {line}
+              {lineIdx < member.description.split('\n').length - 1 && <br />}
+            </span>
+          ))}
+        </p>
+      </div>
+    </Reveal>
   );
 }

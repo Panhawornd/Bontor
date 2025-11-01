@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { X, User, LogOut, ChevronDown } from 'lucide-react'
 import GradeInputForm from '@/components/GradeInputForm'
 import RecommendationDashboard from '@/components/RecommendationDashboard'
 import { AnalysisResult } from '@/types'
@@ -20,6 +20,8 @@ export default function InputPage() {
   const [user, setUser] = useState<{ name: string; email?: string } | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [isErrorVisible, setIsErrorVisible] = useState(true)
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -61,6 +63,23 @@ export default function InputPage() {
     
     checkAuth()
   }, [router])
+
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false)
+      }
+    }
+
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showProfileMenu])
 
   const handleSubmit = async (data: GradeAnalysisData) => {
     setLoading(true)
@@ -175,22 +194,66 @@ export default function InputPage() {
                 }}
               />
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ 
-                color: 'var(--text-secondary)',
-                fontSize: '14px'
-              }}>
-                Welcome, {user?.name}!
-              </span>
-              <button 
-                onClick={handleLogout}
-                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
-                style={{ 
-                  fontSize: '14px'
-                }}
-              >
-                Logout
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
+              {/* Profile Menu */}
+              <div ref={profileMenuRef} style={{ position: 'relative' }}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                  style={{ 
+                    fontSize: '14px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <User size={16} />
+                  <span className="hidden sm:inline">{user?.name}</span>
+                  <ChevronDown size={14} style={{ transform: showProfileMenu ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showProfileMenu && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '8px',
+                      background: '#1f2937',
+                      border: '1px solid #374151',
+                      borderRadius: '8px',
+                      minWidth: '160px',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+                      zIndex: 1000,
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <div style={{ padding: '8px 12px', borderBottom: '1px solid #374151' }}>
+                      <p style={{ color: '#ffffff', fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                        {user?.name}
+                      </p>
+                      {user?.email && (
+                        <p style={{ color: '#9ca3af', fontSize: '12px', margin: '4px 0 0 0' }}>
+                          {user.email}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-gray-700 transition-colors"
+                      style={{
+                        fontSize: '14px',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

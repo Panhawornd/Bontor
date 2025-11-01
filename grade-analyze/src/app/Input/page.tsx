@@ -183,26 +183,65 @@ export default function InputPage() {
         backdropFilter: 'blur(20px)'
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+            {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <img 
-                src="/image/Bontor-logo.png" 
-                alt="Bontor" 
-                style={{ 
-                  height: '23px',
-                  width: 'auto'
-                }}
-              />
+              <button
+                onClick={() => router.push('/Input')}
+                className="hover:opacity-80 transition-opacity"
+                style={{ background: 'transparent', border: 'none', padding: 0}}
+              >
+                <img 
+                  src="/image/Bontor-logo.png" 
+                  alt="Bontor" 
+                  style={{ 
+                    height: '23px',
+                    width: 'auto'
+                  }}
+                />
+              </button>
             </div>
+
+            {/* Navigation Links - Centered */}
+            <div className="flex items-center space-x-8" style={{ 
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)'
+            }}>
+              <button
+                onClick={() => router.push('/Input')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                Analyze
+              </button>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => router.push('/university')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                University
+              </button>
+              <button
+                onClick={() => router.push('/agent')}
+                className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
+              >
+                Agent
+              </button>
+            </div>
+
+            {/* Profile Menu */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', position: 'relative' }}>
-              {/* Profile Menu */}
               <div ref={profileMenuRef} style={{ position: 'relative' }}>
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
                   style={{ 
-                    fontSize: '14px',
-                    cursor: 'pointer'
+                    fontSize: '14px'
                   }}
                 >
                   <User size={16} />

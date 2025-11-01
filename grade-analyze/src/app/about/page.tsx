@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
-import { Code, Database, Monitor } from "lucide-react";
+import { Code, Database, Monitor, Target, Lightbulb, Heart, Globe } from "lucide-react";
 import dynamic from 'next/dynamic';
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import StarBorder from "@/components/ui/StarBorder";
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
@@ -317,6 +318,120 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
         </div>
       </section>
 
+      {/* Our Values */}
+      <section className="py-32 relative z-10" data-section="our-values">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Header */}
+          <Reveal
+            className="text-center mb-16"
+            rootMargin="-50px"
+            threshold={0.2}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span className="text-sm text-gray-500">Our Foundation</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl text-white mb-4">
+              Our Values
+            </h2>
+          </Reveal>
+
+          {/* Values Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <Reveal
+              delay={0}
+              rootMargin="-50px"
+              threshold={0.2}
+            >
+              <StarBorder
+                color="#3b82f6"
+                className="w-full"
+              >
+                <div className="flex flex-col justify-center items-center text-center p-6 min-h-[280px]">
+                  <div className="mb-4">
+                    <Target className="w-12 h-12 text-blue-500 mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Purpose-Driven
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mt-4">
+                    Every student&apos;s dream matters. We empower students to pursue their goals.
+                  </p>
+                </div>
+              </StarBorder>
+            </Reveal>
+
+            <Reveal
+              delay={100}
+              rootMargin="-50px"
+              threshold={0.2}
+            >
+              <StarBorder
+                color="#3b82f6"
+                className="w-full"
+              >
+                <div className="flex flex-col justify-center items-center text-center p-6 min-h-[280px]">
+                  <div className="mb-4">
+                    <Lightbulb className="w-12 h-12 text-blue-500 mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Innovation
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mt-4">
+                    We use technology to make guidance smarter and more accessible.
+                  </p>
+                </div>
+              </StarBorder>
+            </Reveal>
+
+            <Reveal
+              delay={200}
+              rootMargin="-50px"
+              threshold={0.2}
+            >
+              <StarBorder
+                color="#3b82f6"
+                className="w-full"
+              >
+                <div className="flex flex-col justify-center items-center text-center p-6 min-h-[280px]">
+                  <div className="mb-4">
+                    <Heart className="w-12 h-12 text-blue-500 mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Empathy
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mt-4">
+                    We understand because we&apos;ve been there. We know the challenges students face.
+                  </p>
+                </div>
+              </StarBorder>
+            </Reveal>
+
+            <Reveal
+              delay={300}
+              rootMargin="-50px"
+              threshold={0.2}
+            >
+              <StarBorder
+                color="#3b82f6"
+                className="w-full"
+              >
+                <div className="flex flex-col justify-center items-center text-center p-6 min-h-[280px]">
+                  <div className="mb-4">
+                    <Globe className="w-12 h-12 text-blue-500 mx-auto" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Impact
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed mt-4">
+                    We aim to improve educational choices and career readiness for students nationwide.
+                  </p>
+                </div>
+              </StarBorder>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
       {/* Our Team Section - Zigzag Design */}
       <section className="py-32 relative z-10">

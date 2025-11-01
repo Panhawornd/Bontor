@@ -388,3 +388,66 @@ h4 { font-size: 1.25rem; }
   transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Star Border Animation - Simple continuous loop */
+@keyframes star-border-loop {
+  0% {
+    top: -40px;
+    left: -100px;
+    opacity: 1;
+  }
+  25% {
+    top: -40px;
+    left: calc(100% + 100px);
+    opacity: 1;
+  }
+  25.01% {
+    top: 0px;
+    left: calc(100% + 60px);
+    opacity: 1;
+  }
+  50% {
+    top: calc(100% + 40px);
+    left: calc(100% + 60px);
+    opacity: 1;
+  }
+  50.01% {
+    top: calc(100% + 40px);
+    left: 100%;
+    opacity: 1;
+  }
+  73% {
+    top: calc(100% + 40px);
+    left: -60px;
+    opacity: 1;
+  }
+  75% {
+    top: calc(100% + 40px);
+    left: -100px;
+    opacity: 0.8;
+  }
+  75.01% {
+    top: calc(100%);
+    left: -100px;
+    opacity: 0.6;
+  }
+  77% {
+    top: calc(100% - 10px);
+    left: -100px;
+    opacity: 0.8;
+  }
+  79% {
+    top: calc(100% - 20px);
+    left: -100px;
+    opacity: 1;
+  }
+  100% {
+    top: -40px;
+    left: -100px;
+    opacity: 1;
+  }
+}
+
+.animate-star-border-loop {
+  animation: star-border-loop linear infinite;
+}
+

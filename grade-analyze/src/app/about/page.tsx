@@ -1,19 +1,20 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useLayoutEffect } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor } from "lucide-react";
 import dynamic from 'next/dynamic';
-import Lottie from "lottie-react";
+import Lottie, { LottieRefCurrentProps } from "lottie-react";
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
 export default function AboutPage() {
   const router = useRouter();
   const [hasToken, setHasToken] = useState<boolean | null>(null);
-  const [confusionAnimation, setConfusionAnimation] = useState(null);
+  const [confusionAnimation, setConfusionAnimation] = useState<any>(null);
+  const lottieRef = useRef<LottieRefCurrentProps>(null);
 
   useLayoutEffect(() => {
     // Scroll to top immediately before browser paints
@@ -30,7 +31,9 @@ export default function AboutPage() {
     // Load confusion Lottie animation
     fetch('/lottie/confusion.json')
       .then(res => res.json())
-      .then(data => setConfusionAnimation(data))
+      .then(data => {
+        setConfusionAnimation(data);
+      })
       .catch(err => console.error('Error loading confusion animation:', err));
   }, []);
 
@@ -254,10 +257,21 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               <div className="flex-shrink-0 flex items-center justify-center">
                 {confusionAnimation && (
                   <Lottie
+                    lottieRef={lottieRef}
                     animationData={confusionAnimation}
-                    loop={true}
+                    loop={false}
                     autoplay={true}
                     style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
+                    onEnterFrame={(evt: any) => {
+                      // Stop at 70% of total frames (before it ends)
+                      if (confusionAnimation && evt && evt.currentFrame !== undefined) {
+                        const totalFrames = confusionAnimation.op || 181;
+                        const stopFrame = Math.floor(totalFrames * 0.7);
+                        if (evt.currentFrame >= stopFrame && lottieRef.current) {
+                          lottieRef.current.stop();
+                        }
+                      }
+                    }}
                   />
                 )}
               </div>

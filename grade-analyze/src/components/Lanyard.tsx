@@ -150,21 +150,70 @@ export default function Lanyard({
   scale = 1,
   onHoverChange
 }: LanyardProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '50px'
+      }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const handleHoverChange = (hovered: boolean) => {
+    setIsHovered(hovered);
+    if (onHoverChange) {
+      onHoverChange(hovered);
+    }
+  };
+
   return (
-    <div className="relative z-0 w-full h-full" style={{ width: '100%', height: '100%' }}>
+    <div 
+      ref={containerRef}
+      className="relative z-0 w-full h-full" 
+      style={{ width: '100%', height: '100%' }}
+    >
       <Canvas
         camera={{ position: position, fov: fov }}
-        gl={{ alpha: transparent, powerPreference: 'high-performance', antialias: true }}
+        gl={{ 
+          alpha: transparent, 
+          powerPreference: 'high-performance', 
+          antialias: true,
+          stencil: false,
+          depth: true
+        }}
         onCreated={({ gl }) => {
           gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
         }}
-        dpr={[1, 2]}
-        performance={{ min: 0.8 }}
-        style={{ width: '100%', height: '100%', display: 'block', willChange: 'auto' }}
+        dpr={isHovered ? [1.5, 2] : [1, 1.5]}
+        performance={{ min: isHovered ? 0.5 : 0.3 }}
+        frameloop={isVisible ? 'always' : 'never'}
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          display: 'block'
+        }}
       >
         <ambientLight intensity={0.8} />
         <directionalLight position={[2, 2, 5]} intensity={0.5} />
-        <SimpleCard onHoverChange={onHoverChange} />
+        <SimpleCard onHoverChange={handleHoverChange} />
       </Canvas>
     </div>
   );

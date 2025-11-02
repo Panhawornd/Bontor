@@ -83,24 +83,6 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         {/* Grades Section */}
         <div>
-          <div style={{ marginBottom: '24px' }}>
-            <h4 style={{ 
-              fontSize: '20px', 
-              fontWeight: '600', 
-              marginBottom: '8px',
-              color: 'var(--text-primary)'
-            }}>
-              BacII Exam Results
-            </h4>
-            <p style={{ 
-              color: 'var(--text-secondary)', 
-              fontSize: '14px',
-              margin: 0
-            }}>
-              Enter your BacII scores 
-            </p>
-          </div>
-          
           <div className="grid-2-col">
             {SUBJECTS.map(subject => (
               <div key={subject.id} style={{

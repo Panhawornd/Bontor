@@ -398,7 +398,7 @@ export default function InputPage() {
                     Academic Profile Analysis
                   </h3>
                   <p className="text-gray-300">
-                    Enter your grades and interests to get personalized recommendations
+                    Enter your BacII grades and interests to get personalized recommendations
                   </p>
                 </div>
                 

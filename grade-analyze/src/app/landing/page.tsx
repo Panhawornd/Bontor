@@ -145,19 +145,15 @@ export default function LandingPage() {
       
       {/* Hero Section */}
       <section className="relative">
-        {/* Background Image - only hero text height */}
+        {/* Background Image - cuts at bottom on all screen sizes */}
         <div
-          className="absolute inset-x-0 top-15 bg-cover bg-center bg-no-repeat bg-black"
+          className="absolute inset-x-0 top-15 bg-cover bg-center bg-no-repeat bg-black hero-bg-image"
           style={{ 
-            backgroundImage: "url(/image/Herosection.jpg)",
-            height: "calc(82vh - 80px)"
+            backgroundImage: "url(/image/Herosection.jpg)"
           }}
         />
         {/* Dark overlay matched to height */}
-        <div
-          className="absolute inset-x-0 top-0 bg-black/70"
-          style={{ height: "calc(82vh - 80px)" }}
-        />
+        <div className="absolute inset-x-0 top-0 bg-black/70 hero-bg-overlay" />
         <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
           <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
             <Reveal
@@ -313,9 +309,8 @@ export default function LandingPage() {
 
       {/* Dark gradient background from hero to footer */}
       <div
-        className="absolute inset-x-0"
+        className="absolute inset-x-0 hero-gradient-bg"
         style={{ 
-          top: "calc(82vh - 80px)",
           bottom: 0,
           background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
         }}

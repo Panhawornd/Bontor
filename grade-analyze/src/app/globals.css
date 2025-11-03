@@ -451,3 +451,32 @@ h4 { font-size: 1.25rem; }
   animation: star-border-loop linear infinite;
 }
 
+/* Hero background image - cuts at bottom on all screen sizes */
+.hero-bg-image {
+  height: calc(82vh - 80px);
+}
+
+.hero-bg-overlay {
+  height: calc(82vh - 80px);
+}
+
+/* Gradient background position */
+.hero-gradient-bg {
+  top: calc(82vh - 80px);
+}
+
+/* Reduce height on desktop/PC screens (1600px and above) - laptops stay original */
+@media (min-width: 1600px) {
+  .hero-bg-image {
+    height: calc(75vh - 64px) !important;
+  }
+  
+  .hero-bg-overlay {
+    height: calc(75vh - 64px) !important;
+  }
+  
+  .hero-gradient-bg {
+    top: calc(75vh - 64px) !important;
+  }
+}
+

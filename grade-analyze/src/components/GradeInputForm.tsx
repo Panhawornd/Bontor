@@ -151,7 +151,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I love programming and building apps. I enjoy working with data and solving complex problems. I'm also interested in artificial intelligence and machine learning..."
+            placeholder="I love programming and building apps. I enjoy working with data and solving complex problems..."
             value={interestText}
             onChange={(e) => setInterestText(e.target.value)}
             required

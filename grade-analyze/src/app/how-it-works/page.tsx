@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import Reveal from "@/components/Reveal";
 import { FileSpreadsheet, SlidersHorizontal, Sparkles, MessageSquare } from "lucide-react";
 
 const steps = [
@@ -62,10 +63,20 @@ export default function HowItWorksPage() {
     const startY = first.offsetTop;
     const endY = last.offsetTop + last.offsetHeight;
 
-    // Use a point slightly below the top to match timeline perception
-    const indicatorY = window.scrollY + window.innerHeight * 0.3;
+    // Use raw scroll position; if not past the start, stay at 0
+    const probe = window.scrollY;
+
+    if (probe <= startY) {
+      setProgressPct(0);
+      return;
+    }
+    if (probe >= endY) {
+      setProgressPct(100);
+      return;
+    }
+
     const span = Math.max(1, endY - startY);
-    const raw = (indicatorY - startY) / span;
+    const raw = (probe - startY) / span;
     const clamped = Math.min(1, Math.max(0, raw));
     setProgressPct(clamped * 100);
   };
@@ -241,7 +252,7 @@ export default function HowItWorksPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-10 md:gap-14 py-12 md:py-20">
+        <Reveal className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-10 md:gap-14 py-12 md:py-20" rootMargin="-50px" threshold={0.2}>
           {/* Left timeline rail */}
           <aside className="relative md:sticky md:top-24">
             {/* Wrapper matches content height to align dots */}
@@ -362,7 +373,8 @@ export default function HowItWorksPage() {
               );
             })}
           </section>
-        </div>
+        </Reveal>
+
       </main>
 
     </div>

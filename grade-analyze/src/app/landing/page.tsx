@@ -19,6 +19,35 @@ export default function LandingPage() {
   const [skillDevelopmentAnimation, setSkillDevelopmentAnimation] = useState(null)
   const [cambodiaAnimation, setCambodiaAnimation] = useState(null)
   const [hasToken, setHasToken] = useState<boolean | null>(null)
+  const [grades, setGrades] = useState<Record<string, string>>({})
+  const [interestText, setInterestText] = useState('')
+  const [careerGoals, setCareerGoals] = useState('')
+
+  // Validate form - check if all required fields are filled
+  const isFormValid = () => {
+    const SUBJECTS = [
+      { id: 'math', maxScore: 125 },
+      { id: 'physics', maxScore: 75 },
+      { id: 'chemistry', maxScore: 75 },
+      { id: 'biology', maxScore: 75 },
+      { id: 'khmer', maxScore: 75 },
+      { id: 'english', maxScore: 50 },
+      { id: 'history', maxScore: 50 },
+    ]
+
+    // Check all subjects have valid scores
+    const allGradesValid = SUBJECTS.every(subj => {
+      const val = grades[subj.id]?.trim()
+      if (!val) return false
+      const num = parseFloat(val)
+      return !isNaN(num) && num >= 0 && num <= subj.maxScore
+    })
+
+    // Check interests text is filled
+    const interestsValid = interestText.trim().length > 0
+
+    return allGradesValid && interestsValid
+  }
 
   useEffect(() => {
     // Check if user has auth token cookie
@@ -201,6 +230,8 @@ export default function LandingPage() {
               </Button>
             </Reveal>
           </div>
+
+          
           
           {/* Hero Visual - Bento Grid */}
           <div className="mt-24 relative" style={{ perspective: '1000px' }}>
@@ -249,7 +280,6 @@ export default function LandingPage() {
                   </div>
                 </div>
               </Reveal>
-
               {/* Small Card 1 */}
               <Reveal
                 className="relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
@@ -301,6 +331,222 @@ export default function LandingPage() {
               </Reveal>
             </div>
           </div>
+
+          {/* Interactive Input Section - Small Compact Version */}
+          <Reveal
+            className="mt-10 mb-8"
+            rootMargin="-100px"
+            threshold={0.2}
+          >
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-10 text-center mt-10">
+                <p className="text-gray-300 text-lg">
+                  Try our interactive analysis tool - fill out the form below to see how it works
+                </p>
+              </div>
+              <div className="rounded-lg border border-[#1f1f1f] bg-[#111111] overflow-hidden hover:border-[#2a2a2a] transition-colors">
+                {/* Two Column Layout - Small */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                  {/* Left Column - Ready for Analysis */}
+                  <div 
+                    className="min-h-full overflow-y-auto"
+                    style={{
+                      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
+                    }}
+                  >
+                    <div className="flex items-center justify-center h-full p-4">
+                      <div className="text-center">
+                        <div className="w-10 h-10 flex items-center justify-center mx-auto mb-2">
+                          <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <h3 className="text-base font-semibold text-white mb-1">
+                          Ready for Analysis
+                        </h3>
+                        <p className="text-gray-300 text-xs max-w-[200px] mt-1">
+                          Fill out the form on the right to get your personalized career recommendations.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Input Form */}
+                  <div className="bg-[#111111] border-l border-[#1f1f1f] min-h-full overflow-y-auto">
+                    <div className="p-4">
+                      <div className="mb-4 text-center">
+                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-3">
+                          <div className="w-1 h-1 rounded-full bg-blue-500" />
+                          <span className="text-[10px] text-gray-500">Academic Profile Analysis</span>
+                        </div>
+                        <p className="text-gray-300 text-xs">
+                          Enter your BacII grades and interests
+                        </p>
+                      </div>
+                      
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          router.push('/login');
+                        }}
+                        style={{ width: '100%' }}
+                      >
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          {/* Grades Section */}
+                          <div>
+                            <div className="grid-2-col">
+                              {[
+                                { id: 'math', name: 'Mathematics', category: 'Science', maxScore: 125 },
+                                { id: 'physics', name: 'Physics', category: 'Science', maxScore: 75 },
+                                { id: 'chemistry', name: 'Chemistry', category: 'Science', maxScore: 75 },
+                                { id: 'biology', name: 'Biology', category: 'Science', maxScore: 75 },
+                                { id: 'khmer', name: 'Khmer Literature', category: 'Language', maxScore: 75 },
+                                { id: 'english', name: 'English', category: 'Language', maxScore: 50 },
+                                { id: 'history', name: 'History', category: 'Social Studies', maxScore: 50 },
+                              ].map((subject) => (
+                                <div key={subject.id} style={{
+                                  padding: '8px',
+                                  transition: 'all 0.2s ease'
+                                }}>
+                                  <label style={{ 
+                                    fontSize: '10px', 
+                                    fontWeight: '500', 
+                                    marginBottom: '4px',
+                                    color: '#ffffff',
+                                    display: 'block'
+                                  }}>
+                                    {subject.name}
+                                    <span style={{ 
+                                      color: '#9ca3af', 
+                                      fontSize: '9px',
+                                      fontWeight: '400',
+                                      marginLeft: '4px'
+                                    }}>
+                                      ({subject.category}) - Max: {subject.maxScore}
+                                    </span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder={`0-${subject.maxScore}`}
+                                    className="input-field"
+                                    value={grades[subject.id] || ''}
+                                    onChange={(e) => setGrades(prev => ({ ...prev, [subject.id]: e.target.value }))}
+                                    style={{ margin: 0, fontSize: '11px', padding: '6px 8px' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Interests Section */}
+                          <div>
+                            <h4 style={{ 
+                              fontSize: '13px', 
+                              fontWeight: '600', 
+                              marginBottom: '4px',
+                              color: '#ffffff'
+                            }}>
+                              Your Interests & Strengths
+                            </h4>
+                            <p style={{ 
+                              color: '#9ca3af', 
+                              fontSize: '10px',
+                              marginBottom: '6px'
+                            }}>
+                              Describe your interests, hobbies, and skills...
+                            </p>
+                            <textarea
+                              className="input-field"
+                              style={{ 
+                                minHeight: '50px', 
+                                resize: 'vertical',
+                                fontFamily: 'inherit',
+                                lineHeight: '1.4',
+                                fontSize: '11px',
+                                padding: '6px 8px'
+                              }}
+                              placeholder="I love programming and building apps..."
+                              value={interestText}
+                              onChange={(e) => setInterestText(e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          {/* Career Goals Section */}
+                          <div>
+                            <h4 style={{ 
+                              fontSize: '13px', 
+                              fontWeight: '600', 
+                              marginBottom: '4px',
+                              color: '#ffffff'
+                            }}>
+                              Career Goals (Optional)
+                            </h4>
+                            <p style={{ 
+                              color: '#9ca3af', 
+                              fontSize: '10px',
+                              marginBottom: '6px'
+                            }}>
+                              What kind of career are you interested in?
+                            </p>
+                            <textarea
+                              className="input-field"
+                              style={{ 
+                                minHeight: '45px', 
+                                resize: 'vertical',
+                                fontFamily: 'inherit',
+                                lineHeight: '1.4',
+                                fontSize: '11px',
+                                padding: '6px 8px'
+                              }}
+                              placeholder="I want to become a software engineer..."
+                              value={careerGoals}
+                              onChange={(e) => setCareerGoals(e.target.value)}
+                            />
+                          </div>
+
+                          {/* Submit Button */}
+                          <div style={{ paddingTop: '8px' }}>
+                            <button 
+                              type="submit" 
+                              disabled={!isFormValid()}
+                              className="px-4 py-1.5 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ 
+                                width: '100%',
+                                backgroundColor: isFormValid() ? '#1d4ed8' : '#1f2937',
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: isFormValid() ? '#1d4ed8' : '#374151',
+                                padding: '8px 12px',
+                                fontSize: '12px',
+                                fontWeight: '500'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (isFormValid()) {
+                                  e.currentTarget.style.backgroundColor = '#1e40af';
+                                  e.currentTarget.style.borderColor = '#1e40af';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (isFormValid()) {
+                                  e.currentTarget.style.backgroundColor = '#1d4ed8';
+                                  e.currentTarget.style.borderColor = '#1d4ed8';
+                                }
+                              }}
+                            >
+                              Analyze My Results
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </section>
 

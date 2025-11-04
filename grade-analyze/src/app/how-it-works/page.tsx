@@ -130,7 +130,8 @@ export default function HowItWorksPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const intersecting = entries.filter((e) => e.isIntersecting);
+        // Filter to only elements with significant intersection ratio to prevent glitches
+        const intersecting = entries.filter((e) => e.isIntersecting && e.intersectionRatio > 0.2);
         if (intersecting.length > 0) {
           const sorted = intersecting.sort((a, b) => {
             if (Math.abs(b.intersectionRatio - a.intersectionRatio) > 0.1) {
@@ -139,8 +140,10 @@ export default function HowItWorksPage() {
             return a.boundingClientRect.top - b.boundingClientRect.top;
           });
           const activeEntry = sorted[0];
-          const idx = ids.indexOf(activeEntry.target.id);
-          if (idx !== -1) setActiveIndex(idx);
+          if (activeEntry && activeEntry.intersectionRatio > 0.2) {
+            const idx = ids.indexOf(activeEntry.target.id);
+            if (idx !== -1) setActiveIndex(idx);
+          }
         }
       },
       {
@@ -285,7 +288,7 @@ export default function HowItWorksPage() {
                           className={
                             "block h-3.5 w-3.5 rounded-full border transition-all duration-300 " +
                             (active
-                              ? "bg-blue-500 border-blue-400 scale-125"
+                              ? "bg-blue-500 border-white scale-125"
                               : completed
                               ? "bg-blue-500 border-blue-400"
                               : "bg-gray-900 border-gray-700")

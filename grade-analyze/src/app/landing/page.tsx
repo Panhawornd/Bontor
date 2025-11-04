@@ -737,22 +737,84 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="py-16 border-t border-[#1f1f1f] relative z-20">
         <div className="max-w-7xl mx-auto px-6">
-          
-          
-          <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-[#1f1f1f]">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <img 
-                src="/image/Bontor-logo.png" 
-                alt="Bontor" 
-                style={{ 
-                  height: '24px',
-                  width: 'auto'
-                }}
-              />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8">
+            {/* Logo and Description */}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 mb-4">
+                <img 
+                  src="/image/Bontor-logo.png" 
+                  alt="Bontor" 
+                  style={{ 
+                    height: '24px',
+                    width: 'auto'
+                  }}
+                />
+              </div>
+              <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+                AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
+              </p>
             </div>
-            <p className="text-gray-600 text-sm">
-              © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
-            </p>
+
+            {/* Quick Links and Copyright */}
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row md:flex-row gap-20">
+                <div className="flex flex-col">
+                  <h3 className="text-white font-semibold mb-3">Quick Links</h3>
+                  <ul className="space-y-2 mt-2">
+                    <li>
+                      <button
+                        onClick={() => router.push('/landing')}
+                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                      >
+                        Home
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => router.push('/how-it-works')}
+                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                      >
+                        How it Works
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => router.push('/about')}
+                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                      >
+                        About
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div className="flex flex-col">
+                  <h3 className="text-white font-semibold mb-3">Account</h3>
+                  <ul className="space-y-2 mt-2">
+                    <li>
+                      <button
+                        onClick={() => router.push('/login')}
+                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                      >
+                        Login
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        onClick={() => router.push('/signup')}
+                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                      >
+                        Register
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="pt-4 border-t border-[#1f1f1f]">
+                <p className="text-gray-600 text-sm">
+                  © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

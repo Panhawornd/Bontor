@@ -394,9 +394,10 @@ export default function InputPage() {
             <div className={`bg-[#111111] border-l border-[#1f1f1f] min-h-full overflow-y-auto ${analysisResult ? 'hidden lg:block' : 'block'}`}>
               <div className="p-8">
                 <div className="mb-8 text-center">
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Academic Profile Analysis
-                  </h3>
+                   <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
+                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                       <span className="text-sm text-gray-500">Academic Profile Analysis</span>
+                     </div>
                   <p className="text-gray-300">
                     Enter your BacII grades and interests to get personalized recommendations
                   </p>

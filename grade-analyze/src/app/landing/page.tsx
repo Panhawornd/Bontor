@@ -120,11 +120,8 @@ export default function LandingPage() {
               >
                 <img 
                   src="/image/Bontor-logo.png" 
-                  alt="Bontor" 
-                  style={{ 
-                    height: '23px',
-                    width: 'auto'
-                  }}
+                  alt="Bontor"                   
+                  className="h-5 md:h-[23px] w-auto"
                 />
               </button>
             </div>
@@ -208,7 +205,7 @@ export default function LandingPage() {
             </Reveal>
             
             <Reveal
-              className="text-xl md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
               rootMargin="-100px"
               threshold={0.2}
             >

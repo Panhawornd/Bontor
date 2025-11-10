@@ -117,10 +117,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 <img 
                   src="/image/Bontor-logo.png" 
                   alt="Bontor" 
-                  style={{ 
-                    height: '23px',
-                    width: 'auto'
-                  }}
+                  className="h-5 md:h-[23px] w-auto"
                 />
               </button>
             </div>

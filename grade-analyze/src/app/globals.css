@@ -466,18 +466,63 @@ h4 { font-size: 1.25rem; }
   top: calc(82vh - 80px);
 }
 
-/* Reduce height on desktop/PC screens (1600px and above) - laptops stay original */
-@media (min-width: 1600px) {
+/* Tablet screens (768px to 1024px) - cut bottom slightly */
+@media (min-width: 768px) and (max-width: 1024px) {
   .hero-bg-image {
-    height: calc(75vh - 64px) !important;
+    height: calc(78vh - 100px) !important;
   }
   
   .hero-bg-overlay {
-    height: calc(75vh - 64px) !important;
+    height: calc(78vh - 100px) !important;
   }
   
   .hero-gradient-bg {
-    top: calc(75vh - 64px) !important;
+    top: calc(78vh - 100px) !important;
+  }
+}
+
+/* Phone screens (below 768px) - cut bottom slightly */
+@media (max-width: 767px) {
+  .hero-bg-image {
+    height: calc(78vh - 100px) !important;
+  }
+  
+  .hero-bg-overlay {
+    height: calc(78vh - 100px) !important;
+  }
+  
+  .hero-gradient-bg {
+    top: calc(78vh - 100px) !important;
+  }
+}
+
+/* PC screens (1025px and above, but below 1600px) - cut bottom slightly */
+@media (min-width: 1025px) and (max-width: 1599px) {
+  .hero-bg-image {
+    height: calc(78vh - 100px) !important;
+  }
+  
+  .hero-bg-overlay {
+    height: calc(78vh - 100px) !important;
+  }
+  
+  .hero-gradient-bg {
+    top: calc(78vh - 100px) !important;
+  }
+}
+
+/* Reduce height on desktop/PC screens (1600px and above) - laptops stay original */
+@media (min-width: 1600px) {
+  .hero-bg-image {
+    height: calc(75vh - 100px) !important;
+  }
+  
+  .hero-bg-overlay {
+    height: calc(75vh - 100px) !important;
+  }
+  
+  .hero-gradient-bg {
+    top: calc(75vh - 100px) !important;
   }
 }
 

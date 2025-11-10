@@ -27,9 +27,27 @@ export default function Home() {
       justifyContent: 'center', 
       alignItems: 'center', 
       minHeight: '100vh',
-      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
-      padding: '40px 20px'
+      padding: '40px 20px',
+      position: 'relative'
     }}>
+      {/* Ultravib image background with dark overlay */}
+      <div
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      <div style={{ position: 'relative', zIndex: 10 }}>
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -61,6 +79,7 @@ export default function Home() {
           maxWidth: '400px'
         }}>
         </p>
+      </div>
       </div>
     </div>
   )

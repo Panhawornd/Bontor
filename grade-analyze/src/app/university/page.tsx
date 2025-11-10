@@ -8,7 +8,25 @@ export default function UniversityPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 relative">
+      {/* Ultravib image background with dark overlay */}
+      <div
+        className="fixed inset-x-0"
+        style={{ 
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      <div className="relative z-10">
       <div className="text-center">
         <GraduationCap className="w-24 h-24 text-blue-500 mx-auto mb-8 animate-bounce" />
         <h1 className="text-5xl font-bold mb-4">University</h1>
@@ -19,6 +37,7 @@ export default function UniversityPage() {
         >
           <ArrowLeft className="w-5 h-5 mr-2" /> Back
         </Button>
+      </div>
       </div>
     </div>
   );

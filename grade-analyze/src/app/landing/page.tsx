@@ -108,6 +108,23 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Ultravib image background with dark overlay - covers from Cards section to bottom */}
+      <div
+        className="fixed inset-x-0"
+        style={{ 
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -120,7 +137,7 @@ export default function LandingPage() {
               >
                 <img 
                   src="/image/Bontor-logo.png" 
-                  alt="Bontor"                   
+                  alt="Bontor" 
                   className="h-5 md:h-[23px] w-auto"
                 />
               </button>
@@ -170,17 +187,28 @@ export default function LandingPage() {
       <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
       
       {/* Hero Section */}
-      <section className="relative">
+      <section className="relative" style={{ minHeight: 'calc(82vh - 120px + 5rem)' }}>
         {/* Background Image - cuts at bottom on all screen sizes */}
         <div
-          className="absolute inset-x-0 top-15 bg-cover bg-center bg-no-repeat bg-black hero-bg-image"
+          className="absolute inset-x-0 bg-cover bg-center bg-no-repeat bg-black hero-bg-image"
           style={{ 
-            backgroundImage: "url(/image/Herosection.jpg)"
+            top: '4rem',
+            backgroundImage: "url(/image/Herosection.jpg)",
+            height: 'calc(82vh - 120px)',
+            overflow: 'hidden',
+            zIndex: 1
           }}
         />
         {/* Dark overlay matched to height */}
-        <div className="absolute inset-x-0 top-0 bg-black/70 hero-bg-overlay" />
-        <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10">
+        <div 
+          className="absolute inset-x-0 bg-black/70 hero-bg-overlay"
+          style={{
+            top: '4rem',
+            height: 'calc(82vh - 120px)',
+            zIndex: 2
+          }}
+        />
+        <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10" style={{ position: 'relative' }}>
           <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
             <Reveal
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-8"
@@ -227,11 +255,14 @@ export default function LandingPage() {
               </Button>
             </Reveal>
           </div>
-
+        </div>
+      </section>
           
-          
+      {/* Cards and Input Section */}
+      <section className="relative py-24">
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
           {/* Hero Visual - Bento Grid */}
-          <div className="mt-24 relative" style={{ perspective: '1000px' }}>
+          <div className="mt-[-6rem] relative" style={{ perspective: '1000px' }}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-6xl mx-auto">
               {/* Large Card */}
               <Reveal
@@ -340,18 +371,28 @@ export default function LandingPage() {
                 <p className="text-gray-300 text-lg">
                   Try our interactive analysis tool - fill out the form below to see how it works
                 </p>
-              </div>
+        </div>
               <div className="rounded-lg border border-[#1f1f1f] bg-[#111111] overflow-hidden hover:border-[#2a2a2a] transition-colors">
                 {/* Two Column Layout - Small */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                   {/* Left Column - Ready for Analysis */}
                   <div 
-                    className="min-h-full overflow-y-auto"
-                    style={{
-                      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
-                    }}
+                    className="min-h-full overflow-y-auto relative"
                   >
-                    <div className="flex items-center justify-center h-full p-4">
+                    {/* Background layer with filter */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: "url(/image/Ultravib.png)",
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        filter: 'brightness(0.3)',
+                        zIndex: 0
+                      }}
+                    />
+                    {/* Content layer */}
+                    <div className="flex items-center justify-center h-full p-4 relative z-10">
                       <div className="text-center">
                         <div className="w-10 h-10 flex items-center justify-center mx-auto mb-2">
                           <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -490,7 +531,7 @@ export default function LandingPage() {
                             </p>
                             <textarea
                               className="input-field"
-                              style={{ 
+        style={{ 
                                 minHeight: '45px', 
                                 resize: 'vertical',
                                 fontFamily: 'inherit',
@@ -546,18 +587,6 @@ export default function LandingPage() {
           </Reveal>
         </div>
       </section>
-
-      
-      
-
-      {/* Dark gradient background from hero to footer */}
-      <div
-        className="absolute inset-x-0 hero-gradient-bg"
-        style={{ 
-          bottom: 0,
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
-        }}
-      />
 
       {/* Key Benefits */}
       <section className="py-32 relative">
@@ -978,21 +1007,21 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t border-[#1f1f1f] relative z-20">
+      <footer className="py-16 border-t relative z-20" style={{ borderColor: '#777777' }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8">
             {/* Logo and Description */}
             <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-4">
-                <img 
-                  src="/image/Bontor-logo.png" 
-                  alt="Bontor" 
-                  style={{ 
-                    height: '24px',
-                    width: 'auto'
-                  }}
-                />
-              </div>
+              <img 
+                src="/image/Bontor-logo.png" 
+                alt="Bontor" 
+                style={{ 
+                  height: '24px',
+                  width: 'auto'
+                }}
+              />
+            </div>
               <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
                 AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
               </p>
@@ -1052,10 +1081,10 @@ export default function LandingPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#1f1f1f]">
-                <p className="text-gray-600 text-sm">
-                  © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
-                </p>
+              <div className="pt-4 border-t border-[#777777]">
+            <p className="text-gray-600 text-sm">
+              © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
+            </p>
               </div>
             </div>
           </div>

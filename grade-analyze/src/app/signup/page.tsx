@@ -73,9 +73,26 @@ export default function Signup() {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
-      color: '#ffffff'
+      color: '#ffffff',
+      position: 'relative'
     }}>
+      {/* Ultravib image background with dark overlay */}
+      <div
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -141,7 +158,9 @@ export default function Signup() {
         justifyContent: 'center',
         minHeight: '100vh',
         padding: '16px',
-        paddingTop: '80px' // Account for fixed navigation
+        paddingTop: '80px', // Account for fixed navigation
+        position: 'relative',
+        zIndex: 10
       }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>

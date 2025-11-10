@@ -118,9 +118,27 @@ export default function InputPage() {
         justifyContent: 'center', 
         alignItems: 'center', 
         minHeight: '100vh',
-        background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
-        padding: '40px 20px'
+        padding: '40px 20px',
+        position: 'relative'
       }}>
+        {/* Ultravib image background with dark overlay */}
+        <div
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: "url(/image/Ultravib.png)",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.3)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        <div style={{ position: 'relative', zIndex: 10 }}>
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -154,6 +172,7 @@ export default function InputPage() {
             Our AI is processing your grades and preferences to provide personalized recommendations.
           </p>
         </div>
+        </div>
       </div>
     )
   }
@@ -167,11 +186,28 @@ export default function InputPage() {
   return (
     <div style={{ 
       height: '100vh', 
-      background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)",
       position: 'relative',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      zIndex: 10
     }}>
+      {/* Ultravib image background with dark overlay */}
+      <div
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
 
       {/* Header */}
       <header style={{ 
@@ -305,7 +341,9 @@ export default function InputPage() {
           flex: 1,
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          position: 'relative',
+          zIndex: 10
         }}>
           {error && (
             <div style={{
@@ -346,13 +384,31 @@ export default function InputPage() {
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0" style={{ flex: 1, height: '100%' }}>
-            {/* Left Column - Recommendations (landing gradient) - Hidden on mobile until analysis */}
+            {/* Left Column - Recommendations - Hidden on mobile until analysis */}
             <div 
-              className={`min-h-full overflow-y-auto ${analysisResult ? 'block' : 'hidden lg:block'}`}
+              className={`h-full overflow-y-auto relative ${analysisResult ? 'block' : 'hidden lg:block'}`}
               style={{
-                background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
+                position: 'relative'
               }}
             >
+              {/* Ultravib image background with dark overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: "url(/image/Ultravib.png)",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center center',
+                  backgroundRepeat: 'no-repeat',
+                  filter: 'brightness(0.3)',
+                  zIndex: 0,
+                  pointerEvents: 'none'
+                }}
+              />
+              <div style={{ position: 'relative', zIndex: 10, height: '100%' }}>
               {analysisResult ? (
                 <div className="p-8">
                   <div className="mb-6 text-center">
@@ -388,6 +444,7 @@ export default function InputPage() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
 
             {/* Right Column - Input Form - Hidden on mobile after analysis */}

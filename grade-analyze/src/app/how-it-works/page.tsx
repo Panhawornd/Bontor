@@ -224,13 +224,21 @@ export default function HowItWorksPage() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
       <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
       
-      {/* Dark gradient background from hero to footer */}
+      {/* Ultravib image background with dark overlay */}
       <div
-        className="absolute inset-x-0"
+        className="fixed inset-x-0"
         style={{
           top: 0,
+          left: 0,
+          right: 0,
           bottom: 0,
-          background: "radial-gradient(ellipse 80% 60% at 50% 50%, #2d3748 0%, #1a202c 30%, #0f1419 60%, #000000 100%)"
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
         }}
       />
 
@@ -380,7 +388,7 @@ export default function HowItWorksPage() {
     </div>
 
       {/* Footer */}
-      <footer className="py-16 border-t border-[#1f1f1f] relative z-20">
+      <footer className="py-16 border-t border-[#777777] relative z-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8">
             {/* Logo and Description */}
@@ -454,7 +462,7 @@ export default function HowItWorksPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#1f1f1f]">
+              <div className="pt-4 border-t border-[#777777]">
                 <p className="text-gray-600 text-sm">
                   © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
                 </p>

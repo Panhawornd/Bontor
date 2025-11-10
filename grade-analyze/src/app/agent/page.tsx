@@ -8,8 +8,25 @@ export default function AgentPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-      <div className="text-center">
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-6 relative">
+      {/* Ultravib image background with dark overlay */}
+      <div
+        className="fixed inset-x-0"
+        style={{ 
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: "url(/image/Ultravib.png)",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      />
+      <div className="relative z-10 text-center">
         <Bot className="w-24 h-24 text-blue-500 mx-auto mb-8 animate-bounce" />
         <h1 className="text-5xl font-bold mb-4">Agent</h1>
         <p className="text-xl text-gray-400 mb-8">This page is coming soon! We&apos;re working hard to bring you an AI-powered assistant for career guidance.</p>

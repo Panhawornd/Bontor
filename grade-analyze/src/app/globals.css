@@ -452,13 +452,80 @@ h4 { font-size: 1.25rem; }
   animation: star-border-loop linear infinite;
 }
 
-/* Hero background image - cuts at bottom on all screen sizes */
+/* Hero Section Wrapper */
+.hero-section-wrapper {
+  position: relative;
+}
+
+/* Hero Image Container - Content is positioned within this */
+.hero-image-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hero background image - Default for laptops */
 .hero-bg-image {
   height: calc(82vh - 80px);
 }
 
 .hero-bg-overlay {
-  height: calc(82vh - 80px);
+  height: 100%;
+}
+
+/* Content wrapper positioned within image */
+.hero-content-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Responsive Typography */
+.hero-title {
+  font-size: clamp(2.5rem, 4.5vw, 5.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: clamp(1.5rem, 3vw, 3rem);
+  text-align: center;
+}
+
+/* Laptop screens - reduce font size */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .hero-title {
+    font-size: clamp(3rem, 5vw, 4rem);
+  }
+}
+
+.hero-description-text {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  line-height: 1.6;
+  color: #9ca3af;
+  max-width: 48rem;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 1rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* Hero CTA Button - scales with heading */
+.hero-cta-button {
+  padding: clamp(0.75rem, 1vw, 0.5rem) clamp(1rem, 1.5vw, 1.5rem);
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+  font-weight: 500;
+}
+
+.hero-cta-icon {
+  width: clamp(1rem, 1.5vw, 1.25rem);
+  height: clamp(1rem, 1.5vw, 1.25rem);
 }
 
 /* Gradient background position */
@@ -466,33 +533,33 @@ h4 { font-size: 1.25rem; }
   top: calc(82vh - 80px);
 }
 
-/* Tablet screens (768px to 1024px) - cut bottom slightly */
+/* Tablet screens (768px to 1024px) - consistent for both orientations */
 @media (min-width: 768px) and (max-width: 1024px) {
-  .hero-bg-image {
-    height: calc(78vh - 100px) !important;
+  .hero-section-wrapper {
+    min-height: calc(550px + 5rem) !important;
   }
   
-  .hero-bg-overlay {
-    height: calc(78vh - 100px) !important;
+  .hero-bg-image {
+    height: 550px !important;
   }
   
   .hero-gradient-bg {
-    top: calc(78vh - 100px) !important;
+    top: 550px !important;
   }
 }
 
-/* Phone screens (below 768px) - cut bottom slightly */
+/* Phone screens (below 768px) - consistent for both orientations */
 @media (max-width: 767px) {
-  .hero-bg-image {
-    height: calc(78vh - 100px) !important;
+  .hero-section-wrapper {
+    min-height: calc(500px + 5rem) !important;
   }
   
-  .hero-bg-overlay {
-    height: calc(78vh - 100px) !important;
+  .hero-bg-image {
+    height: 500px !important;
   }
   
   .hero-gradient-bg {
-    top: calc(78vh - 100px) !important;
+    top: 500px !important;
   }
 }
 
@@ -525,4 +592,71 @@ h4 { font-size: 1.25rem; }
     top: calc(75vh - 100px) !important;
   }
 }
+
+/* Phone screens - make Subject Analysis Lottie moderately smaller and centered */
+@media (max-width: 767px) {
+  .subject-analysis-lottie-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .subject-analysis-lottie-container > div {
+    max-width: 220px !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 auto;
+  }
+  
+  /* Footer - center content on phone screens */
+  .footer-content {
+    align-items: center !important;
+    text-align: center;
+  }
+  
+  .footer-logo-section {
+    align-items: center !important;
+    width: 100%;
+  }
+  
+  .footer-logo {
+    justify-content: center !important;
+  }
+  
+  .footer-description {
+    text-align: center !important;
+    margin: 0 auto;
+  }
+  
+  .footer-links-section {
+    align-items: center !important;
+    width: 100%;
+  }
+  
+  .footer-links {
+    justify-content: center !important;
+    gap: 5rem !important;
+    flex-wrap: wrap;
+  }
+  
+  .footer-copyright {
+    text-align: center !important;
+  }
+  
+  .footer-links-section ul {
+    align-items: center !important;
+  }
+  
+  .footer-links-section ul li {
+    text-align: center;
+  }
+  
+  /* Subject category names - smaller font on phone */
+  .subject-category-name {
+    font-size: 0.75rem !important;
+  }
+}
+
+
 

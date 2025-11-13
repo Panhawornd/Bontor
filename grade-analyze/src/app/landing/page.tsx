@@ -126,7 +126,7 @@ export default function LandingPage() {
         }}
       />
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/2 backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
@@ -187,73 +187,74 @@ export default function LandingPage() {
       <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
       
       {/* Hero Section */}
-      <section className="relative" style={{ minHeight: 'calc(82vh - 120px + 5rem)' }}>
-        {/* Background Image - cuts at bottom on all screen sizes */}
+      <section className="relative hero-section-wrapper" style={{ minHeight: 'calc(82vh - 120px + 5rem)' }}>
+        {/* Background Image Container - Content is positioned within this */}
         <div
-          className="absolute inset-x-0 bg-cover bg-center bg-no-repeat bg-black hero-bg-image"
+          className="absolute inset-x-0 hero-bg-image hero-image-container"
           style={{ 
             top: '4rem',
-            backgroundImage: "url(/image/Herosection.jpg)",
-            height: 'calc(82vh - 120px)',
             overflow: 'hidden',
             zIndex: 1
           }}
-        />
-        {/* Dark overlay matched to height */}
-        <div 
-          className="absolute inset-x-0 bg-black/70 hero-bg-overlay"
-          style={{
-            top: '4rem',
-            height: 'calc(82vh - 120px)',
-            zIndex: 2
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-6 pt-32 pb-24 relative z-10" style={{ position: 'relative' }}>
-          <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
-            <Reveal
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-8"
-              rootMargin="-100px"
-              threshold={0.2}
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <span className="text-sm text-gray-400">
-                AI-Powered Career Guidance for Cambodian Students
-              </span>
-            </Reveal>
-            
-            <Reveal rootMargin="-100px" threshold={0.2}>
-              <h1
-                className="text-6xl md:text-8xl text-white tracking-tight leading-none"
-                style={{ marginBottom: '3rem' }}
-              >
-                Your future starts
-                <br />
-                <span className="text-white">with insight</span>
-              </h1>
-            </Reveal>
-            
-            <Reveal
-              className="text-lg md:text-2xl text-gray-500 mb-12 max-w-3xl mx-auto leading-relaxed"
-              rootMargin="-100px"
-              threshold={0.2}
-            >
-              Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
-            </Reveal>
-            
-            <Reveal
-              className="flex justify-center items-center"
-              rootMargin="-100px"
-              threshold={0.2}
-            >
-              <Button
-                onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
-                size="lg"
-                className="group px-6 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
-              >
-                {hasToken ? 'Start Analysis' : 'Get Started'}
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Reveal>
+        >
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-black"
+            style={{ 
+              backgroundImage: "url(/image/Herosection.jpg)",
+            }}
+          />
+          
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/70 hero-bg-overlay" />
+          
+          {/* Content positioned within the image container */}
+          <div className="absolute inset-0 flex items-center justify-center hero-content-wrapper">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+              <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
+                <Reveal
+                  className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6 sm:mb-8"
+                  rootMargin="-100px"
+                  threshold={0.2}
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span className="text-xs sm:text-sm text-gray-400">
+                    AI-Powered Career Guidance for Cambodian Students
+                  </span>
+                </Reveal>
+                
+                <Reveal rootMargin="-100px" threshold={0.2}>
+                  <h1 className="hero-title">
+                    Your future starts
+                    <br />
+                    <span className="text-white">with insight</span>
+                  </h1>
+                </Reveal>
+                
+                <Reveal
+                  className="hero-description-text"
+                  rootMargin="-100px"
+                  threshold={0.2}
+                >
+                  Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
+                </Reveal>
+                
+                <Reveal
+                  className="flex justify-center items-center mt-8 sm:mt-10 md:mt-12"
+                  rootMargin="-100px"
+                  threshold={0.2}
+                >
+                  <Button
+                    onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
+                    size="lg"
+                    className="group hero-cta-button rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600"
+                  >
+                    {hasToken ? 'Start Analysis' : 'Get Started'}
+                    <ArrowRight className="hero-cta-icon ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Reveal>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -351,7 +352,7 @@ export default function LandingPage() {
                         <div className="w-14 h-14 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-3">
                           <subject.icon className="w-6 h-6 text-gray-600" />
                         </div>
-                        <p className="text-sm text-gray-500">{subject.name}</p>
+                        <p className="text-sm text-gray-500 subject-category-name">{subject.name}</p>
                       </div>
                     ))}
                   </div>
@@ -680,9 +681,9 @@ export default function LandingPage() {
             </p>
           </Reveal>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
             {/* Connecting Line */}
-            <div className="hidden md:block absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(179,179,179,0.3)] to-transparent" />
+            <div className="hidden lg:block absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(179,179,179,0.3)] to-transparent" />
             
             {[
               {
@@ -781,12 +782,12 @@ export default function LandingPage() {
                     ))}
                   </div>
                   {subjectAnalysisAnimation && (
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center subject-analysis-lottie-container">
                       <Lottie 
                         animationData={subjectAnalysisAnimation}
                         loop={true}
                         autoplay={true}
-                        style={{ width: '350px', height: '350px' }}
+                        style={{ width: '100%', maxWidth: 350, height: 'auto' }}
                       />
                     </div>
                   )}
@@ -1007,12 +1008,12 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t relative z-20" style={{ borderColor: '#777777' }}>
+      <footer className="py-16 border-t relative z-20 footer-container" style={{ borderColor: '#777777' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8 footer-content">
             {/* Logo and Description */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
+            <div className="flex flex-col footer-logo-section">
+              <div className="flex items-center gap-2 mb-4 footer-logo">
               <img 
                 src="/image/Bontor-logo.png" 
                 alt="Bontor" 
@@ -1022,14 +1023,14 @@ export default function LandingPage() {
                 }}
               />
             </div>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+              <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
                 AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
               </p>
             </div>
 
             {/* Quick Links and Copyright */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row md:flex-row gap-20">
+            <div className="flex flex-col gap-4 footer-links-section">
+              <div className="flex flex-row md:flex-row gap-20 footer-links">
                 <div className="flex flex-col">
                   <h3 className="text-white font-semibold mb-3">Quick Links</h3>
                   <ul className="space-y-2 mt-2">
@@ -1081,7 +1082,7 @@ export default function LandingPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#777777]">
+              <div className="pt-4 border-t border-[#777777] footer-copyright">
             <p className="text-gray-600 text-sm">
               © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>

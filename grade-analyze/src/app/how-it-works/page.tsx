@@ -166,7 +166,7 @@ export default function HowItWorksPage() {
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Navigation (same as landing) */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/2 backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
@@ -387,30 +387,30 @@ export default function HowItWorksPage() {
 
     </div>
 
-      {/* Footer */}
-      <footer className="py-16 border-t border-[#777777] relative z-20">
+     {/* Footer */}
+     <footer className="py-16 border-t relative z-20 footer-container" style={{ borderColor: '#777777' }}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8 footer-content">
             {/* Logo and Description */}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-4">
-                <img 
-                  src="/image/Bontor-logo.png" 
-                  alt="Bontor" 
-                  style={{ 
-                    height: '24px',
-                    width: 'auto'
-                  }}
-                />
-              </div>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
+            <div className="flex flex-col footer-logo-section">
+              <div className="flex items-center gap-2 mb-4 footer-logo">
+              <img 
+                src="/image/Bontor-logo.png" 
+                alt="Bontor" 
+                style={{ 
+                  height: '24px',
+                  width: 'auto'
+                }}
+              />
+            </div>
+              <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
                 AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
               </p>
             </div>
 
             {/* Quick Links and Copyright */}
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-row md:flex-row gap-20">
+            <div className="flex flex-col gap-4 footer-links-section">
+              <div className="flex flex-row md:flex-row gap-20 footer-links">
                 <div className="flex flex-col">
                   <h3 className="text-white font-semibold mb-3">Quick Links</h3>
                   <ul className="space-y-2 mt-2">
@@ -462,10 +462,10 @@ export default function HowItWorksPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#777777]">
-                <p className="text-gray-600 text-sm">
-                  © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
-                </p>
+              <div className="pt-4 border-t border-[#777777] footer-copyright">
+            <p className="text-gray-600 text-sm">
+              © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
+            </p>
               </div>
             </div>
           </div>

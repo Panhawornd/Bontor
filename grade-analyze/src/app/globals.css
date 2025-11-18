@@ -455,6 +455,7 @@ h4 { font-size: 1.25rem; }
 /* Hero Section Wrapper */
 .hero-section-wrapper {
   position: relative;
+  min-height: calc(82vh - 80px + 5rem);
 }
 
 /* Hero Image Container - Content is positioned within this */
@@ -563,18 +564,22 @@ h4 { font-size: 1.25rem; }
   }
 }
 
-/* PC screens (1025px and above, but below 1600px) - cut bottom slightly */
+/* Laptop screens (1025px and above, but below 1600px) - use default height, responsive to viewport height */
 @media (min-width: 1025px) and (max-width: 1599px) {
+  .hero-section-wrapper {
+    min-height: calc(82vh - 80px + 5rem);
+  }
+  
   .hero-bg-image {
-    height: calc(78vh - 100px) !important;
+    height: calc(82vh - 80px);
   }
   
   .hero-bg-overlay {
-    height: calc(78vh - 100px) !important;
+    height: calc(82vh - 80px);
   }
   
   .hero-gradient-bg {
-    top: calc(78vh - 100px) !important;
+    top: calc(82vh - 80px);
   }
 }
 

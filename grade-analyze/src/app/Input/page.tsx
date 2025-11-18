@@ -210,14 +210,13 @@ export default function InputPage() {
       />
 
       {/* Header */}
-      <header style={{ 
-        background: 'transparent',  
+      <header className="bg-white/2 backdrop-blur-[20px]" style={{ 
         padding: '16px 0',
         position: 'sticky',
         top: 0,
-        zIndex: 100,
-        backdropFilter: 'blur(20px)'
-      }}>
+        zIndex: 100
+       }}>  
+        
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
             {/* Logo */}

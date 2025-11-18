@@ -187,7 +187,7 @@ export default function LandingPage() {
       <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
       
       {/* Hero Section */}
-      <section className="relative hero-section-wrapper" style={{ minHeight: 'calc(82vh - 120px + 5rem)' }}>
+      <section className="relative hero-section-wrapper">
         {/* Background Image Container - Content is positioned within this */}
         <div
           className="absolute inset-x-0 hero-bg-image hero-image-container"

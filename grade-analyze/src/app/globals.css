@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /* Ensure no black space */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -36,7 +37,8 @@ html, body {
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+    Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
   line-height: 1.6;
@@ -68,16 +70,29 @@ html {
 }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 600;
   line-height: 1.25;
   margin: 0;
 }
 
-h1 { font-size: 3.5rem; }
-h2 { font-size: 2.5rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+h1 {
+  font-size: 3.5rem;
+}
+h2 {
+  font-size: 2.5rem;
+}
+h3 {
+  font-size: 1.5rem;
+}
+h4 {
+  font-size: 1.25rem;
+}
 
 /* Utility component classes */
 .input-field {
@@ -182,8 +197,13 @@ h4 { font-size: 1.25rem; }
 
 /* Loading animation */
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .loading {
@@ -216,16 +236,21 @@ h4 { font-size: 1.25rem; }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  h1 { font-size: 3rem; }
-  h2 { font-size: 1.75rem; }
-  h3 { font-size: 1.25rem; }
-  
-  
+  h1 {
+    font-size: 3rem;
+  }
+  h2 {
+    font-size: 1.75rem;
+  }
+  h3 {
+    font-size: 1.25rem;
+  }
+
   .card {
     padding: 16px;
     margin: 12px 0;
   }
-  
+
   .grid-2-col {
     grid-template-columns: 1fr;
   }
@@ -241,7 +266,7 @@ h4 { font-size: 1.25rem; }
     gap: 20px !important;
     overflow-x: hidden !important;
   }
-  
+
   /* Charts grid - transparent wrapper */
   .rec-charts-grid {
     grid-template-columns: 1fr !important;
@@ -253,7 +278,7 @@ h4 { font-size: 1.25rem; }
     box-shadow: none !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Chart cards - match section inner content cards */
   .rec-chart-card {
     width: 100% !important;
@@ -268,19 +293,19 @@ h4 { font-size: 1.25rem; }
     border-radius: 12px !important;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
   }
-  
+
   /* Chart card headers */
   .rec-chart-card h3 {
     font-size: 18px !important;
     margin-bottom: 16px !important;
   }
-  
+
   /* All other grids in dashboard */
   .rec-dashboard-container > div > div[style*="display: 'grid'"] {
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
-  
+
   /* Section cards */
   .rec-dashboard-container > div {
     padding: 20px !important;
@@ -290,7 +315,7 @@ h4 { font-size: 1.25rem; }
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Section cards inner content */
   .rec-dashboard-container > div > div[style*="padding: '32px'"] {
     padding: 20px !important;
@@ -298,14 +323,14 @@ h4 { font-size: 1.25rem; }
     width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Individual cards inside sections */
   .rec-dashboard-container div[style*="padding: '24px'"],
   .rec-dashboard-container div[style*="padding: '20px'"] {
     padding: 14px !important;
     margin: 12px !important;
   }
-  
+
   /* All inner cards - more space */
   .rec-major-card,
   .rec-career-card,
@@ -314,7 +339,7 @@ h4 { font-size: 1.25rem; }
     padding: 20px !important;
     margin: 6px !important;
   }
-  
+
   /* Increase font sizes for mobile readability */
   .rec-dashboard-container h2 {
     font-size: 20px !important;
@@ -323,39 +348,41 @@ h4 { font-size: 1.25rem; }
     padding-top: 2px !important;
     margin-left: 15px !important;
   }
-  
+
   .rec-dashboard-container h3 {
     font-size: 16px !important;
   }
-  
+
   .rec-dashboard-container p {
     font-size: 14px !important;
     line-height: 1.6 !important;
   }
-  
+
   .rec-dashboard-container span {
     font-size: 14px !important;
     line-height: 1.6 !important;
   }
-  
+
   /* Match badges and source badges - smaller on mobile (must be after general span rule) */
   .rec-dashboard-container .rec-match-badge {
     font-size: 11px !important;
     padding: 4px 8px !important;
   }
-  
+
   .rec-dashboard-container .rec-source-badge {
     font-size: 9px !important;
     padding: 2px 6px !important;
   }
 }
 
-
-
 /* Logo spin animation */
 @keyframes logoSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .logo-spin {
@@ -365,8 +392,10 @@ h4 { font-size: 1.25rem; }
 /* Reveal animation - IntersectionObserver based */
 .reveal {
   opacity: 0;
-  transform: translateY(var(--translate-y, 0)) translateX(var(--translate-x, 0)) scale(var(--scale, 1));
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(var(--translate-y, 0)) translateX(var(--translate-x, 0))
+    scale(var(--scale, 1));
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: opacity, transform;
 }
 
@@ -539,11 +568,11 @@ h4 { font-size: 1.25rem; }
   .hero-section-wrapper {
     min-height: calc(550px + 5rem) !important;
   }
-  
+
   .hero-bg-image {
     height: 550px !important;
   }
-  
+
   .hero-gradient-bg {
     top: 550px !important;
   }
@@ -554,11 +583,11 @@ h4 { font-size: 1.25rem; }
   .hero-section-wrapper {
     min-height: calc(500px + 5rem) !important;
   }
-  
+
   .hero-bg-image {
     height: 500px !important;
   }
-  
+
   .hero-gradient-bg {
     top: 500px !important;
   }
@@ -569,15 +598,15 @@ h4 { font-size: 1.25rem; }
   .hero-section-wrapper {
     min-height: calc(82vh - 80px + 5rem);
   }
-  
+
   .hero-bg-image {
     height: calc(82vh - 80px);
   }
-  
+
   .hero-bg-overlay {
     height: calc(82vh - 80px);
   }
-  
+
   .hero-gradient-bg {
     top: calc(82vh - 80px);
   }
@@ -585,14 +614,18 @@ h4 { font-size: 1.25rem; }
 
 /* Reduce height on desktop/PC screens (1600px and above) - laptops stay original */
 @media (min-width: 1600px) {
+  .hero-section-wrapper {
+    min-height: calc(80vh - 90px + 5rem) !important;
+  }
+
   .hero-bg-image {
-    height: calc(75vh - 100px) !important;
+    height: calc(80vh - 100px) !important;
   }
-  
+
   .hero-bg-overlay {
-    height: calc(75vh - 100px) !important;
+    height: calc(80vh - 100px) !important;
   }
-  
+
   .hero-gradient-bg {
     top: calc(75vh - 100px) !important;
   }
@@ -606,62 +639,59 @@ h4 { font-size: 1.25rem; }
     justify-content: center;
     align-items: center;
   }
-  
+
   .subject-analysis-lottie-container > div {
     max-width: 220px !important;
     width: 100% !important;
     height: auto !important;
     margin: 0 auto;
   }
-  
+
   /* Footer - center content on phone screens */
   .footer-content {
     align-items: center !important;
     text-align: center;
   }
-  
+
   .footer-logo-section {
     align-items: center !important;
     width: 100%;
   }
-  
+
   .footer-logo {
     justify-content: center !important;
   }
-  
+
   .footer-description {
     text-align: center !important;
     margin: 0 auto;
   }
-  
+
   .footer-links-section {
     align-items: center !important;
     width: 100%;
   }
-  
+
   .footer-links {
     justify-content: center !important;
     gap: 5rem !important;
     flex-wrap: wrap;
   }
-  
+
   .footer-copyright {
     text-align: center !important;
   }
-  
+
   .footer-links-section ul {
     align-items: center !important;
   }
-  
+
   .footer-links-section ul li {
     text-align: center;
   }
-  
+
   /* Subject category names - smaller font on phone */
   .subject-category-name {
     font-size: 0.75rem !important;
   }
 }
-
-
-

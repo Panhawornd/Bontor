@@ -36,6 +36,7 @@ export default function LandingPage() {
   const [grades, setGrades] = useState<Record<string, string>>({});
   const [interestText, setInterestText] = useState("");
   const [careerGoals, setCareerGoals] = useState("");
+  const [isAnalysisCardRevealed, setIsAnalysisCardRevealed] = useState(false);
 
   // Validate form - check if all required fields are filled
   const isFormValid = () => {
@@ -300,6 +301,12 @@ export default function LandingPage() {
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
                 rootMargin="-100px"
                 threshold={0.2}
+                onReveal={() => {
+                  // Wait for reveal animation to complete (0.6s) before starting progress bars
+                  setTimeout(() => {
+                    setIsAnalysisCardRevealed(true);
+                  }, 600);
+                }}
               >
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
@@ -335,9 +342,11 @@ export default function LandingPage() {
                               {
                                 "--target-width": `${item.value}%`,
                                 width: "0%",
-                                animation: `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${
-                                  0.6 + i * 0.15
-                                }s forwards`,
+                                animation: isAnalysisCardRevealed
+                                  ? `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${
+                                      i * 0.15
+                                    }s forwards`
+                                  : "none",
                                 transformOrigin: "left",
                                 willChange: "width",
                               } as React.CSSProperties & {

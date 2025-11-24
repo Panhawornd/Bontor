@@ -37,6 +37,8 @@ export default function LandingPage() {
   const [interestText, setInterestText] = useState("");
   const [careerGoals, setCareerGoals] = useState("");
   const [isAnalysisCardRevealed, setIsAnalysisCardRevealed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
   // Validate form - check if all required fields are filled
   const isFormValid = () => {
@@ -151,7 +153,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
-            <div className="absolute left-0 flex items-center">
+            <div className="absolute left-3 md:left-0 flex items-center">
               <button
                 onClick={() => router.push("/landing")}
                 className="hover:opacity-80 transition-opacity"
@@ -199,9 +201,126 @@ export default function LandingPage() {
                 {hasToken ? "Start Analysis" : "Get Started"}
               </Button>
             </div>
+            {/* Mobile Menu trigger */}
+            <div className="absolute inset-y-0 right-3 left-3 md:hidden flex items-center justify-end">
+              <button
+                type="button"
+                className="flex items-center justify-end text-white text-sm tracking-wide uppercase text-right w-auto"
+                aria-label="Open menu"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <span className="w-5 h-5 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-text-align-end-icon lucide-text-align-end"
+                  >
+                    <path d="M21 5H3" />
+                    <path d="M21 12H9" />
+                    <path d="M21 19H7" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
+
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => {
+                  router.push("/landing");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/how-it-works");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                How it Works
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/about");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                About
+              </button>
+            </div>
+            <div className="mt-5 px-5 pb-8">
+              <Button
+                onClick={() => {
+                  if (hasToken) {
+                    router.push("/Input");
+                  } else {
+                    handleGetStarted();
+                  }
+                  setIsMenuOpen(false);
+                }}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                {hasToken ? "Start Analysis" : "Get Started"}
+              </Button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Subtle Gradient Orbs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
@@ -431,8 +550,7 @@ export default function LandingPage() {
             <div className="max-w-4xl mx-auto">
               <div className="mb-10 text-center mt-10">
                 <p className="text-gray-300 text-lg">
-                  Try our interactive analysis tool - fill out the form below to
-                  see how it works
+                  Fill out the form below to see how it works
                 </p>
               </div>
               <div className="rounded-lg border border-[#1f1f1f] bg-[#111111] overflow-hidden hover:border-[#2a2a2a] transition-colors">
@@ -474,8 +592,7 @@ export default function LandingPage() {
                           Ready for Analysis
                         </h3>
                         <p className="text-gray-300 text-xs max-w-[200px] mt-1">
-                          Fill out the form on the right to get your
-                          personalized career recommendations.
+                          Fill out the form on the right to get your personalized academic insights recommendations.
                         </p>
                       </div>
                     </div>
@@ -806,13 +923,9 @@ export default function LandingPage() {
                       <div className="mt-auto flex justify-center items-center">
                         <Lottie
                           animationData={benefit.lottie}
-                          loop={true}
-                          autoplay={true}
-                          style={{
-                            width: "100%",
-                            maxWidth: 300,
-                            height: "auto",
-                          }}
+                          loop
+                          autoplay
+                          className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[300px] h-auto"
                         />
                       </div>
                     )}

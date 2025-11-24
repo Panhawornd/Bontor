@@ -260,11 +260,11 @@ export default function HowItWorksPage() {
           </p>
         </div>
 
-        <Reveal className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-10 md:gap-14 py-12 md:py-20" rootMargin="-50px" threshold={0.2}>
+        <Reveal className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 lg:gap-14 py-12 md:py-20" rootMargin="-50px" threshold={0.2}>
           {/* Left timeline rail */}
-          <aside className="relative md:sticky md:top-24">
+          <aside className="relative lg:sticky lg:top-24">
             {/* Wrapper matches content height to align dots */}
-            <div className="relative hidden md:block" style={{ height: totalHeight ? `${totalHeight}px` : undefined }}>
+            <div className="relative hidden lg:block" style={{ height: totalHeight ? `${totalHeight}px` : undefined }}>
               {/* Rail */}
               <div className="absolute left-[22px] top-0 bottom-0">
                 <div className="h-full w-0.5 bg-gray-800/70 rounded" />

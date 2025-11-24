@@ -79,6 +79,6 @@ export const config = {
      * - logo.svg (logo file)
      * - file.svg, globe.svg, next.svg, vercel.svg, window.svg (public assets)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|image|lottie|logo.svg|file.svg|globe.svg|next.svg|vercel.svg|window.svg).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|icon-with-bg.svg|icon.svg|image|lottie|logo.svg|file.svg|globe.svg|next.svg|vercel.svg|window.svg).*)',
   ],
 }

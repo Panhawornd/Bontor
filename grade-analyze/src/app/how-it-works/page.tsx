@@ -44,6 +44,7 @@ export default function HowItWorksPage() {
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [metrics, setMetrics] = useState<number[]>([]);
   const [progressPct, setProgressPct] = useState<number>(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const cookies = document.cookie;
@@ -128,6 +129,10 @@ export default function HowItWorksPage() {
   }, [ids]);
 
   useEffect(() => {
+    const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)') : null;
+    // Only run IntersectionObserver on desktop/laptop (lg and up)
+    if (!mq || !mq.matches) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         // Filter to only elements with significant intersection ratio to prevent glitches
@@ -161,6 +166,32 @@ export default function HowItWorksPage() {
     return () => observer.disconnect();
   }, [ids]);
 
+  // Phone/Tablet: derive activeIndex from progressPct vs. cumulative section heights
+  useEffect(() => {
+    const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)') : null;
+    if (mq && mq.matches) return; // do nothing on desktop
+    if (!metrics || metrics.length === 0 || ids.length === 0) return;
+
+    // Compute total locally to avoid referencing const declared later
+    const total = metrics.reduce((a, b) => a + b, 0) || 1;
+    const progressed = (progressPct / 100) * total;
+
+    let acc = 0;
+    let nextActive = 0;
+    for (let i = 0; i < metrics.length; i++) {
+      const start = acc;
+      const end = acc + metrics[i];
+      if (progressed >= start && progressed < end) {
+        nextActive = i;
+        break;
+      }
+      acc = end;
+      if (i === metrics.length - 1) nextActive = metrics.length - 1;
+    }
+
+    if (nextActive !== activeIndex) setActiveIndex(nextActive);
+  }, [progressPct, metrics, ids, activeIndex]);
+
   const totalHeight = metrics.reduce((a, b) => a + b, 0) || 1;
 
   return (
@@ -170,7 +201,7 @@ export default function HowItWorksPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
-            <div className="absolute left-0 flex items-center">
+            <div className="absolute left-3 md:left-0 flex items-center">
               <button
                 onClick={() => router.push('/landing')}
                 className="hover:opacity-80 transition-opacity"
@@ -216,9 +247,126 @@ export default function HowItWorksPage() {
                 {hasToken ? 'Start Analysis' : 'Get Started'}
               </Button>
             </div>
+            {/* Mobile Menu trigger */}
+            <div className="absolute inset-y-0 right-3 left-3 md:hidden flex items-center justify-end">
+              <button
+                type="button"
+                className="flex items-center justify-end text-white text-sm tracking-wide uppercase text-right w-auto"
+                aria-label="Open menu"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <span className="w-5 h-5 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-text-align-end-icon lucide-text-align-end"
+                  >
+                    <path d="M21 5H3" />
+                    <path d="M21 12H9" />
+                    <path d="M21 19H7" />
+                  </svg>
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
+
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => {
+                  router.push("/landing");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/how-it-works");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                How it Works
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/about");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                About
+              </button>
+            </div>
+            <div className="mt-5 px-5 pb-8">
+              <Button
+                onClick={() => {
+                  if (hasToken) {
+                    router.push("/Input");
+                  } else {
+                    router.push("/login");
+                  }
+                  setIsMenuOpen(false);
+                }}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                {hasToken ? "Start Analysis" : "Get Started"}
+              </Button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Subtle Gradient Orbs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
@@ -244,10 +392,10 @@ export default function HowItWorksPage() {
 
       {/* Content wrapper */}
     <div className="relative z-10 text-white">
-      <main className="mx-auto max-w-7xl px-6 pt-28 pb-32 md:pb-40">
+      <main className="mx-auto max-w-7xl px-6 pt-32 pb-32 md:pb-40">
 
         {/* Page Header */}
-        <div className="max-w-5xl mx-auto text-center mb-14">
+        <div className="max-w-5xl mx-auto text-center mb-2 md:mb-0 lg:mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
             <span className="text-sm text-gray-500">Features</span>
@@ -334,7 +482,20 @@ export default function HowItWorksPage() {
           </aside>
 
           {/* Right content */}
-          <section>
+          <section className="lg:static relative">
+            {/* Mobile/Tablet only: centered progress bar behind cards - NO DOTS */}
+            <div className="lg:hidden absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-0.5 pointer-events-none" style={{ zIndex: 0 }}>
+              <div className="absolute inset-0 bg-gray-800/70 rounded" />
+              <div
+                className="absolute left-0 top-0 w-full h-full bg-blue-500 rounded"
+                style={{
+                  transform: `scaleY(${progressPct / 100})`,
+                  transformOrigin: 'top center',
+                  willChange: 'transform'
+                }}
+              />
+            </div>
+
             {steps.map((step, idx) => {
               const Icon = step.icon;
               const isActive = idx === activeIndex;
@@ -345,7 +506,8 @@ export default function HowItWorksPage() {
                   ref={(el) => {
                     sectionRefs.current[step.id] = el;
                   }}
-                  className="scroll-mt-28 mb-24 last:mb-0"
+                  className="scroll-mt-28 mb-24 last:mb-0 lg:static relative"
+                  style={{ zIndex: 1 }}
                 >
                   <div
                     className={
@@ -388,7 +550,7 @@ export default function HowItWorksPage() {
     </div>
 
      {/* Footer */}
-     <footer className="py-16 border-t relative z-20 footer-container" style={{ borderColor: '#777777' }}>
+     <footer className="py-16 border-t relative z-20 footer-container border-white/10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8 footer-content">
             {/* Logo and Description */}
@@ -462,7 +624,7 @@ export default function HowItWorksPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#777777] footer-copyright">
+              <div className="pt-4 border-t border-white/10 footer-copyright">
             <p className="text-gray-600 text-sm">
               © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>

@@ -44,6 +44,14 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
 
   const SUBJECTS = examType === 'science' ? SCIENCE_SUBJECTS : SOCIAL_SCIENCE_SUBJECTS
 
+  const interestPlaceholder = examType === 'social-science'
+    ? 'I enjoy debating, understanding legal systems, justice, public policy, and human rights...'
+    : 'I love programming and building apps. I enjoy working with data and solving complex problems...'
+
+  const careerPlaceholder = examType === 'social-science'
+    ? 'I want to study law and become a lawyer, or work in public policy/legal advocacy...'
+    : 'I want to become a software engineer and work for a tech company...'
+
   const handleExamTypeChange = (newType: ExamType) => {
     if (newType !== examType) {
       setExamType(newType)
@@ -225,7 +233,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I love programming and building apps. I enjoy working with data and solving complex problems..."
+            placeholder={interestPlaceholder}
             value={interestText}
             onChange={(e) => setInterestText(e.target.value)}
             required
@@ -257,7 +265,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I want to become a software engineer and work for a tech company..."
+            placeholder={careerPlaceholder}
             value={careerGoals}
             onChange={(e) => setCareerGoals(e.target.value)}
           />

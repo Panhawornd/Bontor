@@ -13,8 +13,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bontor - AI-Powered Majorand Career Guidance for Cambodian BacII Students",
-  description: "AI-powered career guidance and university recommendations for Cambodian BacII students",
+  title: "Bontor - AI-Powered Major and Career Guidance for Cambodian BacII Students",
+  description: "AI-powered Major, University, and Career Recommendations System for Cambodian BacII Students",
+  icons: {
+    icon: '/icon-with-bg.svg',
+    shortcut: '/icon-with-bg.svg',
+    apple: '/icon-with-bg.svg',
+  },
+  openGraph: {
+    title: "Bontor - AI-Powered Major and Career Guidance for Cambodian BacII Students",
+    description: "AI-powered Major, University, and Career Recommendations System for Cambodian BacII Students",
+      images: [
+      {
+        url: '/icon-with-bg.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Bontor Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Bontor - AI-Powered Major and Career Guidance for Cambodian BacII Students",
+    description: "AI-powered Major, University, and Career Recommendations System for Cambodian BacII Students",
+    images: ['/icon-with-bg.svg'],
+  },
 };
 
 export default function RootLayout({

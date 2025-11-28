@@ -477,7 +477,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t relative z-20 footer-container" style={{ borderColor: '#777777' }}>
+      <footer className="py-16 border-t relative z-20 footer-container border-white/10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8 footer-content">
             {/* Logo and Description */}
@@ -551,7 +551,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#777777] footer-copyright">
+              <div className="pt-4 border-t border-white/10 footer-copyright">
             <p className="text-gray-600 text-sm">
               © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>

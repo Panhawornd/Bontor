@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
@@ -24,6 +25,31 @@ export default function Signup() {
     setLoading(true)
     setError('')
     setIsErrorVisible(true)
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(''), 300)
+      }, 5000)
+      setLoading(false)
+      return
+    }
+
+    // Validate password length (8 or more characters)
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long')
+      setIsErrorVisible(true)
+      setTimeout(() => {
+        setIsErrorVisible(false)
+        setTimeout(() => setError(''), 300)
+      }, 5000)
+      setLoading(false)
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
@@ -48,7 +74,7 @@ export default function Signup() {
       })
 
       if (response.ok) {
-        router.push('/input?message=Account created successfully')
+        router.push('/Input')
       } else {
         const data = await response.json()
         setError(data.error || 'Signup failed')
@@ -179,16 +205,32 @@ export default function Signup() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {error && (
               <div style={{
-                padding: '16px',
-                backgroundColor: '#1a1111',
-                border: '1px solid #666666',
-                borderRadius: '8px',
-                color: '#ffffff',
-                fontSize: '14px',
+                background: 'rgba(220, 53, 69, 0.1)', 
+                border: '1px solid var(--accent-error)', 
+                borderRadius: '12px', 
+                padding: '20px', 
+                marginBottom: '32px',
+                color: 'var(--accent-error)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
                 opacity: isErrorVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease-out'
               }}>
-                {error}
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: 'transparent',
+                  border: '2px solid #ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <X size={12} style={{ color: '#ef4444' }} />
+                </div>
+                <span>{error}</span>
               </div>
             )}
 
@@ -242,9 +284,10 @@ export default function Signup() {
               <input
                 type="password"
                 required
+                minLength={8}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Create a password"
+                placeholder="Create a password (min. 8 characters)"
                 className="input-field"
               />
             </div>

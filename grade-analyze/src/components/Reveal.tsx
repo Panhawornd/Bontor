@@ -14,6 +14,7 @@ interface RevealProps {
   scale?: boolean;
   style?: React.CSSProperties;
   immediatelyVisible?: boolean;
+  onReveal?: () => void;
 }
 
 export default function Reveal({
@@ -27,9 +28,11 @@ export default function Reveal({
   translateX = 0,
   scale = false,
   style = {},
-  immediatelyVisible = false
+  immediatelyVisible = false,
+  onReveal
 }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     const element = ref.current;
@@ -39,6 +42,9 @@ export default function Reveal({
     if (immediatelyVisible) {
       const applyAnimation = () => {
         element.classList.add('reveal-visible');
+        if (onReveal) {
+          onReveal();
+        }
       };
       if (delay > 0) {
         setTimeout(applyAnimation, delay);
@@ -48,41 +54,96 @@ export default function Reveal({
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Apply delay via setTimeout if specified
-            const applyAnimation = () => {
-              element.classList.add('reveal-visible');
-              if (once) {
-                observer.unobserve(element);
-              }
-            };
-
-            if (delay > 0) {
-              setTimeout(applyAnimation, delay);
-            } else {
-              applyAnimation();
-            }
-          } else if (!once) {
-            element.classList.remove('reveal-visible');
+    // Check if element is already visible in viewport on mount
+    const checkInitialVisibility = () => {
+      const rect = element.getBoundingClientRect();
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+      
+      // Simple check: element is visible if any part of it is in the viewport
+      // This is more lenient than IntersectionObserver with negative rootMargin
+      // We want elements that are already on screen to reveal immediately
+      const isVisible = 
+        rect.bottom > 0 &&
+        rect.top < windowHeight &&
+        rect.right > 0 &&
+        rect.left < windowWidth;
+      
+      if (isVisible) {
+        const applyAnimation = () => {
+          element.classList.add('reveal-visible');
+          if (onReveal) {
+            onReveal();
           }
-        });
-      },
-      {
-        root: null,
-        rootMargin,
-        threshold
+        };
+        if (delay > 0) {
+          setTimeout(applyAnimation, delay);
+        } else {
+          applyAnimation();
+        }
+        return true; // Element was already visible
       }
-    );
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
+      return false; // Element not visible yet
     };
-  }, [rootMargin, threshold, once, delay, immediatelyVisible]);
+
+    // Check initial visibility after layout is complete
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    const setupObserver = () => {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Apply delay via setTimeout if specified
+              const applyAnimation = () => {
+                element.classList.add('reveal-visible');
+                if (onReveal) {
+                  onReveal();
+                }
+                if (once && observerRef.current) {
+                  observerRef.current.unobserve(element);
+                }
+              };
+
+              if (delay > 0) {
+                setTimeout(applyAnimation, delay);
+              } else {
+                applyAnimation();
+              }
+            } else if (!once) {
+              element.classList.remove('reveal-visible');
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin,
+          threshold
+        }
+      );
+
+      observerRef.current.observe(element);
+    };
+
+    // Check visibility after next frame to ensure layout is complete
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const wasVisible = checkInitialVisibility();
+        
+        // If not already visible, set up observer
+        if (!wasVisible) {
+          setupObserver();
+        }
+      });
+    });
+    
+    // Return cleanup function
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+    };
+  }, [rootMargin, threshold, once, delay, immediatelyVisible, onReveal]);
 
   // Set initial transform based on props
   useEffect(() => {

@@ -13,7 +13,9 @@ interface GradeInputFormProps {
   loading: boolean
 }
 
-const SUBJECTS = [
+type ExamType = 'science' | 'social-science'
+
+const SCIENCE_SUBJECTS = [
   { id: 'math', name: 'Mathematics', category: 'Science', maxScore: 125 },
   { id: 'physics', name: 'Physics', category: 'Science', maxScore: 75 },
   { id: 'chemistry', name: 'Chemistry', category: 'Science', maxScore: 75 },
@@ -23,11 +25,40 @@ const SUBJECTS = [
   { id: 'history', name: 'History', category: 'Social Studies', maxScore: 50 },
 ]
 
+const SOCIAL_SCIENCE_SUBJECTS = [
+  { id: 'khmer', name: 'Khmer Literature', category: 'Language', maxScore: 125 },
+  { id: 'math', name: 'Mathematics', category: 'Science', maxScore: 75 },
+  { id: 'geography', name: 'Geography', category: 'Social Studies', maxScore: 75 },
+  { id: 'history', name: 'History', category: 'Social Studies', maxScore: 75 },
+  { id: 'moral', name: 'Moral Education', category: 'Social Studies', maxScore: 75 },
+  { id: 'earth', name: 'Earth', category: 'Science', maxScore: 50 },
+  { id: 'english', name: 'English', category: 'Language', maxScore: 50 },
+]
+
 export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProps) {
+  const [examType, setExamType] = useState<ExamType>('science')
   const [grades, setGrades] = useState<Record<string, string>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [interestText, setInterestText] = useState('')
   const [careerGoals, setCareerGoals] = useState('')
+
+  const SUBJECTS = examType === 'science' ? SCIENCE_SUBJECTS : SOCIAL_SCIENCE_SUBJECTS
+
+  const interestPlaceholder = examType === 'social-science'
+    ? 'I enjoy debating, understanding legal systems, justice, public policy, and human rights...'
+    : 'I love programming and building apps. I enjoy working with data and solving complex problems...'
+
+  const careerPlaceholder = examType === 'social-science'
+    ? 'I want to study law and become a lawyer, or work in public policy/legal advocacy...'
+    : 'I want to become a software engineer and work for a tech company...'
+
+  const handleExamTypeChange = (newType: ExamType) => {
+    if (newType !== examType) {
+      setExamType(newType)
+      setGrades({})
+      setErrors({})
+    }
+  }
 
   const validateGrade = (subject: string, value: string): string => {
     const subjDef = SUBJECTS.find(s => s.id === subject)
@@ -81,6 +112,57 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        {/* Exam Type Toggle */}
+        <div style={{ marginBottom: '8px' }}>
+          <div style={{ 
+            display: 'flex', 
+            gap: '12px',
+            backgroundColor: '#1a1a1a',
+            padding: '4px',
+            borderRadius: '8px',
+            border: '1px solid #2a2a2a'
+          }}>
+            <button
+              type="button"
+              onClick={() => handleExamTypeChange('science')}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backgroundColor: examType === 'science' ? '#1f2937' : 'transparent',
+                color: examType === 'science' ? '#ffffff' : 'var(--text-secondary)',
+                border: 'none',
+                outline: 'none'
+              }}
+            >
+              Science
+            </button>
+            <button
+              type="button"
+              onClick={() => handleExamTypeChange('social-science')}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backgroundColor: examType === 'social-science' ? '#1f2937' : 'transparent',
+                color: examType === 'social-science' ? '#ffffff' : 'var(--text-secondary)',
+                border: 'none',
+                outline: 'none'
+              }}
+            >
+              Social Science
+            </button>
+          </div>
+        </div>
+
         {/* Grades Section */}
         <div>
           <div className="grid-2-col">
@@ -151,7 +233,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I love programming and building apps. I enjoy working with data and solving complex problems..."
+            placeholder={interestPlaceholder}
             value={interestText}
             onChange={(e) => setInterestText(e.target.value)}
             required
@@ -183,7 +265,7 @@ export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProp
               fontFamily: 'inherit',
               lineHeight: '1.5'
             }}
-            placeholder="I want to become a software engineer and work for a tech company..."
+            placeholder={careerPlaceholder}
             value={careerGoals}
             onChange={(e) => setCareerGoals(e.target.value)}
           />

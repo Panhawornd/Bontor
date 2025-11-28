@@ -1,128 +1,151 @@
 "use client";
 
-import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
-import { Brain, TrendingUp, Target, Shield, CheckCircle2, BarChart3, Globe, Zap, ArrowRight, Award } from "lucide-react";
+import {
+  Brain,
+  TrendingUp,
+  Target,
+  Shield,
+  CheckCircle2,
+  BarChart3,
+  Globe,
+  Zap,
+  ArrowRight,
+  Award,
+} from "lucide-react";
 import Lottie from "lottie-react";
 import InfiniteScroll from "@/components/InfiniteScroll";
 
 export default function LandingPage() {
-  const router = useRouter()
-  const [aiAnimation, setAiAnimation] = useState(null)
-  const [bacIIAnimation, setBacIIAnimation] = useState(null)
-  const [nextStepAnimation, setNextStepAnimation] = useState(null)
-  const [securityAnimation, setSecurityAnimation] = useState(null)
-  const [subjectAnalysisAnimation, setSubjectAnalysisAnimation] = useState(null)
-  const [recommendationEngineAnimation, setRecommendationEngineAnimation] = useState(null)
-  const [skillDevelopmentAnimation, setSkillDevelopmentAnimation] = useState(null)
-  const [cambodiaAnimation, setCambodiaAnimation] = useState(null)
-  const [hasToken, setHasToken] = useState<boolean | null>(null)
-  const [grades, setGrades] = useState<Record<string, string>>({})
-  const [interestText, setInterestText] = useState('')
-  const [careerGoals, setCareerGoals] = useState('')
+  const router = useRouter();
+  const [aiAnimation, setAiAnimation] = useState(null);
+  const [bacIIAnimation, setBacIIAnimation] = useState(null);
+  const [nextStepAnimation, setNextStepAnimation] = useState(null);
+  const [securityAnimation, setSecurityAnimation] = useState(null);
+  const [subjectAnalysisAnimation, setSubjectAnalysisAnimation] =
+    useState(null);
+  const [recommendationEngineAnimation, setRecommendationEngineAnimation] =
+    useState(null);
+  const [skillDevelopmentAnimation, setSkillDevelopmentAnimation] =
+    useState(null);
+  const [cambodiaAnimation, setCambodiaAnimation] = useState(null);
+  const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [grades, setGrades] = useState<Record<string, string>>({});
+  const [interestText, setInterestText] = useState("");
+  const [careerGoals, setCareerGoals] = useState("");
+  const [isAnalysisCardRevealed, setIsAnalysisCardRevealed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
   // Validate form - check if all required fields are filled
   const isFormValid = () => {
     const SUBJECTS = [
-      { id: 'math', maxScore: 125 },
-      { id: 'physics', maxScore: 75 },
-      { id: 'chemistry', maxScore: 75 },
-      { id: 'biology', maxScore: 75 },
-      { id: 'khmer', maxScore: 75 },
-      { id: 'english', maxScore: 50 },
-      { id: 'history', maxScore: 50 },
-    ]
+      { id: "math", maxScore: 125 },
+      { id: "physics", maxScore: 75 },
+      { id: "chemistry", maxScore: 75 },
+      { id: "biology", maxScore: 75 },
+      { id: "khmer", maxScore: 75 },
+      { id: "english", maxScore: 50 },
+      { id: "history", maxScore: 50 },
+    ];
 
     // Check all subjects have valid scores
-    const allGradesValid = SUBJECTS.every(subj => {
-      const val = grades[subj.id]?.trim()
-      if (!val) return false
-      const num = parseFloat(val)
-      return !isNaN(num) && num >= 0 && num <= subj.maxScore
-    })
+    const allGradesValid = SUBJECTS.every((subj) => {
+      const val = grades[subj.id]?.trim();
+      if (!val) return false;
+      const num = parseFloat(val);
+      return !isNaN(num) && num >= 0 && num <= subj.maxScore;
+    });
 
     // Check interests text is filled
-    const interestsValid = interestText.trim().length > 0
+    const interestsValid = interestText.trim().length > 0;
 
-    return allGradesValid && interestsValid
-  }
+    return allGradesValid && interestsValid;
+  };
 
   useEffect(() => {
     // Check if user has auth token cookie
-    const cookies = document.cookie
-    const hasAuthToken = cookies.includes('auth-token=')
-    
+    const cookies = document.cookie;
+    const hasAuthToken = cookies.includes("auth-token=");
+
     if (hasAuthToken) {
-      setHasToken(true)
+      setHasToken(true);
     } else {
-      setHasToken(false)
+      setHasToken(false);
     }
 
     // Load Lottie animations
-    fetch('/lottie/AI.json')
-      .then(res => res.json())
-      .then(data => setAiAnimation(data))
-      .catch(err => console.error('Failed to load AI animation:', err))
+    fetch("/lottie/AI.json")
+      .then((res) => res.json())
+      .then((data) => setAiAnimation(data))
+      .catch((err) => console.error("Failed to load AI animation:", err));
 
-    fetch('/lottie/BacII-student.json')
-      .then(res => res.json())
-      .then(data => setBacIIAnimation(data))
-      .catch(err => console.error('Failed to load BacII animation:', err))
+    fetch("/lottie/BacII-student.json")
+      .then((res) => res.json())
+      .then((data) => setBacIIAnimation(data))
+      .catch((err) => console.error("Failed to load BacII animation:", err));
 
-    fetch('/lottie/Next-step.json')
-      .then(res => res.json())
-      .then(data => setNextStepAnimation(data))
-      .catch(err => console.error('Failed to load NextStep animation:', err))
+    fetch("/lottie/Next-step.json")
+      .then((res) => res.json())
+      .then((data) => setNextStepAnimation(data))
+      .catch((err) => console.error("Failed to load NextStep animation:", err));
 
-    fetch('/lottie/Security.json')
-      .then(res => res.json())
-      .then(data => setSecurityAnimation(data))
-      .catch(err => console.error('Failed to load Security animation:', err))
+    fetch("/lottie/Security.json")
+      .then((res) => res.json())
+      .then((data) => setSecurityAnimation(data))
+      .catch((err) => console.error("Failed to load Security animation:", err));
 
-    fetch('/lottie/Subject-analysis.json')
-      .then(res => res.json())
-      .then(data => setSubjectAnalysisAnimation(data))
-      .catch(err => console.error('Failed to load Subject-analysis animation:', err))
+    fetch("/lottie/Subject-analysis.json")
+      .then((res) => res.json())
+      .then((data) => setSubjectAnalysisAnimation(data))
+      .catch((err) =>
+        console.error("Failed to load Subject-analysis animation:", err)
+      );
 
-    fetch('/lottie/Recommendation-engine.json')
-      .then(res => res.json())
-      .then(data => setRecommendationEngineAnimation(data))
-      .catch(err => console.error('Failed to load Recommendation-engine animation:', err))
+    fetch("/lottie/Recommendation-engine.json")
+      .then((res) => res.json())
+      .then((data) => setRecommendationEngineAnimation(data))
+      .catch((err) =>
+        console.error("Failed to load Recommendation-engine animation:", err)
+      );
 
-    fetch('/lottie/Skill-development.json')
-      .then(res => res.json())
-      .then(data => setSkillDevelopmentAnimation(data))
-      .catch(err => console.error('Failed to load Skill-development animation:', err))
+    fetch("/lottie/Skill-development.json")
+      .then((res) => res.json())
+      .then((data) => setSkillDevelopmentAnimation(data))
+      .catch((err) =>
+        console.error("Failed to load Skill-development animation:", err)
+      );
 
-    fetch('/lottie/Cambodia.json')
-      .then(res => res.json())
-      .then(data => setCambodiaAnimation(data))
-      .catch(err => console.error('Failed to load Cambodia animation:', err))
-  }, [])
+    fetch("/lottie/Cambodia.json")
+      .then((res) => res.json())
+      .then((data) => setCambodiaAnimation(data))
+      .catch((err) => console.error("Failed to load Cambodia animation:", err));
+  }, []);
 
   const handleGetStarted = () => {
-    router.push('/login')
-  }
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
       {/* Ultravib image background with dark overlay - covers from Cards section to bottom */}
       <div
         className="fixed inset-x-0"
-        style={{ 
+        style={{
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
           backgroundImage: "url(/image/Ultravib.png)",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center center',
-          backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.3)',
+          backgroundSize: "cover",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          filter: "brightness(0.3)",
           zIndex: 0,
-          pointerEvents: 'none'
+          pointerEvents: "none",
         }}
       />
       {/* Navigation */}
@@ -130,14 +153,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
-            <div className="absolute left-0 flex items-center">
+            <div className="absolute left-3 md:left-0 flex items-center">
               <button
-                onClick={() => router.push('/landing')}
+                onClick={() => router.push("/landing")}
                 className="hover:opacity-80 transition-opacity"
               >
-                <img 
-                  src="/image/Bontor-logo.png" 
-                  alt="Bontor" 
+                <img
+                  src="/image/Bontor-logo.png"
+                  alt="Bontor"
                   className="h-5 md:h-[23px] w-auto"
                 />
               </button>
@@ -147,19 +170,19 @@ export default function LandingPage() {
             <div className="hidden md:block">
               <div className="flex items-baseline space-x-8">
                 <button
-                  onClick={() => router.push('/landing')}
+                  onClick={() => router.push("/landing")}
                   className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
                 >
                   Home
                 </button>
                 <button
-                  onClick={() => router.push('/how-it-works')}
+                  onClick={() => router.push("/how-it-works")}
                   className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
                 >
                   How it Works
                 </button>
                 <button
-                  onClick={() => router.push('/about')}
+                  onClick={() => router.push("/about")}
                   className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
                 >
                   About
@@ -170,48 +193,168 @@ export default function LandingPage() {
             {/* Get Started/Analyze Button */}
             <div className="absolute right-0 hidden md:block">
               <Button
-                onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
+                onClick={
+                  hasToken ? () => router.push("/Input") : handleGetStarted
+                }
                 className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
               >
-                {hasToken ? 'Start Analysis' : 'Get Started'}
+                {hasToken ? "Start Analysis" : "Get Started"}
               </Button>
+            </div>
+            {/* Mobile Menu trigger */}
+            <div className="absolute inset-y-0 right-3 left-3 md:hidden flex items-center justify-end">
+              <button
+                type="button"
+                className="flex items-center justify-end text-white text-sm tracking-wide uppercase text-right w-auto"
+                aria-label="Open menu"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <span className="w-5 h-5 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 22 22"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-text-align-end-icon lucide-text-align-end"
+                  >
+                    <path d="M21 5H3" />
+                    <path d="M21 12H9" />
+                    <path d="M21 19H7" />
+                  </svg>
+                </span>
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
-      
-      
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => {
+                  router.push("/landing");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/how-it-works");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                How it Works
+              </button>
+              <button
+                onClick={() => {
+                  router.push("/about");
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                About
+              </button>
+            </div>
+            <div className="mt-5 px-5 pb-8">
+              <Button
+                onClick={() => {
+                  if (hasToken) {
+                    router.push("/Input");
+                  } else {
+                    handleGetStarted();
+                  }
+                  setIsMenuOpen(false);
+                }}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                {hasToken ? "Start Analysis" : "Get Started"}
+              </Button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Subtle Gradient Orbs */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
       <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
-      
+
       {/* Hero Section */}
-      <section className="relative hero-section-wrapper" style={{ minHeight: 'calc(82vh - 120px + 5rem)' }}>
+      <section className="relative hero-section-wrapper">
         {/* Background Image Container - Content is positioned within this */}
         <div
           className="absolute inset-x-0 hero-bg-image hero-image-container"
-          style={{ 
-            top: '4rem',
-            overflow: 'hidden',
-            zIndex: 1
+          style={{
+            top: "4rem",
+            overflow: "hidden",
+            zIndex: 1,
           }}
         >
           {/* Background Image */}
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-black"
-            style={{ 
+            style={{
               backgroundImage: "url(/image/Herosection.jpg)",
             }}
           />
-          
+
           {/* Dark overlay */}
           <div className="absolute inset-0 bg-black/70 hero-bg-overlay" />
-          
+
           {/* Content positioned within the image container */}
           <div className="absolute inset-0 flex items-center justify-center hero-content-wrapper">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-              <div className="text-center max-w-5xl mx-auto" style={{ perspective: '1000px' }}>
+              <div
+                className="text-center max-w-5xl mx-auto"
+                style={{ perspective: "1000px" }}
+              >
                 <Reveal
                   className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6 sm:mb-8"
                   rootMargin="-100px"
@@ -222,7 +365,7 @@ export default function LandingPage() {
                     AI-Powered Career Guidance for Cambodian Students
                   </span>
                 </Reveal>
-                
+
                 <Reveal rootMargin="-100px" threshold={0.2}>
                   <h1 className="hero-title">
                     Your future starts
@@ -230,26 +373,30 @@ export default function LandingPage() {
                     <span className="text-white">with insight</span>
                   </h1>
                 </Reveal>
-                
+
                 <Reveal
                   className="hero-description-text"
                   rootMargin="-100px"
                   threshold={0.2}
                 >
-                  Transform your BacII grades into a personalized roadmap. Discover your ideal major, career path, and university powered by AI.
+                  Transform your BacII grades into a personalized roadmap.
+                  Discover your ideal major, career path, and university powered
+                  by AI.
                 </Reveal>
-                
+
                 <Reveal
                   className="flex justify-center items-center mt-8 sm:mt-10 md:mt-12"
                   rootMargin="-100px"
                   threshold={0.2}
                 >
                   <Button
-                    onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
+                    onClick={
+                      hasToken ? () => router.push("/Input") : handleGetStarted
+                    }
                     size="lg"
                     className="group hero-cta-button rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600"
                   >
-                    {hasToken ? 'Start Analysis' : 'Get Started'}
+                    {hasToken ? "Start Analysis" : "Get Started"}
                     <ArrowRight className="hero-cta-icon ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Reveal>
@@ -258,18 +405,27 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-          
+
       {/* Cards and Input Section */}
       <section className="relative py-24">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           {/* Hero Visual - Bento Grid */}
-          <div className="mt-[-6rem] relative" style={{ perspective: '1000px' }}>
+          <div
+            className="mt-[-6rem] relative"
+            style={{ perspective: "1000px" }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-6xl mx-auto">
               {/* Large Card */}
               <Reveal
                 className="md:col-span-2 relative rounded-lg bg-[#111111] border border-[#1f1f1f] p-8 overflow-hidden group hover:border-[#2a2a2a] transition-colors"
                 rootMargin="-100px"
                 threshold={0.2}
+                onReveal={() => {
+                  // Wait for reveal animation to complete (0.6s) before starting progress bars
+                  setTimeout(() => {
+                    setIsAnalysisCardRevealed(true);
+                  }, 600);
+                }}
               >
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-6">
@@ -278,30 +434,44 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="text-white">AI Analysis Engine</h3>
-                      <p className="text-sm text-gray-500">Personalized recommendations</p>
+                      <p className="text-sm text-gray-500">
+                        Personalized recommendations
+                      </p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     {[
-                      { value: 94, label: 'Recommendation Accuracy' },
-                      { value: 92, label: 'User Satisfaction' },
-                      { value: 95, label: 'University Match Success' }
+                      { value: 94, label: "Recommendation Accuracy" },
+                      { value: 92, label: "User Satisfaction" },
+                      { value: 95, label: "University Match Success" },
                     ].map((item, i) => (
                       <div key={i}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-gray-400">{item.label}</span>
-                          <span className="text-sm text-gray-500 w-12 text-right">{item.value}%</span>
+                          <span className="text-xs text-gray-400">
+                            {item.label}
+                          </span>
+                          <span className="text-sm text-gray-500 w-12 text-right">
+                            {item.value}%
+                          </span>
                         </div>
                         <div className="flex-1 h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
                           <div
                             className="h-full bg-blue-500 progress-bar-smooth"
-                            style={{
-                              '--target-width': `${item.value}%`,
-                              width: '0%',
-                              animation: `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${0.6+ i * 0.15}s forwards`,
-                              transformOrigin: 'left',
-                              willChange: 'width'
-                            } as React.CSSProperties & { '--target-width': string }}
+                            style={
+                              {
+                                "--target-width": `${item.value}%`,
+                                width: "0%",
+                                animation: isAnalysisCardRevealed
+                                  ? `progressFill 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${
+                                      i * 0.15
+                                    }s forwards`
+                                  : "none",
+                                transformOrigin: "left",
+                                willChange: "width",
+                              } as React.CSSProperties & {
+                                "--target-width": string;
+                              }
+                            }
                           />
                         </div>
                       </div>
@@ -316,9 +486,16 @@ export default function LandingPage() {
                 threshold={0.2}
               >
                 <div className="relative">
-                        <Zap className="w-8 h-8 text-blue-500 mb-4" />
-                  <h4 className="text-white" style={{ marginBottom: '1rem' }}>Instant Insights</h4>
-                  <p className="text-sm text-gray-500">Real-time analysis in seconds upload your grades and instantly see trends, strengths, and next‑step recommendations. Get subject-level breakdowns, targeted improvement tips, and suggested majors without waiting.</p>
+                  <Zap className="w-8 h-8 text-blue-500 mb-4" />
+                  <h4 className="text-white" style={{ marginBottom: "1rem" }}>
+                    Instant Insights
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Real-time analysis in seconds upload your grades and
+                    instantly see trends, strengths, and next‑step
+                    recommendations. Get subject-level breakdowns, targeted
+                    improvement tips, and suggested majors without waiting.
+                  </p>
                 </div>
               </Reveal>
 
@@ -329,8 +506,10 @@ export default function LandingPage() {
                 threshold={0.2}
               >
                 <div className="relative">
-                        <Target className="w-8 h-8 text-blue-500 mb-4" />
-                  <h4 className="text-white" style={{ marginBottom: '1rem' }}>92% Accuracy</h4>
+                  <Target className="w-8 h-8 text-blue-500 mb-4" />
+                  <h4 className="text-white" style={{ marginBottom: "1rem" }}>
+                    92% Accuracy
+                  </h4>
                   <p className="text-sm text-gray-500">Average match rate</p>
                 </div>
               </Reveal>
@@ -344,15 +523,20 @@ export default function LandingPage() {
                 <div className="relative h-full flex items-center justify-center">
                   <div className="grid grid-cols-3 gap-25 justify-items-center">
                     {[
-                      { name: 'Mathematics', icon: BarChart3 },
-                      { name: 'Sciences', icon: Globe },
-                      { name: 'Languages', icon: CheckCircle2 }
+                      { name: "Mathematics", icon: BarChart3 },
+                      { name: "Sciences", icon: Globe },
+                      { name: "Languages", icon: CheckCircle2 },
                     ].map((subject, i) => (
-                      <div key={i} className="text-center flex flex-col items-center">
+                      <div
+                        key={i}
+                        className="text-center flex flex-col items-center"
+                      >
                         <div className="w-14 h-14 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-3">
                           <subject.icon className="w-6 h-6 text-gray-600" />
                         </div>
-                        <p className="text-sm text-gray-500 subject-category-name">{subject.name}</p>
+                        <p className="text-sm text-gray-500 subject-category-name">
+                          {subject.name}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -362,49 +546,53 @@ export default function LandingPage() {
           </div>
 
           {/* Interactive Input Section - Small Compact Version */}
-          <Reveal
-            className="mt-10 mb-8"
-            rootMargin="-100px"
-            threshold={0.2}
-          >
+          <Reveal className="mt-10 mb-8" rootMargin="-100px" threshold={0.2}>
             <div className="max-w-4xl mx-auto">
               <div className="mb-10 text-center mt-10">
                 <p className="text-gray-300 text-lg">
-                  Try our interactive analysis tool - fill out the form below to see how it works
+                  Fill out the form below to see how it works
                 </p>
-        </div>
+              </div>
               <div className="rounded-lg border border-[#1f1f1f] bg-[#111111] overflow-hidden hover:border-[#2a2a2a] transition-colors">
                 {/* Two Column Layout - Small */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                   {/* Left Column - Ready for Analysis */}
-                  <div 
-                    className="min-h-full overflow-y-auto relative"
-                  >
+                  <div className="min-h-full overflow-y-auto relative">
                     {/* Background layer with filter */}
                     <div
                       className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                       style={{
                         backgroundImage: "url(/image/Ultravib.png)",
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        filter: 'brightness(0.3)',
-                        zIndex: 0
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        filter: "brightness(0.3)",
+                        zIndex: 0,
                       }}
                     />
                     {/* Content layer */}
                     <div className="flex items-center justify-center h-full p-4 relative z-10">
                       <div className="text-center">
                         <div className="w-10 h-10 flex items-center justify-center mx-auto mb-2">
-                          <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            className="w-8 h-8 text-blue-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                         </div>
                         <h3 className="text-base font-semibold text-white mb-1">
                           Ready for Analysis
                         </h3>
                         <p className="text-gray-300 text-xs max-w-[200px] mt-1">
-                          Fill out the form on the right to get your personalized career recommendations.
+                          Fill out the form on the right to get your personalized academic insights recommendations.
                         </p>
                       </div>
                     </div>
@@ -416,52 +604,103 @@ export default function LandingPage() {
                       <div className="mb-4 text-center">
                         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-3">
                           <div className="w-1 h-1 rounded-full bg-blue-500" />
-                          <span className="text-[10px] text-gray-500">Academic Profile Analysis</span>
+                          <span className="text-[10px] text-gray-500">
+                            Academic Profile Analysis
+                          </span>
                         </div>
                         <p className="text-gray-300 text-xs">
                           Enter your BacII grades and interests
                         </p>
                       </div>
-                      
+
                       <form
                         onSubmit={(e) => {
                           e.preventDefault();
-                          router.push('/login');
+                          router.push("/login");
                         }}
-                        style={{ width: '100%' }}
+                        style={{ width: "100%" }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "12px",
+                          }}
+                        >
                           {/* Grades Section */}
                           <div>
                             <div className="grid-2-col">
                               {[
-                                { id: 'math', name: 'Mathematics', category: 'Science', maxScore: 125 },
-                                { id: 'physics', name: 'Physics', category: 'Science', maxScore: 75 },
-                                { id: 'chemistry', name: 'Chemistry', category: 'Science', maxScore: 75 },
-                                { id: 'biology', name: 'Biology', category: 'Science', maxScore: 75 },
-                                { id: 'khmer', name: 'Khmer Literature', category: 'Language', maxScore: 75 },
-                                { id: 'english', name: 'English', category: 'Language', maxScore: 50 },
-                                { id: 'history', name: 'History', category: 'Social Studies', maxScore: 50 },
+                                {
+                                  id: "math",
+                                  name: "Mathematics",
+                                  category: "Science",
+                                  maxScore: 125,
+                                },
+                                {
+                                  id: "physics",
+                                  name: "Physics",
+                                  category: "Science",
+                                  maxScore: 75,
+                                },
+                                {
+                                  id: "chemistry",
+                                  name: "Chemistry",
+                                  category: "Science",
+                                  maxScore: 75,
+                                },
+                                {
+                                  id: "biology",
+                                  name: "Biology",
+                                  category: "Science",
+                                  maxScore: 75,
+                                },
+                                {
+                                  id: "khmer",
+                                  name: "Khmer Literature",
+                                  category: "Language",
+                                  maxScore: 75,
+                                },
+                                {
+                                  id: "english",
+                                  name: "English",
+                                  category: "Language",
+                                  maxScore: 50,
+                                },
+                                {
+                                  id: "history",
+                                  name: "History",
+                                  category: "Social Studies",
+                                  maxScore: 50,
+                                },
                               ].map((subject) => (
-                                <div key={subject.id} style={{
-                                  padding: '8px',
-                                  transition: 'all 0.2s ease'
-                                }}>
-                                  <label style={{ 
-                                    fontSize: '10px', 
-                                    fontWeight: '500', 
-                                    marginBottom: '4px',
-                                    color: '#ffffff',
-                                    display: 'block'
-                                  }}>
+                                <div
+                                  key={subject.id}
+                                  style={{
+                                    padding: "8px",
+                                    transition: "all 0.2s ease",
+                                  }}
+                                >
+                                  <label
+                                    style={{
+                                      fontSize: "10px",
+                                      fontWeight: "500",
+                                      marginBottom: "4px",
+                                      color: "#ffffff",
+                                      display: "block",
+                                    }}
+                                  >
                                     {subject.name}
-                                    <span style={{ 
-                                      color: '#9ca3af', 
-                                      fontSize: '9px',
-                                      fontWeight: '400',
-                                      marginLeft: '4px'
-                                    }}>
-                                      ({subject.category}) - Max: {subject.maxScore}
+                                    <span
+                                      style={{
+                                        color: "#9ca3af",
+                                        fontSize: "9px",
+                                        fontWeight: "400",
+                                        marginLeft: "4px",
+                                      }}
+                                    >
+                                      ({subject.category}) - Max:{" "}
+                                      {subject.maxScore}
                                     </span>
                                   </label>
                                   <input
@@ -470,9 +709,18 @@ export default function LandingPage() {
                                     pattern="[0-9]*"
                                     placeholder={`0-${subject.maxScore}`}
                                     className="input-field"
-                                    value={grades[subject.id] || ''}
-                                    onChange={(e) => setGrades(prev => ({ ...prev, [subject.id]: e.target.value }))}
-                                    style={{ margin: 0, fontSize: '11px', padding: '6px 8px' }}
+                                    value={grades[subject.id] || ""}
+                                    onChange={(e) =>
+                                      setGrades((prev) => ({
+                                        ...prev,
+                                        [subject.id]: e.target.value,
+                                      }))
+                                    }
+                                    style={{
+                                      margin: 0,
+                                      fontSize: "11px",
+                                      padding: "6px 8px",
+                                    }}
                                   />
                                 </div>
                               ))}
@@ -481,30 +729,34 @@ export default function LandingPage() {
 
                           {/* Interests Section */}
                           <div>
-                            <h4 style={{ 
-                              fontSize: '13px', 
-                              fontWeight: '600', 
-                              marginBottom: '4px',
-                              color: '#ffffff'
-                            }}>
+                            <h4
+                              style={{
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                marginBottom: "4px",
+                                color: "#ffffff",
+                              }}
+                            >
                               Your Interests & Strengths
                             </h4>
-                            <p style={{ 
-                              color: '#9ca3af', 
-                              fontSize: '10px',
-                              marginBottom: '6px'
-                            }}>
+                            <p
+                              style={{
+                                color: "#9ca3af",
+                                fontSize: "10px",
+                                marginBottom: "6px",
+                              }}
+                            >
                               Describe your interests, hobbies, and skills...
                             </p>
                             <textarea
                               className="input-field"
-                              style={{ 
-                                minHeight: '50px', 
-                                resize: 'vertical',
-                                fontFamily: 'inherit',
-                                lineHeight: '1.4',
-                                fontSize: '11px',
-                                padding: '6px 8px'
+                              style={{
+                                minHeight: "50px",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                lineHeight: "1.4",
+                                fontSize: "11px",
+                                padding: "6px 8px",
                               }}
                               placeholder="I love programming and building apps..."
                               value={interestText}
@@ -515,30 +767,34 @@ export default function LandingPage() {
 
                           {/* Career Goals Section */}
                           <div>
-                            <h4 style={{ 
-                              fontSize: '13px', 
-                              fontWeight: '600', 
-                              marginBottom: '4px',
-                              color: '#ffffff'
-                            }}>
+                            <h4
+                              style={{
+                                fontSize: "13px",
+                                fontWeight: "600",
+                                marginBottom: "4px",
+                                color: "#ffffff",
+                              }}
+                            >
                               Career Goals (Optional)
                             </h4>
-                            <p style={{ 
-                              color: '#9ca3af', 
-                              fontSize: '10px',
-                              marginBottom: '6px'
-                            }}>
+                            <p
+                              style={{
+                                color: "#9ca3af",
+                                fontSize: "10px",
+                                marginBottom: "6px",
+                              }}
+                            >
                               What kind of career are you interested in?
                             </p>
                             <textarea
                               className="input-field"
-        style={{ 
-                                minHeight: '45px', 
-                                resize: 'vertical',
-                                fontFamily: 'inherit',
-                                lineHeight: '1.4',
-                                fontSize: '11px',
-                                padding: '6px 8px'
+                              style={{
+                                minHeight: "45px",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                lineHeight: "1.4",
+                                fontSize: "11px",
+                                padding: "6px 8px",
                               }}
                               placeholder="I want to become a software engineer..."
                               value={careerGoals}
@@ -547,31 +803,37 @@ export default function LandingPage() {
                           </div>
 
                           {/* Submit Button */}
-                          <div style={{ paddingTop: '8px' }}>
-                            <button 
-                              type="submit" 
+                          <div style={{ paddingTop: "8px" }}>
+                            <button
+                              type="submit"
                               disabled={!isFormValid()}
                               className="px-4 py-1.5 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              style={{ 
-                                width: '100%',
-                                backgroundColor: isFormValid() ? '#1d4ed8' : '#1f2937',
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: isFormValid() ? '#1d4ed8' : '#374151',
-                                padding: '8px 12px',
-                                fontSize: '12px',
-                                fontWeight: '500'
+                              style={{
+                                width: "100%",
+                                backgroundColor: isFormValid()
+                                  ? "#1d4ed8"
+                                  : "#1f2937",
+                                borderWidth: "1px",
+                                borderStyle: "solid",
+                                borderColor: isFormValid()
+                                  ? "#1d4ed8"
+                                  : "#374151",
+                                padding: "8px 12px",
+                                fontSize: "12px",
+                                fontWeight: "500",
                               }}
                               onMouseEnter={(e) => {
                                 if (isFormValid()) {
-                                  e.currentTarget.style.backgroundColor = '#1e40af';
-                                  e.currentTarget.style.borderColor = '#1e40af';
+                                  e.currentTarget.style.backgroundColor =
+                                    "#1e40af";
+                                  e.currentTarget.style.borderColor = "#1e40af";
                                 }
                               }}
                               onMouseLeave={(e) => {
                                 if (isFormValid()) {
-                                  e.currentTarget.style.backgroundColor = '#1d4ed8';
-                                  e.currentTarget.style.borderColor = '#1d4ed8';
+                                  e.currentTarget.style.backgroundColor =
+                                    "#1d4ed8";
+                                  e.currentTarget.style.borderColor = "#1d4ed8";
                                 }
                               }}
                             >
@@ -597,40 +859,48 @@ export default function LandingPage() {
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Features</span>
             </div>
-            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+            <h2
+              className="text-5xl md:text-6xl text-white"
+              style={{ marginBottom: "2rem" }}
+            >
               Everything you need
             </h2>
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
-              Built specifically for Cambodian BacII students with cutting-edge AI technology
+              Built specifically for Cambodian BacII students with cutting-edge
+              AI technology
             </p>
           </Reveal>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
                 icon: Brain,
                 title: "AI-Powered Insights",
-                description: "Personalized majors, careers, and universities tailored to your profile",
-                lottie: aiAnimation
+                description:
+                  "Personalized majors, careers, and universities tailored to your profile",
+                lottie: aiAnimation,
               },
               {
                 icon: TrendingUp,
                 title: "Built for BacII",
-                description: "Subject max scores, normalization, and Cambodian educational context",
-                lottie: bacIIAnimation
+                description:
+                  "Subject max scores, normalization, and Cambodian educational context",
+                lottie: bacIIAnimation,
               },
               {
                 icon: Target,
                 title: "Actionable Next Steps",
-                description: "Clear skill gaps and how to improve with specific suggestions",
-                lottie: nextStepAnimation
+                description:
+                  "Clear skill gaps and how to improve with specific suggestions",
+                lottie: nextStepAnimation,
               },
               {
                 icon: Shield,
                 title: "Private & Secure",
-                description: "Your data, your control. All analysis happens locally",
-                lottie: securityAnimation
-              }
+                description:
+                  "Your data, your control. All analysis happens locally",
+                lottie: securityAnimation,
+              },
             ].map((benefit, idx) => (
               <Reveal
                 key={idx}
@@ -643,15 +913,19 @@ export default function LandingPage() {
                     <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                       <benefit.icon className="w-5 h-5 text-blue-500" />
                     </div>
-                    <h3 className="text-white" style={{ marginBottom: '1rem' }}>{benefit.title}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{benefit.description}</p>
+                    <h3 className="text-white" style={{ marginBottom: "1rem" }}>
+                      {benefit.title}
+                    </h3>
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                      {benefit.description}
+                    </p>
                     {benefit.lottie && (
                       <div className="mt-auto flex justify-center items-center">
-                        <Lottie 
+                        <Lottie
                           animationData={benefit.lottie}
-                          loop={true}
-                          autoplay={true}
-                          style={{ width: '100%', maxWidth: 300, height: 'auto' }}
+                          loop
+                          autoplay
+                          className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[300px] h-auto"
                         />
                       </div>
                     )}
@@ -663,8 +937,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      
-
       {/* Three Steps Process */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6 relative">
@@ -673,37 +945,43 @@ export default function LandingPage() {
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Simple Process</span>
             </div>
-            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+            <h2
+              className="text-5xl md:text-6xl text-white"
+              style={{ marginBottom: "2rem" }}
+            >
               Three steps to clarity
             </h2>
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               From grades to guidance in minutes
             </p>
           </Reveal>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
             {/* Connecting Line */}
             <div className="hidden lg:block absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(179,179,179,0.3)] to-transparent" />
-            
+
             {[
               {
                 step: "01",
                 title: "Enter Your Grades",
-                description: "Input your BacII exam results and tell us about your interests and goals",
-                icon: BarChart3
+                description:
+                  "Input your BacII exam results and tell us about your interests and goals",
+                icon: BarChart3,
               },
               {
                 step: "02",
                 title: "AI Analysis",
-                description: "Our AI analyzes your strengths, preferences, and career aspirations",
-                icon: Brain
+                description:
+                  "Our AI analyzes your strengths, preferences, and career aspirations",
+                icon: Brain,
               },
               {
                 step: "03",
                 title: "Get Recommendations",
-                description: "Receive personalized majors, careers, and universities with skill-gap guidance",
-                icon: Target
-              }
+                description:
+                  "Receive personalized majors, careers, and universities with skill-gap guidance",
+                icon: Target,
+              },
             ].map((step, idx) => (
               <Reveal
                 key={idx}
@@ -714,18 +992,20 @@ export default function LandingPage() {
                 <div className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group">
                   {/* Step Number */}
                   <div className="relative flex items-center justify-center w-12 h-12 mb-6 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
-                    <span className="text-lg text-gray-600">
-                      {step.step}
-                    </span>
+                    <span className="text-lg text-gray-600">{step.step}</span>
                   </div>
-                  
+
                   {/* Icon */}
                   <div className="w-10 h-10 rounded-lg bg-blue-600/10 border border-blue-600/20 flex items-center justify-center mb-6">
                     <step.icon className="w-5 h-5 text-blue-500" />
                   </div>
-                  
-                  <h3 className="text-white" style={{ marginBottom: '1rem' }}>{step.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
+
+                  <h3 className="text-white" style={{ marginBottom: "1rem" }}>
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    {step.description}
+                  </p>
                   {/* Image in bordered container */}
                   <div className="mt-4 h-80 rounded-lg border border-[#2a2a2a] bg-transparent overflow-hidden">
                     <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
@@ -739,8 +1019,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      
-
       {/* Feature Highlights - Bento Grid */}
       <section className="py-32 relative">
         <div className="max-w-7xl mx-auto px-6">
@@ -749,15 +1027,18 @@ export default function LandingPage() {
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
               <span className="text-sm text-gray-500">Comprehensive</span>
             </div>
-            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+            <h2
+              className="text-5xl md:text-6xl text-white"
+              style={{ marginBottom: "2rem" }}
+            >
               Deep analysis, clear results
             </h2>
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
               Everything you need to make informed decisions about your future
             </p>
           </Reveal>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Large Feature 1 */}
             <Reveal
               scale={true}
@@ -768,13 +1049,24 @@ export default function LandingPage() {
                 <div className="w-12 h-12 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-6">
                   <BarChart3 className="w-6 h-6 text-blue-500" />
                 </div>
-                <h3 className="text-white text-xl" style={{ marginBottom: '1rem' }}>Subject Analysis</h3>
+                <h3
+                  className="text-white text-xl"
+                  style={{ marginBottom: "1rem" }}
+                >
+                  Subject Analysis
+                </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-6">
-                  See your strengths across Math, Physics, Chemistry, Biology, Khmer, English, and History with detailed performance breakdowns and insights.
+                  See your strengths across Math, Physics, Chemistry, Biology,
+                  Khmer, English, and History with detailed performance
+                  breakdowns and insights.
                 </p>
                 <div className="mt-auto flex flex-col gap-4">
                   <div className="space-y-2">
-                    {['Mathematics: Strong', 'Physics: Moderate', 'English: Strong'].map((item, i) => (
+                    {[
+                      "Mathematics: Strong",
+                      "Physics: Moderate",
+                      "English: Strong",
+                    ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                         <span className="text-sm text-gray-600">{item}</span>
@@ -783,18 +1075,18 @@ export default function LandingPage() {
                   </div>
                   {subjectAnalysisAnimation && (
                     <div className="flex items-center justify-center subject-analysis-lottie-container">
-                      <Lottie 
+                      <Lottie
                         animationData={subjectAnalysisAnimation}
                         loop={true}
                         autoplay={true}
-                        style={{ width: '100%', maxWidth: 350, height: 'auto' }}
+                        style={{ width: "100%", maxWidth: 350, height: "auto" }}
                       />
                     </div>
                   )}
                 </div>
               </div>
             </Reveal>
-            
+
             {/* Small Feature 1 */}
             <Reveal
               scale={true}
@@ -805,23 +1097,26 @@ export default function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <Award className="w-5 h-5 text-blue-500" />
                 </div>
-                <h3 className="text-white" style={{ marginBottom: '1rem' }}>Recommendation Engine</h3>
+                <h3 className="text-white" style={{ marginBottom: "1rem" }}>
+                  Recommendation Engine
+                </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                  Get majors, careers, and universities with match scores and detailed breakdowns
+                  Get majors, careers, and universities with match scores and
+                  detailed breakdowns
                 </p>
                 {recommendationEngineAnimation && (
                   <div className="mt-auto flex justify-center items-center">
-                    <Lottie 
+                    <Lottie
                       animationData={recommendationEngineAnimation}
                       loop={true}
                       autoplay={true}
-                      style={{ width: '100%', maxWidth: 150, height: 'auto' }}
+                      style={{ width: "100%", maxWidth: 150, height: "auto" }}
                     />
                   </div>
                 )}
               </div>
             </Reveal>
-            
+
             {/* Small Feature 2 */}
             <Reveal
               scale={true}
@@ -832,23 +1127,25 @@ export default function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <TrendingUp className="w-5 h-5 text-blue-500" />
                 </div>
-                <h3 className="text-white" style={{ marginBottom: '1rem' }}>Skill Development</h3>
+                <h3 className="text-white" style={{ marginBottom: "1rem" }}>
+                  Skill Development
+                </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Current vs target levels with improvement plans
                 </p>
                 {skillDevelopmentAnimation && (
                   <div className="mt-auto flex justify-center items-center">
-                    <Lottie 
+                    <Lottie
                       animationData={skillDevelopmentAnimation}
                       loop={true}
                       autoplay={true}
-                      style={{ width: '100%', maxWidth: 220, height: 'auto' }}
+                      style={{ width: "100%", maxWidth: 220, height: "auto" }}
                     />
                   </div>
                 )}
               </div>
             </Reveal>
-            
+
             {/* Small Feature 3 */}
             <Reveal
               scale={true}
@@ -859,17 +1156,19 @@ export default function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center mb-4">
                   <Globe className="w-5 h-5 text-blue-500" />
                 </div>
-                <h3 className="text-white" style={{ marginBottom: '1rem' }}>Cambodia Focused</h3>
+                <h3 className="text-white" style={{ marginBottom: "1rem" }}>
+                  Cambodia Focused
+                </h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Specialized recommendations for Cambodian universities
                 </p>
                 {cambodiaAnimation && (
                   <div className="mt-auto flex justify-center items-center">
-                    <Lottie 
+                    <Lottie
                       animationData={cambodiaAnimation}
                       loop={true}
                       autoplay={true}
-                      style={{ width: '100%', maxWidth: 150, height: 'auto' }}
+                      style={{ width: "100%", maxWidth: 150, height: "auto" }}
                     />
                   </div>
                 )}
@@ -885,29 +1184,35 @@ export default function LandingPage() {
           <Reveal className="text-center mb-20">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              <span className="text-sm text-gray-500">Partner Universities</span>
+              <span className="text-sm text-gray-500">
+                Partner Universities
+              </span>
             </div>
-            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+            <h2
+              className="text-5xl md:text-6xl text-white"
+              style={{ marginBottom: "2rem" }}
+            >
               Top Cambodian Universities
             </h2>
             <p className="text-gray-500 text-xl max-w-2xl mx-auto">
-              Based on your recommended major, we match you with the best universities in Cambodia
+              Based on your recommended major, we match you with the best
+              universities in Cambodia
             </p>
           </Reveal>
 
           {/* 2 Column Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Description */}
-            <Reveal
-              translateX={-20}
-              className="space-y-6"
-            >
+            <Reveal translateX={-20} className="space-y-6">
               <div className="space-y-4">
                 <h3 className="text-3xl md:text-4xl text-white font-bold">
                   Your Perfect University Match
                 </h3>
                 <p className="text-gray-400 text-lg leading-relaxed">
-                  Our AI-powered system analyzes your academic performance and career goals to recommend the most suitable universities for your chosen major. All partner institutions are accredited and recognized leaders in their fields.
+                  Our AI-powered system analyzes your academic performance and
+                  career goals to recommend the most suitable universities for
+                  your chosen major. All partner institutions are accredited and
+                  recognized leaders in their fields.
                 </p>
               </div>
 
@@ -917,8 +1222,13 @@ export default function LandingPage() {
                     <CheckCircle2 className="w-5 h-5 text-blue-500" />
                   </div>
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Accredited Programs</h4>
-                    <p className="text-gray-500 text-sm">All universities offer internationally recognized degrees and certifications</p>
+                    <h4 className="text-white font-semibold mb-1">
+                      Accredited Programs
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      All universities offer internationally recognized degrees
+                      and certifications
+                    </p>
                   </div>
                 </div>
 
@@ -927,8 +1237,13 @@ export default function LandingPage() {
                     <Award className="w-5 h-5 text-blue-500" />
                   </div>
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Specialized Excellence</h4>
-                    <p className="text-gray-500 text-sm">Each institution excels in specific fields matching your interests</p>
+                    <h4 className="text-white font-semibold mb-1">
+                      Specialized Excellence
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      Each institution excels in specific fields matching your
+                      interests
+                    </p>
                   </div>
                 </div>
 
@@ -937,36 +1252,134 @@ export default function LandingPage() {
                     <Target className="w-5 h-5 text-blue-500" />
                   </div>
                   <div>
-                    <h4 className="text-white font-semibold mb-1">Career-Focused</h4>
-                    <p className="text-gray-500 text-sm">Strong industry connections and high graduate employment rates</p>
+                    <h4 className="text-white font-semibold mb-1">
+                      Career-Focused
+                    </h4>
+                    <p className="text-gray-500 text-sm">
+                      Strong industry connections and high graduate employment
+                      rates
+                    </p>
                   </div>
                 </div>
               </div>
             </Reveal>
 
             {/* Right Column - Infinite Scroll */}
-            <Reveal
-              translateX={20}
-              className="relative mt-6"
-            >
+            <Reveal translateX={20} className="relative mt-6">
               <InfiniteScroll
                 items={[
-                  { content: <div className="text-white text-xs p-2">Cambodia Academy of Digital Technology (CADT)</div> },
-                  { content: <div className="text-white text-xs p-2">Royal University of Phnom Penh (RUPP)</div> },
-                  { content: <div className="text-white text-xs p-2">Institute of Technology of Cambodia (ITC)</div> },
-                  { content: <div className="text-white text-xs p-2">Phnom Penh International University (PPIU)</div> },
-                  { content: <div className="text-white text-xs p-2">Western University</div> },
-                  { content: <div className="text-white text-xs p-2">Royal University of Law and Economics (RULE)</div> },
-                  { content: <div className="text-white text-xs p-2">Build Bright University (BBU)</div> },
-                  { content: <div className="text-white text-xs p-2">University of Cambodia (UC)</div> },
-                  { content: <div className="text-white text-xs p-2">American University of Phnom Penh (AUPP)</div> },
-                  { content: <div className="text-white text-xs p-2">National University of Management (NUM)</div> },
-                  { content: <div className="text-white text-xs p-2">Royal University of Fine Arts (RUFA)</div> },
-                  { content: <div className="text-white text-xs p-2">University of Health Sciences (UHS)</div> },
-                  { content: <div className="text-white text-xs p-2">Paññāsāstra University of Cambodia (PUC)</div> },
-                  { content: <div className="text-white text-xs p-2">Paragon International University</div> },
-                  { content: <div className="text-white text-xs p-2">University of Puthisastra (UP)</div> },
-                  { content: <div className="text-white text-xs p-2">National Polytechnic Institute of Cambodia (NPIC)</div> },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Cambodia Academy of Digital Technology (CADT)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Royal University of Phnom Penh (RUPP)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Institute of Technology of Cambodia (ITC)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Phnom Penh International University (PPIU)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Western University
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Royal University of Law and Economics (RULE)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Build Bright University (BBU)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        University of Cambodia (UC)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        American University of Phnom Penh (AUPP)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        National University of Management (NUM)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Royal University of Fine Arts (RUFA)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        University of Health Sciences (UHS)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Paññāsāstra University of Cambodia (PUC)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        Paragon International University
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        University of Puthisastra (UP)
+                      </div>
+                    ),
+                  },
+                  {
+                    content: (
+                      <div className="text-white text-xs p-2">
+                        National Polytechnic Institute of Cambodia (NPIC)
+                      </div>
+                    ),
+                  },
                 ]}
                 isTilted={true}
                 tiltDirection="right"
@@ -987,19 +1400,25 @@ export default function LandingPage() {
       <section className="py-32 relative">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <Reveal translateY={true}>
-            <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
+            <h2
+              className="text-5xl md:text-6xl text-white"
+              style={{ marginBottom: "2rem" }}
+            >
               Ready to discover your path?
             </h2>
             <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
-              Join thousands of Cambodian students who have found clarity in their academic journey
+              Join thousands of Cambodian students who have found clarity in
+              their academic journey
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
-                onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
+                onClick={
+                  hasToken ? () => router.push("/Input") : handleGetStarted
+                }
                 size="lg"
                 className="group px-8 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600"
               >
-                {hasToken ? 'Start Analysis' : 'Start Free Analysis'}
+                {hasToken ? "Start Analysis" : "Start Free Analysis"}
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
@@ -1008,23 +1427,27 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 border-t relative z-20 footer-container" style={{ borderColor: '#777777' }}>
+      <footer
+        className="py-16 border-t relative z-20 footer-container border-white/10"
+        >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pt-2 gap-8 footer-content">
             {/* Logo and Description */}
             <div className="flex flex-col footer-logo-section">
               <div className="flex items-center gap-2 mb-4 footer-logo">
-              <img 
-                src="/image/Bontor-logo.png" 
-                alt="Bontor" 
-                style={{ 
-                  height: '24px',
-                  width: 'auto'
-                }}
-              />
-            </div>
+                <img
+                  src="/image/Bontor-logo.png"
+                  alt="Bontor"
+                  style={{
+                    height: "24px",
+                    width: "auto",
+                  }}
+                />
+              </div>
               <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
-                AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
+                AI-powered career guidance platform designed specifically for
+                Cambodian BacII students. Transform your grades into
+                personalized major and university recommendations.
               </p>
             </div>
 
@@ -1036,7 +1459,7 @@ export default function LandingPage() {
                   <ul className="space-y-2 mt-2">
                     <li>
                       <button
-                        onClick={() => router.push('/landing')}
+                        onClick={() => router.push("/landing")}
                         className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
                       >
                         Home
@@ -1044,7 +1467,7 @@ export default function LandingPage() {
                     </li>
                     <li>
                       <button
-                        onClick={() => router.push('/how-it-works')}
+                        onClick={() => router.push("/how-it-works")}
                         className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
                       >
                         How it Works
@@ -1052,7 +1475,7 @@ export default function LandingPage() {
                     </li>
                     <li>
                       <button
-                        onClick={() => router.push('/about')}
+                        onClick={() => router.push("/about")}
                         className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
                       >
                         About
@@ -1065,7 +1488,7 @@ export default function LandingPage() {
                   <ul className="space-y-2 mt-2">
                     <li>
                       <button
-                        onClick={() => router.push('/login')}
+                        onClick={() => router.push("/login")}
                         className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
                       >
                         Login
@@ -1073,7 +1496,7 @@ export default function LandingPage() {
                     </li>
                     <li>
                       <button
-                        onClick={() => router.push('/signup')}
+                        onClick={() => router.push("/signup")}
                         className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
                       >
                         Register
@@ -1082,10 +1505,11 @@ export default function LandingPage() {
                   </ul>
                 </div>
               </div>
-              <div className="pt-4 border-t border-[#777777] footer-copyright">
-            <p className="text-gray-600 text-sm">
-              © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
-            </p>
+              <div className="pt-4 border-t border-white/10 footer-copyright">
+                <p className="text-gray-600 text-sm">
+                  © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights
+                  reserved.
+                </p>
               </div>
             </div>
           </div>

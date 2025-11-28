@@ -153,24 +153,16 @@ export default function InputPage() {
               <path d="M30.5372 172.649C13.9687 172.67 0.453776 159.257 0.350835 142.689L0.341564 141.196L47.9011 141.134L47.7346 114.338L90.7336 114.282L90.5595 86.2549L140.464 86.1897L140.814 142.505C140.917 159.073 127.569 172.522 111 172.544L30.5372 172.649Z" fill="#3B82F6"/>
             </g>
           </svg>
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            margin: 0,
-            textAlign: 'center',
-            color: 'var(--text-primary)'
-          }}>
-            Loading Your Profile...
-          </h2>
-          <p style={{
-            fontSize: '16px',
-            color: 'var(--text-secondary)',
-            margin: 0,
-            textAlign: 'center',
-            maxWidth: '400px'
-          }}>
-            Our AI is processing your grades and preferences to provide personalized recommendations.
-          </p>
+          <img 
+            src="/image/Bontor-logo.png" 
+            alt="Bontor" 
+            style={{ 
+              height: '30px',
+              width: 'auto',
+              display: 'block'
+            }}
+          />
+         
         </div>
         </div>
       </div>
@@ -210,14 +202,13 @@ export default function InputPage() {
       />
 
       {/* Header */}
-      <header style={{ 
-        background: 'transparent',  
+      <header className="bg-white/2 backdrop-blur-md" style={{ 
         padding: '16px 0',
         position: 'sticky',
         top: 0,
-        zIndex: 100,
-        backdropFilter: 'blur(20px)'
-      }}>
+        zIndex: 100
+       }}>  
+        
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
             {/* Logo */}
@@ -230,10 +221,7 @@ export default function InputPage() {
                 <img 
                   src="/image/Bontor-logo.png" 
                   alt="Bontor" 
-                  style={{ 
-                    height: '23px',
-                    width: 'auto'
-                  }}
+                  className="h-5 md:h-[23px] w-auto"
                 />
               </button>
             </div>
@@ -347,15 +335,6 @@ export default function InputPage() {
         }}>
           {error && (
             <div style={{
-              background: 'rgba(220, 53, 69, 0.1)', 
-              border: '1px solid var(--accent-error)', 
-              borderRadius: '12px', 
-              padding: '20px', 
-              marginBottom: '32px',
-              color: 'var(--accent-error)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
               position: 'absolute',
               top: '80px',
               left: '50%',
@@ -367,18 +346,32 @@ export default function InputPage() {
               transition: 'opacity 0.3s ease-out'
             }}>
               <div style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                background: 'var(--accent-error)',
+                background: 'rgba(220, 53, 69, 0.1)', 
+                border: '1px solid var(--accent-error)', 
+                borderRadius: '12px', 
+                padding: '20px', 
+                marginBottom: '32px',
+                color: 'var(--accent-error)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white'
+                gap: '12px',
+                position: 'relative'
               }}>
-                <X size={12} />
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: 'transparent',
+                  border: '2px solid #ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <X size={12} style={{ color: '#ef4444' }} />
+                </div>
+                <span>{error}</span>
               </div>
-              <span>{error}</span>
             </div>
           )}
 
@@ -439,7 +432,7 @@ export default function InputPage() {
                       Ready for Analysis
                     </h3>
                     <p className="text-gray-300 max-w-sm mt-2">
-                      Fill out the form on the right to get your personalized career recommendations and academic insights.
+                      Fill out the form on the right to get your personalized academic insights recommendations.
                     </p>
                   </div>
                 </div>

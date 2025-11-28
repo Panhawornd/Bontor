@@ -72,14 +72,15 @@ export default function Results() {
               <path d="M30.5372 172.649C13.9687 172.67 0.453776 159.257 0.350835 142.689L0.341564 141.196L47.9011 141.134L47.7346 114.338L90.7336 114.282L90.5595 86.2549L140.464 86.1897L140.814 142.505C140.917 159.073 127.569 172.522 111 172.544L30.5372 172.649Z" fill="#3B82F6"/>
             </g>
           </svg>
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            margin: 0,
-            textAlign: 'center'
-          }}>
-            Loading Results...
-          </h2>
+          <img 
+            src="/image/Bontor-logo.png" 
+            alt="Bontor" 
+            style={{ 
+              height: '30px',
+              width: 'auto',
+              display: 'block'
+            }}
+          />
           <p style={{
             fontSize: '16px',
             color: 'var(--text-secondary)',

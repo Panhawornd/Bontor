@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
@@ -164,16 +165,32 @@ export default function Login() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {error && (
               <div style={{
-                padding: '16px',
-                backgroundColor: '#1a1111',
-                border: '1px solid #666666',
-                borderRadius: '8px',
-                color: '#ffffff',
-                fontSize: '14px',
+                background: 'rgba(220, 53, 69, 0.1)', 
+                border: '1px solid var(--accent-error)', 
+                borderRadius: '12px', 
+                padding: '20px', 
+                marginBottom: '32px',
+                color: 'var(--accent-error)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
                 opacity: isErrorVisible ? 1 : 0,
                 transition: 'opacity 0.3s ease-out'
               }}>
-                {error}
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: 'transparent',
+                  border: '2px solid #ef4444',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <X size={12} style={{ color: '#ef4444' }} />
+                </div>
+                <span>{error}</span>
               </div>
             )}
 

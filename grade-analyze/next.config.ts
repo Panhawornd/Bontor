@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
       "www.puc.edu.kh",
       "encrypted-tbn0.gstatic.com",
       "cdn.norton-u.com",
+      "i.pinimg.com",
 
          // <-- Add this!
     ],

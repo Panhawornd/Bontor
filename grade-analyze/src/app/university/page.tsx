@@ -12,6 +12,10 @@ import {
   User,
   LogOut,
   ChevronDown,
+  ArrowRight,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Image from "next/image";
@@ -21,9 +25,11 @@ export default function UniversityPage() {
   const [universities, setUniversities] = useState<University[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterLocation, setFilterLocation] = useState("all");
+  const [filterType, setFilterType] = useState<"all" | "recommended">("all");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
   const [user, setUser] = useState<{ name: string; email?: string } | null>(
     null
   );
@@ -102,15 +108,76 @@ export default function UniversityPage() {
       ) ||
       uni.location.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesLocation =
-      filterLocation === "all" || uni.location === filterLocation;
-
-    return matchesSearch && matchesLocation;
+    return matchesSearch;
   });
 
-  const uniqueLocations = Array.from(
-    new Set(universities.map((u) => u.location))
-  ).sort();
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedUniversities = filteredUniversities.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        padding: '40px 20px',
+        position: 'relative'
+      }}>
+        {/* Ultravib image background with dark overlay */}
+        <div
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: "url(/image/Ultravib.png)",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.3)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '24px'
+          }}>
+            <svg className="logo-spin" width="80" height="80" viewBox="-30 -30 201 233" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+              <g>
+                <path d="M110.464 0C127.032 0.000247877 140.464 13.4316 140.464 30V31.4922H92.9033V58.2891H49.9043V86.3154H0V30C0 13.4315 13.4315 1.61637e-06 30 0H110.464Z" fill="white"/>
+              </g>
+              <g>
+                <path d="M30.5372 172.649C13.9687 172.67 0.453776 159.257 0.350835 142.689L0.341564 141.196L47.9011 141.134L47.7346 114.338L90.7336 114.282L90.5595 86.2549L140.464 86.1897L140.814 142.505C140.917 159.073 127.569 172.522 111 172.544L30.5372 172.649Z" fill="#3B82F6"/>
+              </g>
+            </svg>
+            <img 
+              src="/image/Bontor-logo.png" 
+              alt="Bontor" 
+              style={{ 
+                height: '30px',
+                width: 'auto',
+                display: 'block'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-white relative">
@@ -153,8 +220,30 @@ export default function UniversityPage() {
               position: "relative",
             }}
           >
-            {/* Logo */}
+            {/* Logo and mobile menu */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="lg:hidden p-2 hover:bg-gray-800 rounded-md transition-colors"
+                style={{ background: 'transparent', border: 'none' }}
+                aria-label="Open menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 5H3" />
+                  <path d="M21 12H9" />
+                  <path d="M21 19H7" />
+                </svg>
+              </button>
               <button
                 onClick={() => router.push("/Input")}
                 className="hover:opacity-80 transition-opacity"
@@ -172,9 +261,9 @@ export default function UniversityPage() {
               </button>
             </div>
 
-            {/* Navigation Links - Centered */}
+            {/* Navigation Links - Centered - Hidden on mobile */}
             <div
-              className="flex items-center space-x-8"
+              className="hidden lg:flex items-center space-x-8"
               style={{
                 position: "absolute",
                 left: "50%",
@@ -306,11 +395,97 @@ export default function UniversityPage() {
         </div>
       </header>
 
-      <div className="relative z-10">
-        {/* Search and Filter */}
+      {/* Mobile Sidebar Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[200] lg:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => { router.push('/Input'); setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Analyze
+              </button>
+              <button
+                onClick={() => { router.push('/dashboard'); setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => { router.push('/university'); setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                University
+              </button>
+              <button
+                onClick={() => { router.push('/agent'); setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Agent
+              </button>
+            </div>
+            <div className="mt-5 px-5 pb-8">
+              <div className="mb-3">
+                <p className="text-white font-semibold text-sm">{user?.name}</p>
+                {user?.email && (
+                  <p className="text-white/60 text-xs mt-1">{user.email}</p>
+                )}
+              </div>
+              <button
+                onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                Logout
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      <div className="relative z-10 pt-10">
+        {/* Search and Toggle */}
         <div className="container mx-auto px-6 py-4">
-          <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-center">
-            <div className="relative w-full md:w-[600px]">
+          <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-[400px]">
               <Image
                 src="/logo.svg"
                 alt="Logo"
@@ -320,10 +495,19 @@ export default function UniversityPage() {
               />
               <input
                 type="text"
-                placeholder="Search universities, programs, or locations..."
+                placeholder="Search universities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-12 py-3 w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="pl-12 pr-12 py-3 w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-full focus:outline-none focus:border-blue-500 transition-all"
+                style={{
+                  boxShadow: 'none'
+                }}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = 'none';
+                }}
               />
               <button
                 onClick={() => {
@@ -334,25 +518,71 @@ export default function UniversityPage() {
                 <Search className="w-5 h-5 text-gray-400 hover:text-white" />
               </button>
             </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              <select
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+
+            {/* Toggle Filter */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px',
+              backgroundColor: '#1a1a1a',
+              padding: '4px',
+              borderRadius: '8px',
+              border: '1px solid #2a2a2a'
+            }}>
+              <button
+                type="button"
+                onClick={() => setFilterType("all")}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: filterType === "all" ? '#1f2937' : 'transparent',
+                  color: filterType === "all" ? '#ffffff' : '#9ca3af',
+                  border: 'none',
+                  outline: 'none'
+                }}
               >
-                <option value="all">All Locations</option>
-                {uniqueLocations.map((location) => (
-                  <option key={location} value={location}>
-                    {location}
-                  </option>
-                ))}
-              </select>
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterType("recommended")}
+                style={{
+                  padding: '10px 24px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: filterType === "recommended" ? '#1f2937' : 'transparent',
+                  color: filterType === "recommended" ? '#ffffff' : '#9ca3af',
+                  border: 'none',
+                  outline: 'none'
+                }}
+              >
+                Recommended
+              </button>
             </div>
           </div>
 
           {/* Universities Grid */}
-          {loading ? (
+          {filterType === "recommended" ? (
+            <div className="text-center py-20">
+              <BookOpen className="w-16 h-16 text-blue-500 mx-auto mb-6" />
+              <p className="text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+                Complete your academic analysis on the Analyze page to receive university recommendations.
+              </p>
+              <button
+                onClick={() => router.push('/Input')}
+                className="group inline-flex items-center gap-3 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                Go to Analyze
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          ) : loading ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
               <p className="mt-4 text-gray-400">Loading universities...</p>
@@ -364,22 +594,59 @@ export default function UniversityPage() {
                 No universities found
               </p>
               <p className="text-gray-500">
-                Try adjusting your search or filter criteria
+                Try adjusting your search criteria
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {filteredUniversities.map((university) => (
+              {paginatedUniversities.map((university) => (
                 <UniversityCard key={university.name} university={university} />
               ))}
             </div>
           )}
 
-          {/* Results count */}
-          {!loading && (
-            <div className="text-center text-gray-400 mb-4">
-              Showing {filteredUniversities.length} of {universities.length}{" "}
-              universities
+          {/* Pagination Controls */}
+          {!loading && filterType !== "recommended" && filteredUniversities.length > 0 && (
+            <div className="flex flex-col items-center gap-4 mb-8">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors border border-gray-600"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-md transition-colors ${
+                        currentPage === page
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-600'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-md transition-colors border border-gray-600"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="text-center text-gray-400">
+                Page {currentPage} of {totalPages} • Showing {startIndex + 1}-{Math.min(endIndex, filteredUniversities.length)} of {filteredUniversities.length} universities
+              </div>
             </div>
           )}
         </div>

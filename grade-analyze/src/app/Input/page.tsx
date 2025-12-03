@@ -21,6 +21,7 @@ export default function InputPage() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [isErrorVisible, setIsErrorVisible] = useState(true)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -214,6 +215,28 @@ export default function InputPage() {
             {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
+                onClick={() => setIsMenuOpen(true)}
+                className="lg:hidden p-2 hover:bg-gray-800 rounded-md transition-colors"
+                style={{ background: 'transparent', border: 'none' }}
+                aria-label="Open menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 5H3" />
+                  <path d="M21 12H9" />
+                  <path d="M21 19H7" />
+                </svg>
+              </button>
+              <button
                 onClick={() => router.push('/Input')}
                 className="hover:opacity-80 transition-opacity"
                 style={{ background: 'transparent', border: 'none', padding: 0}}
@@ -226,8 +249,8 @@ export default function InputPage() {
               </button>
             </div>
 
-            {/* Navigation Links - Centered */}
-            <div className="flex items-center space-x-8" style={{ 
+            {/* Navigation Links - Centered - Hidden on mobile */}
+            <div className="hidden lg:flex items-center space-x-8" style={{ 
               position: 'absolute',
               left: '50%',
               transform: 'translateX(-50%)'
@@ -321,6 +344,112 @@ export default function InputPage() {
           </div>
         </div>
       </header>
+
+      {/* Mobile Sidebar Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[200] lg:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl overflow-y-auto"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Navigation Links */}
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => {
+                  router.push('/Input');
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Analyze
+              </button>
+              <button
+                onClick={() => {
+                  router.push('/dashboard');
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => {
+                  router.push('/university');
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                University
+              </button>
+              <button
+                onClick={() => {
+                  router.push('/agent');
+                  setIsMenuOpen(false);
+                }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Agent
+              </button>
+            </div>
+
+            {/* User Info & Logout */}
+            <div className="mt-5 px-5 pb-8">
+              <div className="mb-3">
+                <p className="text-white font-semibold text-sm">{user?.name}</p>
+                {user?.email && (
+                  <p className="text-white/60 text-xs mt-1">{user.email}</p>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+              >
+                Logout
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
 
         {/* Main Content */}

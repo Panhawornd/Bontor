@@ -28,12 +28,16 @@ export default function Modal({
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
+      // Prevent layout shift by adding padding when scrollbar is hidden
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
+      document.body.style.paddingRight = "0px";
     };
   }, [isOpen, onClose]);
 
@@ -54,19 +58,28 @@ export default function Modal({
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl w-4xl max-h-[90vh] overflow-y-auto animate-scaleIn z-[2]" /* max-w-md md:max-w-3xl lg:max-w-5xl xl:max-w-6xl */
+        className="relative bg-[#111111] border border-[#1f1f1f] rounded-2xl shadow-2xl w-4xl max-h-[90vh] overflow-y-auto animate-scaleIn z-[2] modal-scroll" /* max-w-md md:max-w-3xl lg:max-w-5xl xl-max-w-6xl */
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Always-visible close button (top-right) */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 rounded-lg transition-colors z-20"
+          aria-label="Close modal"
+        >
+          <X className="w-6 h-6 text-white hover:text-gray-300" />
+        </button>
+
         {/* Header */}
         {title && (
-          <div className="sticky top-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 px-6 py-4 flex items-center justify-between z-10">
+          <div className="sticky top-0 bg-[#111111]/95 backdrop-blur-sm border-b border-[#1f1f1f] px-6 py-4 flex items-center justify-between z-10">
             <h2 className="text-2xl font-bold text-white">{title}</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg transition-colors"
               aria-label="Close modal"
             >
-              <X className="w-6 h-6 text-gray-400 hover:text-white" />
+              <X className="w-6 h-6 text-white hover:text-gray-300" />
             </button>
           </div>
         )}
@@ -102,6 +115,15 @@ export default function Modal({
 
         .animate-scaleIn {
           animation: scaleIn 0.3s ease-out;
+        }
+
+        /* Modal scrollbar styling (hidden but scrollable) */
+        .modal-scroll {
+          scrollbar-width: none; /* Firefox: hide scrollbar */
+        }
+        .modal-scroll::-webkit-scrollbar {
+          width: 0; /* Chrome, Safari: hide scrollbar */
+          height: 0;
         }
       `}</style>
     </div>

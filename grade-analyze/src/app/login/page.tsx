@@ -17,6 +17,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isErrorVisible, setIsErrorVisible] = useState(true)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,9 +82,9 @@ export default function Login() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 relative">
             {/* Logo */}
-            <div className="flex items-center">
+            <div className="absolute left-3 md:left-0 flex items-center gap-3">
               <button
                 onClick={() => {
                   console.log('Logo clicked - navigating to landing')
@@ -94,16 +95,13 @@ export default function Login() {
                 <img 
                   src="/image/Bontor-logo.png" 
                   alt="Bontor" 
-                  style={{ 
-                    height: '23px',
-                    width: 'auto'
-                  }}
+                  className="h-5 md:h-[23px] w-auto"
                 />
               </button>
             </div>
 
-            {/* Navigation Links */}
-            <div className="flex items-center space-x-4 md:space-x-8">
+            {/* Navigation Links - align with logo and stay at right (hidden on mobile) */}
+            <div className="hidden md:flex items-center space-x-8 absolute right-[-10px]">
                 <button
                   onClick={() => {
                     console.log('Home clicked - navigating to landing')
@@ -133,9 +131,100 @@ export default function Login() {
                   About
                 </button>
             </div>
+
+            {/* Mobile Menu Trigger - right */}
+            <div className="md:hidden absolute inset-y-0 right-3 flex items-center">
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2 rounded-md"
+                aria-label="Open menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 22 22"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 5H3" />
+                  <path d="M21 12H9" />
+                  <path d="M21 19H7" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
+
+      {/* Mobile Sidebar Menu (like landing, without footer button) */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[200] md:hidden">
+          <button
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            aria-label="Close menu"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <aside
+            className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <span className="text-base font-semibold tracking-wide uppercase">
+                Menu
+              </span>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Close menu"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex flex-col gap-6 px-5 py-6 text-sm">
+              <button
+                onClick={() => { window.location.href = '/landing'; setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => { window.location.href = '/how-it-works'; setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                How it Works
+              </button>
+              <button
+                onClick={() => { window.location.href = '/about'; setIsMenuOpen(false); }}
+                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
+              >
+                About
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Main Content */}
       <div style={{

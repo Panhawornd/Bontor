@@ -1,3 +1,4 @@
+import { image } from "framer-motion/client";
 import { NextResponse } from "next/server";
 
 type EntranceExamRequirement = {
@@ -21,6 +22,20 @@ type ScholarshipInfo = {
   types?: string[];
 };
 
+type AdditionalInfo = {
+  google_maps_link?: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  international_program?: boolean;
+  application_deadline?: string;
+  duration?: string;
+  tuition_fee?: string;
+  accreditation?: string[];
+  facilities?: string[];
+  student_life?: string;
+};
+
 type UniversityRecord = {
   country: string;
   location: string;
@@ -33,6 +48,7 @@ type UniversityRecord = {
     english_proficiency?: EnglishProficiencyRequirement;
   };
   scholarships?: ScholarshipInfo;
+  additional_info?: AdditionalInfo;
 };
 
 const UNIVERSITY_DATABASE = {
@@ -68,6 +84,9 @@ const UNIVERSITY_DATABASE = {
       available: true,
       description: "Merit-based and need-based scholarships available",
       types: ["Merit Scholarship", "Need-Based", "Technology Excellence"],
+    },
+    additional_info: {
+      google_maps_link: "https://www.google.com/maps/place/Cambodia+Academy+of+Digital+Technology+(CADT)/@11.6530599,104.9068235,17z/data=!3m1!4b1!4m6!3m5!1s0x3109516bdea989b3:0x372d2c5e0e14b706!8m2!3d11.6530599!4d104.9116944!16s%2Fg%2F11byygmxw3?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
     },
   },
 
@@ -107,6 +126,9 @@ const UNIVERSITY_DATABASE = {
       description: "Government scholarships and merit-based awards",
       types: ["Government Scholarship", "Merit-Based", "Research Grant"],
     },
+    additional_info: {
+      google_maps_link: "https://www.google.com/maps/place/Royal+University+of+Phnom+Penh/@11.568676,104.8881668,17z/data=!3m1!4b1!4m6!3m5!1s0x3109519fe4077d69:0x20138e822e434660!8m2!3d11.568676!4d104.8907417!16s%2Fm%2F0278m39?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
+    },
   },
 
   "Institute of Technology of Cambodia (ITC)": {
@@ -139,6 +161,9 @@ const UNIVERSITY_DATABASE = {
       available: true,
       description: "Engineering excellence scholarships available",
       types: ["Engineering Excellence", "Merit-Based"],
+    },
+    additional_info: {
+      google_maps_link: "https://www.google.com/maps/place/Institute+of+Technology+of+Cambodia/@11.5703975,104.8955108,17z/data=!3m1!4b1!4m6!3m5!1s0x3109517388680e15:0x63057e6682968f5!8m2!3d11.5703975!4d104.8980857!16zL20vMDZ5dmhz?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
     },
   },
 
@@ -387,6 +412,7 @@ const UNIVERSITY_DATABASE = {
       "UX/UI Design",
       "Visual Design",
     ],
+    imageUrl: "https://i.pinimg.com/1200x/4f/1d/ef/4f1def2a4d49b27a764ec7d8b71ccce1.jpg",
     requirements: {
       min_grade: 60,
       preferred_subjects: ["english"],
@@ -574,29 +600,7 @@ const UNIVERSITY_DATABASE = {
     },
   },
 
-  "Rithypanha University (RHYU)": {
-    country: "Cambodia",
-    location: "Phnom Penh",
-   
-    programs: ["Information Technology", "Business Administration"],
-    requirements: {
-      min_grade: 70,
-      preferred_subjects: ["math", "physics"],
-      entrance_exam: {
-        required: true,
-        description: "Technical and polytechnic entrance examination",
-      },
-      english_proficiency: {
-        ielts: { required: true, min_score: 5.5 },
-        toefl: { required: false },
-      },
-    },
-    scholarships: {
-      available: false,
-      description: "Technical excellence and polytechnic scholarships",
-      types: ["Technical Excellence", "Polytechnic Scholarship", "Merit-Based"],
-    },
-  },
+  
 
 
   Norton: {

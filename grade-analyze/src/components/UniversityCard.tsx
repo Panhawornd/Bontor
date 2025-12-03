@@ -2,7 +2,16 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { MapPin, GraduationCap, FileText, Award, Globe } from "lucide-react";
+import {
+  MapPin,
+  GraduationCap,
+  FileText,
+  Award,
+  Globe,
+  Eye,
+  Search,
+} from "lucide-react";
+import UniversityDetailModal from "./UniversityDetailModal";
 
 export interface University {
   name: string;
@@ -16,6 +25,9 @@ export interface University {
     entrance_exam?: {
       required: boolean;
       description?: string;
+      subjects?: string[];
+      schedule?: string;
+      fee?: string;
     };
     english_proficiency?: {
       toefl?: {
@@ -32,6 +44,22 @@ export interface University {
     available: boolean;
     description?: string;
     types?: string[];
+    coverage?: string[];
+    application_deadline?: string;
+    how_to_apply?: string;
+  };
+  additional_info?: {
+    website?: string;
+    email?: string;
+    phone?: string;
+    application_deadline?: string;
+    tuition_fee?: string;
+    duration?: string;
+    accreditation?: string[];
+    facilities?: string[];
+    student_life?: string;
+    international_program?: boolean;
+    google_maps_link?: string;
   };
 }
 
@@ -42,6 +70,7 @@ interface UniversityCardProps {
 export default function UniversityCard({ university }: UniversityCardProps) {
   const [showAllPrograms, setShowAllPrograms] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const imageSrc =
     !imageError && university.imageUrl
       ? university.imageUrl
@@ -53,7 +82,7 @@ export default function UniversityCard({ university }: UniversityCardProps) {
 
   return (
     <div
-      className="bg-gray-800 border border-gray-700 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20"
+      className="bg-gray-800 border border-gray-700 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20 flex flex-col h-full"
       style={{
         background: "var(--bg-tertiary)",
         border: "1px solid var(--border-primary)",
@@ -88,8 +117,8 @@ export default function UniversityCard({ university }: UniversityCardProps) {
             <>
               <span className="text-gray-600">•</span>
               <div className="flex items-center gap-1">
-                <FileText className="w-3 h-3 text-blue-500" />
-                <span className="text-xs text-red-400">Entrance Exam</span>
+                <FileText className="w-3 h-3 text-green-500" />
+                <span className="text-xs text-green-500">Entrance Exam</span>
               </div>
             </>
           )}
@@ -171,24 +200,23 @@ export default function UniversityCard({ university }: UniversityCardProps) {
         )}
       </div>
 
-      <div className="border-t border-gray-700 pt-4">
-        <div className="flex flex-col gap-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400">Minimum Grade:</span>
-            <span className="text-white font-semibold">
-              {university.requirements.min_grade}%
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-gray-400">Preferred Subjects:</span>
-            <span className="text-white">
-              {university.requirements.preferred_subjects
-                .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-                .join(", ")}
-            </span>
-          </div>
-        </div>
+      <div className="border-t border-gray-700 pt-4 mt-auto">
+        {/* View Details Button */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 group"
+        >
+          <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          View Details
+        </button>
       </div>
+
+      {/* University Detail Modal */}
+      <UniversityDetailModal
+        university={university}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

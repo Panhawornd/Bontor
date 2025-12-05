@@ -122,6 +122,11 @@ export default function UniversityPage() {
     setCurrentPage(1);
   }, [searchQuery]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   if (loading) {
     return (
       <div style={{ 
@@ -144,7 +149,7 @@ export default function UniversityPage() {
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.3)',
+            filter: 'brightness(0.5)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
@@ -193,7 +198,7 @@ export default function UniversityPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.3)",
+          filter: "brightness(0.5)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -315,7 +320,7 @@ export default function UniversityPage() {
                 >
                   <User size={16} />
                   <span className="hidden sm:inline">
-                    {user?.name || "User"}
+                    {user?.name}
                   </span>
                   <ChevronDown
                     size={14}
@@ -407,7 +412,7 @@ export default function UniversityPage() {
             className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}

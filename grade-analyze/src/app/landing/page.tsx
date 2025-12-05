@@ -38,6 +38,7 @@ export default function LandingPage() {
   const [careerGoals, setCareerGoals] = useState("");
   const [isAnalysisCardRevealed, setIsAnalysisCardRevealed] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
 
   // Validate form - check if all required fields are filled
@@ -143,7 +144,7 @@ export default function LandingPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.3)",
+          filter: "brightness(0.5)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -244,7 +245,7 @@ export default function LandingPage() {
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -322,9 +323,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Subtle Gradient Orbs */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-500/5 rounded-full mix-blend-lighten filter blur-3xl" />
-      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-blue-400/5 rounded-full mix-blend-lighten filter blur-3xl" />
+      
 
       {/* Hero Section */}
       <section className="relative hero-section-wrapper">
@@ -554,8 +553,8 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="rounded-lg border border-[#1f1f1f] bg-[#111111] overflow-hidden hover:border-[#2a2a2a] transition-colors">
-                {/* Two Column Layout - Small */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                {/* Desktop Two Column Layout */}
+                <div className="hidden lg:grid lg:grid-cols-2 gap-0">
                   {/* Left Column - Ready for Analysis */}
                   <div className="min-h-full overflow-y-auto relative">
                     {/* Background layer with filter */}
@@ -566,7 +565,7 @@ export default function LandingPage() {
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
-                        filter: "brightness(0.3)",
+                        filter: "brightness(0.5)",
                         zIndex: 0,
                       }}
                     />
@@ -837,6 +836,227 @@ export default function LandingPage() {
                                 }
                               }}
                             >
+                              Analyze My Results
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile: Hero with slide-up form button */}
+                <div className="lg:hidden relative overflow-hidden" style={{ minHeight: '500px', height: '70vh', maxHeight: '700px' }}>
+                  <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: "url(/image/Ultravib.png)",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      filter: "brightness(0.5)",
+                      zIndex: 0,
+                    }}
+                  />
+                  <div className="relative flex flex-col items-center justify-center px-6 text-center" style={{ minHeight: '500px', height: '70vh', maxHeight: '700px', zIndex: 1 }}>
+                    <div className="w-10 h-10 flex items-center justify-center mx-auto mb-2">
+                      <svg
+                        className="w-8 h-8 text-blue-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-semibold text-white mb-1">
+                      Ready for Analysis
+                    </h3>
+                    <p className="text-gray-300 text-xs max-w-[250px] mt-1 mb-4">
+                     Fill out the form to get your personalized academic insights recommendations.
+                    </p>
+                    <button
+                      onClick={() => setIsMobileFormOpen(true)}
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full text-sm font-semibold transition-colors shadow-lg"
+                    >
+                      Open input form
+                    </button>
+                  </div>
+
+                  {/* Backdrop */}
+                  <div
+                    className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+                      isMobileFormOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}
+                    onClick={() => setIsMobileFormOpen(false)}
+                    style={{ zIndex: 50 }}
+                  />
+
+                  {/* Mobile bottom sheet form */}
+                  <div
+                    className={`absolute bottom-0 left-0 right-0 bg-[#0b0b0b] border border-[#1f1f1f] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out ${
+                      isMobileFormOpen ? 'translate-y-0' : 'translate-y-full'
+                    }`}
+                    style={{ height: '85%', zIndex: 60 }}
+                  >
+                    <div className="h-full overflow-y-auto px-6 pt-6 pb-8 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+                      <div className="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-4" />
+                      <div className="flex items-center justify-center mb-6">
+                        <div className="text-center">
+                          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                            <span className="text-sm text-gray-400">Academic Profile Analysis</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          router.push("/login");
+                        }}
+                        style={{ width: "100%" }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                          {/* Grades Section */}
+                          <div>
+                            <div className="grid grid-cols-2 gap-4">
+                              {[
+                                { id: "math", name: "Mathematics", category: "Science", maxScore: 125 },
+                                { id: "physics", name: "Physics", category: "Science", maxScore: 75 },
+                                { id: "chemistry", name: "Chemistry", category: "Science", maxScore: 75 },
+                                { id: "biology", name: "Biology", category: "Science", maxScore: 75 },
+                                { id: "khmer", name: "Khmer Literature", category: "Language", maxScore: 75 },
+                                { id: "english", name: "English", category: "Language", maxScore: 50 },
+                                { id: "history", name: "History", category: "Social Studies", maxScore: 50 },
+                              ].map((subject) => (
+                                <div key={subject.id} style={{ transition: "all 0.2s ease" }}>
+                                  <label
+                                    style={{
+                                      fontSize: "13px",
+                                      fontWeight: "500",
+                                      marginBottom: "6px",
+                                      color: "#ffffff",
+                                      display: "block",
+                                    }}
+                                  >
+                                    {subject.name}
+                                    <span
+                                      style={{
+                                        color: "#9ca3af",
+                                        fontSize: "11px",
+                                        fontWeight: "400",
+                                        marginLeft: "4px",
+                                      }}
+                                    >
+                                      (Max: {subject.maxScore})
+                                    </span>
+                                  </label>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    placeholder={`0-${subject.maxScore}`}
+                                    className="input-field"
+                                    value={grades[subject.id] || ""}
+                                    onChange={(e) =>
+                                      setGrades((prev) => ({
+                                        ...prev,
+                                        [subject.id]: e.target.value,
+                                      }))
+                                    }
+                                    style={{ margin: 0, fontSize: "14px", padding: "10px 12px" }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Interests Section */}
+                          <div>
+                            <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "8px", color: "#ffffff" }}>
+                              Your Interests & Strengths
+                            </h4>
+                            <p style={{ color: "#9ca3af", fontSize: "13px", marginBottom: "8px" }}>
+                              Describe your interests, hobbies, and skills...
+                            </p>
+                            <textarea
+                              className="input-field"
+                              style={{
+                                minHeight: "80px",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                lineHeight: "1.5",
+                                fontSize: "14px",
+                                padding: "10px 12px",
+                              }}
+                              placeholder="I love programming and building apps..."
+                              value={interestText}
+                              onChange={(e) => setInterestText(e.target.value)}
+                              required
+                            />
+                          </div>
+
+                          {/* Career Goals Section */}
+                          <div>
+                            <h4 style={{ fontSize: "15px", fontWeight: "600", marginBottom: "8px", color: "#ffffff" }}>
+                              Career Goals (Optional)
+                            </h4>
+                            <p style={{ color: "#9ca3af", fontSize: "13px", marginBottom: "8px" }}>
+                              What kind of career are you interested in?
+                            </p>
+                            <textarea
+                              className="input-field"
+                              style={{
+                                minHeight: "70px",
+                                resize: "vertical",
+                                fontFamily: "inherit",
+                                lineHeight: "1.5",
+                                fontSize: "14px",
+                                padding: "10px 12px",
+                              }}
+                              placeholder="I want to become a software engineer..."
+                              value={careerGoals}
+                              onChange={(e) => setCareerGoals(e.target.value)}
+                            />
+                          </div>
+
+                          {/* Submit Button */}
+                          <div style={{ paddingTop: "8px" }}>
+                            <button
+                              type="submit"
+                              disabled={!isFormValid()}
+                              className="px-4 py-3 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{
+                                width: "100%",
+                                backgroundColor: isFormValid() ? "#1d4ed8" : "#1f2937",
+                                borderWidth: "1px",
+                                borderStyle: "solid",
+                                borderColor: isFormValid() ? "#1d4ed8" : "#374151",
+                                fontSize: "15px",
+                                fontWeight: "600",
+                              }}
+                              onMouseEnter={(e) => {
+                                if (isFormValid()) {
+                                  e.currentTarget.style.backgroundColor =
+                                    "#1e40af";
+                                  e.currentTarget.style.borderColor = "#1e40af";
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (isFormValid()) {
+                                  e.currentTarget.style.backgroundColor =
+                                    "#1d4ed8";
+                                  e.currentTarget.style.borderColor = "#1d4ed8";
+                                }
+                              }}
+                            >
+                              
                               Analyze My Results
                             </button>
                           </div>

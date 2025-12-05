@@ -22,6 +22,7 @@ export default function InputPage() {
   const [isErrorVisible, setIsErrorVisible] = useState(true)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMobileFormOpen, setIsMobileFormOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -100,6 +101,7 @@ export default function InputPage() {
       const result = await response.json()
       setAnalysisResult(result)
       sessionStorage.setItem('analysisResult', JSON.stringify(result))
+      setIsMobileFormOpen(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       setIsErrorVisible(true)
@@ -134,7 +136,7 @@ export default function InputPage() {
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.3)',
+            filter: 'brightness(0.5)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
@@ -196,7 +198,7 @@ export default function InputPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.3)',
+          filter: 'brightness(0.5)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -357,7 +359,7 @@ export default function InputPage() {
             className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl overflow-y-auto"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -504,16 +506,106 @@ export default function InputPage() {
             </div>
           )}
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0" style={{ flex: 1, height: '100%' }}>
-            {/* Left Column - Recommendations - Hidden on mobile until analysis */}
+          {/* Mobile: hero with toggleable slide-up form */}
+          <div className="lg:hidden relative flex-1 overflow-hidden">
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: "url(/image/Ultravib.png)",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                filter: 'brightness(0.5)',
+                zIndex: 0,
+                pointerEvents: 'none'
+              }}
+            />
+
+            <div className="relative h-full flex flex-col items-center justify-center px-6 text-center" style={{ zIndex: 1 }}>
+              {analysisResult ? (
+                <div className="w-full space-y-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">Your AI Recommendations</h3>
+                    <p className="text-gray-300 text-sm">Personalized insights based on your profile</p>
+                  </div>
+                  <RecommendationDashboard data={analysisResult} />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setAnalysisResult(null)}
+                      className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md border border-gray-600 transition-colors font-medium"
+                    >
+                      Edit inputs
+                    </button>
+                    <button
+                      onClick={() => setIsMobileFormOpen(true)}
+                      className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+                    >
+                      Refine form
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="w-20 h-20 flex items-center justify-center mx-auto">
+                    <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-white">Ready for Analysis</h3>
+                    <p className="text-gray-300 mt-2 text-sm leading-6">
+                      Fill out the form to get your personalized academic insights recommendations.
+                    </p>
+                  </div>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => setIsMobileFormOpen(true)}
+                      className="px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full text-sm font-semibold transition-colors shadow-lg"
+                    >
+                      Open input form
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isMobileFormOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+              onClick={() => setIsMobileFormOpen(false)}
+              style={{ zIndex: 50 }}
+            />
+
+            <div
+              className={`absolute bottom-0 left-0 right-0 mx-auto w-full max-w-2xl bg-[#0b0b0b] border border-[#1f1f1f] rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out ${isMobileFormOpen ? 'translate-y-0' : 'translate-y-[105%]'}`}
+              style={{ height: '78vh', zIndex: 60 }}
+            >
+              <div className="overflow-y-auto px-6 pt-6 pb-8 scrollbar-hide" style={{ height: '78vh', WebkitOverflowScrolling: 'touch' }}>
+                <div className="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-4" />
+                <div className="flex items-center justify-center mb-6">
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      <span className="text-sm text-gray-400">Academic Profile Analysis</span>
+                    </div>
+                  </div>
+                </div>
+                <GradeInputForm onSubmit={handleSubmit} loading={loading} />
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop: two-column stays familiar */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-0" style={{ flex: 1, height: '100%' }}>
             <div 
-              className={`h-full overflow-y-auto relative ${analysisResult ? 'block' : 'hidden lg:block'}`}
+              className="h-full overflow-y-auto relative"
               style={{
                 position: 'relative'
               }}
             >
-              {/* Ultravib image background with dark overlay */}
               <div
                 style={{
                   position: 'absolute',
@@ -525,7 +617,7 @@ export default function InputPage() {
                   backgroundSize: 'cover',
                   backgroundPosition: 'center center',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'brightness(0.3)',
+                  filter: 'brightness(0.5)',
                   zIndex: 0,
                   pointerEvents: 'none'
                 }}
@@ -542,12 +634,6 @@ export default function InputPage() {
                     </p>
                   </div>
                   <RecommendationDashboard data={analysisResult} />
-                  <button 
-                    onClick={() => setAnalysisResult(null)}
-                    className="lg:hidden mt-8 w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
-                  >
-                    Back to Input Form
-                  </button>
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full p-8">
@@ -569,8 +655,7 @@ export default function InputPage() {
               </div>
             </div>
 
-            {/* Right Column - Input Form - Hidden on mobile after analysis */}
-            <div className={`bg-[#111111] border-l border-[#1f1f1f] min-h-full overflow-y-auto ${analysisResult ? 'hidden lg:block' : 'block'}`}>
+            <div className="bg-[#111111] border-l border-[#1f1f1f] min-h-full overflow-y-auto">
               <div className="p-8">
                 <div className="mb-8 text-center">
                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] mb-6">

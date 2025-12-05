@@ -21,7 +21,7 @@ export default function DashboardPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.3)',
+          filter: 'brightness(0.5)',
           zIndex: 0,
           pointerEvents: 'none'
         }}

@@ -25,7 +25,7 @@ export function generateToken(user: User): string {
     userId: user.id,
     email: user.email
   }
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn: '7d' })
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: '24h' })
 }
 
 export function verifyToken(token: string): JWTPayload | null {

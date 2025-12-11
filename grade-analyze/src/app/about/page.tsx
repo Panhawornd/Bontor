@@ -1,20 +1,30 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor, Target, Lightbulb, Heart, Globe } from "lucide-react";
 import dynamic from 'next/dynamic';
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import confusionAnimationData from "@/lib/lottie/confusion.json";
 import StarBorder from "@/components/ui/StarBorder";
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
 export default function AboutPage() {
   const router = useRouter();
-  const [hasToken, setHasToken] = useState<boolean | null>(null);
-  const [confusionAnimation, setConfusionAnimation] = useState<any>(null);
+  const searchParams = useSearchParams();
+  const [hasToken, setHasToken] = useState(() => {
+    // Initialize based on localStorage flags immediately (client-side only)
+    if (typeof window !== 'undefined') {
+      const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+      return justLoggedIn && !justLoggedOut;
+    }
+    return false; // Default for server-side rendering
+  });
+  const [authLoading, setAuthLoading] = useState(false);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -26,17 +36,44 @@ export default function AboutPage() {
   }, []);
 
   useEffect(() => {
-    const cookies = document.cookie;
-    const hasAuthToken = cookies.includes('auth-token=');
-    setHasToken(hasAuthToken);
+    const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+    const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+    
+    if (justLoggedOut) {
+      setHasToken(false);
+      setAuthLoading(false);
+      localStorage.removeItem('just_logged_in'); // Clear login flag on logout
+      return;
+    }
+    
+    if (justLoggedIn) {
+      setHasToken(true);
+      setAuthLoading(false);
+      return;
+    }
 
-    // Load confusion Lottie animation
-    fetch('/lottie/confusion.json')
-      .then(res => res.json())
-      .then(data => {
-        setConfusionAnimation(data);
-      })
-      .catch(err => console.error('Error loading confusion animation:', err));
+    // Check if user is authenticated via API
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        
+        if (data.user) {
+          setHasToken(true);
+          localStorage.setItem('just_logged_in', 'true'); // Set flag for future page visits
+        } else {
+          setHasToken(false);
+          localStorage.removeItem('just_logged_in'); // Clear flag if not authenticated
+        }
+      } catch (error) {
+        setHasToken(false);
+        localStorage.removeItem('just_logged_in'); // Clear flag on error
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const teamMembers = [
@@ -160,10 +197,11 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             {/* Get Started/Analyze Button */}
             <div className="absolute right-0 hidden md:block">
               <Button
-                onClick={hasToken ? () => router.push('/Input') : handleGetStarted}
-                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                onClick={hasToken ? () => router.push('/dashboard') : handleGetStarted}
+                disabled={authLoading}
+                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? 'Start Analysis' : 'Get Started'}
+                {authLoading ? "Loading..." : (hasToken ? 'Go Dashboard' : 'Get Started')}
               </Button>
             </div>
 
@@ -210,7 +248,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -264,15 +302,16 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               <Button
                 onClick={() => {
                   if (hasToken) {
-                    router.push("/Input");
+                    router.push("/dashboard");
                   } else {
                     handleGetStarted();
                   }
                   setIsMenuOpen(false);
                 }}
-                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                disabled={authLoading}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? "Start Analysis" : "Get Started"}
+                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
               </Button>
             </div>
           </aside>
@@ -295,7 +334,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
+          filter: 'brightness(0.8)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -324,7 +363,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             rootMargin="-50px"
             threshold={0.2}
           >
-            <div className="space-y-1 text-gray-400 text-lg leading-relaxed text-center">
+            <div className="space-y-1 text-gray-200 text-lg leading-relaxed text-center">
               <p>
                 We are students at <span className="text-white font-semibold">Cambodia Academy of Digital Technology</span>. Our vision is to help students who have just finished taking the BacII exam find their suitable major, career, and university.
               </p>
@@ -364,7 +403,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               delay={100}
               rootMargin="-50px"
             >
-              <p className="text-gray-400 text-lg leading-relaxed mb-6">
+              <p className="text-gray-200 text-lg leading-relaxed mb-6">
                 Finishing the BacII exam is one of the biggest milestones in a student's life but it also comes with uncertainty. Many students feel lost, unsure of what major to choose, which university to apply to, or what career path fits them best.
               </p>
               <p className="text-gray-300 text-lg leading-relaxed font-medium mb-6">
@@ -380,17 +419,17 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             >
               {/* Confusion Lottie animation on the left */}
               <div className="flex-shrink-0 flex items-center justify-center">
-                {confusionAnimation && (
+                {confusionAnimationData && (
                   <Lottie
                     lottieRef={lottieRef}
-                    animationData={confusionAnimation}
+                    animationData={confusionAnimationData}
                     loop={false}
                     autoplay={true}
                     style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
                     onEnterFrame={(evt: any) => {
                       // Stop at 70% of total frames (before it ends)
-                      if (confusionAnimation && evt && evt.currentFrame !== undefined) {
-                        const totalFrames = confusionAnimation.op || 181;
+                      if (confusionAnimationData && evt && evt.currentFrame !== undefined) {
+                        const totalFrames = confusionAnimationData.op || 181;
                         const stopFrame = Math.floor(totalFrames * 0.7);
                         if (evt.currentFrame >= stopFrame && lottieRef.current) {
                           lottieRef.current.stop();
@@ -431,7 +470,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               className="text-center max-w-4xl mx-auto mt-12"
               rootMargin="-50px"
             >
-              <p className="text-gray-400 text-lg leading-relaxed mb-6">
+              <p className="text-gray-200 text-lg leading-relaxed mb-6">
                 That period of confusion and exploration inspired us to take action. Instead of letting others go through the same struggle alone, we created Bontor a platform built by students, for students.
               </p>
               <p className="text-gray-300 text-lg leading-relaxed font-medium">
@@ -571,7 +610,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
             <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
               Meet the Developers
             </h2>
-            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-200 text-xl max-w-2xl mx-auto">
               A passionate team of students building the future of career guidance
             </p>
           </Reveal>
@@ -610,7 +649,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 }}
               />
             </div>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs footer-description">
                 AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
               </p>
             </div>
@@ -624,7 +663,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     <li>
                       <button
                         onClick={() => router.push('/landing')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Home
                       </button>
@@ -632,7 +671,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     <li>
                       <button
                         onClick={() => router.push('/how-it-works')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         How it Works
                       </button>
@@ -640,7 +679,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     <li>
                       <button
                         onClick={() => router.push('/about')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         About
                       </button>
@@ -653,7 +692,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     <li>
                       <button
                         onClick={() => router.push('/login')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Login
                       </button>
@@ -661,7 +700,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     <li>
                       <button
                         onClick={() => router.push('/signup')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Register
                       </button>
@@ -670,7 +709,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10 footer-copyright">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-300 text-sm">
               © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>
               </div>
@@ -767,7 +806,7 @@ function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: num
 
       {/* Description Content */}
       <div className="flex-1 text-left max-w-2xl">
-        <p className="text-gray-400 text-lg leading-relaxed">
+        <p className="text-gray-200 text-lg leading-relaxed">
           {member.description.split('\n').map((line: string, lineIdx: number) => (
             <span key={lineIdx}>
               {line}

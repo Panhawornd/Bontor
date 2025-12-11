@@ -149,7 +149,7 @@ export default function UniversityPage() {
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.5)',
+            filter: 'brightness(0.8)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
@@ -198,7 +198,7 @@ export default function UniversityPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.5)",
+          filter: "brightness(0.8)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -250,7 +250,7 @@ export default function UniversityPage() {
                 </svg>
               </button>
               <button
-                onClick={() => router.push("/Input")}
+                onClick={() => router.push("/landing")}
                 className="hover:opacity-80 transition-opacity"
                 style={{
                   background: "transparent",
@@ -412,7 +412,7 @@ export default function UniversityPage() {
             className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -647,10 +647,6 @@ export default function UniversityPage() {
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-              </div>
-              
-              <div className="text-center text-gray-400">
-                Page {currentPage} of {totalPages} • Showing {startIndex + 1}-{Math.min(endIndex, filteredUniversities.length)} of {filteredUniversities.length} universities
               </div>
             </div>
           )}

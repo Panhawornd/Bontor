@@ -115,7 +115,7 @@ export default function Signup() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
+          filter: 'brightness(0.8)',
           zIndex: 0,
           pointerEvents: 'none'
         }}

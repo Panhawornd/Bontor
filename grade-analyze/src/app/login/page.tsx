@@ -33,6 +33,9 @@ export default function Login() {
       })
 
       if (response.ok) {
+        // Set localStorage flag to indicate successful login
+        localStorage.setItem('just_logged_in', 'true')
+        localStorage.removeItem('just_logged_out')
         // Use window.location for a hard redirect to ensure cookie is available
         window.location.href = '/Input'
       } else {
@@ -74,7 +77,7 @@ export default function Login() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
+          filter: 'brightness(0.8)',
           zIndex: 0,
           pointerEvents: 'none'
         }}

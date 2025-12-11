@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
@@ -17,22 +17,29 @@ import {
   Award,
 } from "lucide-react";
 import Lottie from "lottie-react";
+import aiAnimationData from "@/lib/lottie/AI.json";
+import bacIIAnimationData from "@/lib/lottie/BacII-student.json";
+import nextStepAnimationData from "@/lib/lottie/Next-step.json";
+import securityAnimationData from "@/lib/lottie/Security.json";
+import subjectAnalysisAnimationData from "@/lib/lottie/Subject-analysis.json";
+import recommendationEngineAnimationData from "@/lib/lottie/Recommendation-engine.json";
+import skillDevelopmentAnimationData from "@/lib/lottie/Skill-development.json";
+import cambodiaAnimationData from "@/lib/lottie/Cambodia.json";
 import InfiniteScroll from "@/components/InfiniteScroll";
 
 export default function LandingPage() {
   const router = useRouter();
-  const [aiAnimation, setAiAnimation] = useState(null);
-  const [bacIIAnimation, setBacIIAnimation] = useState(null);
-  const [nextStepAnimation, setNextStepAnimation] = useState(null);
-  const [securityAnimation, setSecurityAnimation] = useState(null);
-  const [subjectAnalysisAnimation, setSubjectAnalysisAnimation] =
-    useState(null);
-  const [recommendationEngineAnimation, setRecommendationEngineAnimation] =
-    useState(null);
-  const [skillDevelopmentAnimation, setSkillDevelopmentAnimation] =
-    useState(null);
-  const [cambodiaAnimation, setCambodiaAnimation] = useState(null);
-  const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const searchParams = useSearchParams();
+  const [hasToken, setHasToken] = useState(() => {
+    // Initialize based on localStorage flags immediately (client-side only)
+    if (typeof window !== 'undefined') {
+      const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+      return justLoggedIn && !justLoggedOut;
+    }
+    return false; // Default for server-side rendering
+  });
+  const [authLoading, setAuthLoading] = useState(false);
   const [grades, setGrades] = useState<Record<string, string>>({});
   const [interestText, setInterestText] = useState("");
   const [careerGoals, setCareerGoals] = useState("");
@@ -68,62 +75,44 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    // Check if user has auth token cookie
-    const cookies = document.cookie;
-    const hasAuthToken = cookies.includes("auth-token=");
-
-    if (hasAuthToken) {
-      setHasToken(true);
-    } else {
+    const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+    const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+    
+    if (justLoggedOut) {
       setHasToken(false);
+      setAuthLoading(false);
+      localStorage.removeItem('just_logged_in'); // Clear login flag on logout
+      return;
+    }
+    
+    if (justLoggedIn) {
+      setHasToken(true);
+      setAuthLoading(false);
+      return;
     }
 
-    // Load Lottie animations
-    fetch("/lottie/AI.json")
-      .then((res) => res.json())
-      .then((data) => setAiAnimation(data))
-      .catch((err) => console.error("Failed to load AI animation:", err));
+    // Check if user is authenticated via API
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        
+        if (data.user) {
+          setHasToken(true);
+          localStorage.setItem('just_logged_in', 'true'); // Set flag for future page visits
+        } else {
+          setHasToken(false);
+          localStorage.removeItem('just_logged_in'); // Clear flag if not authenticated
+        }
+      } catch (error) {
+        setHasToken(false);
+        localStorage.removeItem('just_logged_in'); // Clear flag on error
+      } finally {
+        setAuthLoading(false);
+      }
+    };
 
-    fetch("/lottie/BacII-student.json")
-      .then((res) => res.json())
-      .then((data) => setBacIIAnimation(data))
-      .catch((err) => console.error("Failed to load BacII animation:", err));
-
-    fetch("/lottie/Next-step.json")
-      .then((res) => res.json())
-      .then((data) => setNextStepAnimation(data))
-      .catch((err) => console.error("Failed to load NextStep animation:", err));
-
-    fetch("/lottie/Security.json")
-      .then((res) => res.json())
-      .then((data) => setSecurityAnimation(data))
-      .catch((err) => console.error("Failed to load Security animation:", err));
-
-    fetch("/lottie/Subject-analysis.json")
-      .then((res) => res.json())
-      .then((data) => setSubjectAnalysisAnimation(data))
-      .catch((err) =>
-        console.error("Failed to load Subject-analysis animation:", err)
-      );
-
-    fetch("/lottie/Recommendation-engine.json")
-      .then((res) => res.json())
-      .then((data) => setRecommendationEngineAnimation(data))
-      .catch((err) =>
-        console.error("Failed to load Recommendation-engine animation:", err)
-      );
-
-    fetch("/lottie/Skill-development.json")
-      .then((res) => res.json())
-      .then((data) => setSkillDevelopmentAnimation(data))
-      .catch((err) =>
-        console.error("Failed to load Skill-development animation:", err)
-      );
-
-    fetch("/lottie/Cambodia.json")
-      .then((res) => res.json())
-      .then((data) => setCambodiaAnimation(data))
-      .catch((err) => console.error("Failed to load Cambodia animation:", err));
+    checkAuth();
   }, []);
 
   const handleGetStarted = () => {
@@ -144,7 +133,7 @@ export default function LandingPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.5)",
+          filter: "brightness(0.8)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -195,11 +184,12 @@ export default function LandingPage() {
             <div className="absolute right-0 hidden md:block">
               <Button
                 onClick={
-                  hasToken ? () => router.push("/Input") : handleGetStarted
+                  hasToken ? () => router.push("/dashboard") : handleGetStarted
                 }
-                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                disabled={authLoading}
+                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? "Start Analysis" : "Get Started"}
+                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
               </Button>
             </div>
             {/* Mobile Menu trigger */}
@@ -245,7 +235,7 @@ export default function LandingPage() {
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -308,15 +298,16 @@ export default function LandingPage() {
               <Button
                 onClick={() => {
                   if (hasToken) {
-                    router.push("/Input");
+                    router.push("/dashboard");
                   } else {
                     handleGetStarted();
                   }
                   setIsMenuOpen(false);
                 }}
-                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                disabled={authLoading}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? "Start Analysis" : "Get Started"}
+                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
               </Button>
             </div>
           </aside>
@@ -390,13 +381,14 @@ export default function LandingPage() {
                 >
                   <Button
                     onClick={
-                      hasToken ? () => router.push("/Input") : handleGetStarted
+                      hasToken ? () => router.push("/dashboard") : handleGetStarted
                     }
                     size="lg"
-                    className="group hero-cta-button rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600"
+                    disabled={authLoading}
+                    className="group hero-cta-button rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {hasToken ? "Start Analysis" : "Get Started"}
-                    <ArrowRight className="hero-cta-icon ml-2 group-hover:translate-x-1 transition-transform" />
+                    {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                    {!authLoading && <ArrowRight className="hero-cta-icon ml-2 group-hover:translate-x-1 transition-transform" />}
                   </Button>
                 </Reveal>
               </div>
@@ -565,7 +557,7 @@ export default function LandingPage() {
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
-                        filter: "brightness(0.5)",
+                        filter: "brightness(0.8)",
                         zIndex: 0,
                       }}
                     />
@@ -590,7 +582,7 @@ export default function LandingPage() {
                         <h3 className="text-base font-semibold text-white mb-1">
                           Ready for Analysis
                         </h3>
-                        <p className="text-gray-300 text-xs max-w-[200px] mt-1">
+                        <p className="text-gray-200 text-xs max-w-[200px] mt-1">
                           Fill out the form on the right to get your personalized academic insights recommendations.
                         </p>
                       </div>
@@ -854,7 +846,7 @@ export default function LandingPage() {
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
-                      filter: "brightness(0.5)",
+                      filter: "brightness(0.8)",
                       zIndex: 0,
                     }}
                   />
@@ -1085,7 +1077,7 @@ export default function LandingPage() {
             >
               Everything you need
             </h2>
-            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-200 text-xl max-w-2xl mx-auto">
               Built specifically for Cambodian BacII students with cutting-edge
               AI technology
             </p>
@@ -1098,28 +1090,28 @@ export default function LandingPage() {
                 title: "AI-Powered Insights",
                 description:
                   "Personalized majors, careers, and universities tailored to your profile",
-                lottie: aiAnimation,
+                lottie: aiAnimationData,
               },
               {
                 icon: TrendingUp,
                 title: "Built for BacII",
                 description:
                   "Subject max scores, normalization, and Cambodian educational context",
-                lottie: bacIIAnimation,
+                lottie: bacIIAnimationData,
               },
               {
                 icon: Target,
                 title: "Actionable Next Steps",
                 description:
                   "Clear skill gaps and how to improve with specific suggestions",
-                lottie: nextStepAnimation,
+                lottie: nextStepAnimationData,
               },
               {
                 icon: Shield,
                 title: "Private & Secure",
                 description:
                   "Your data, your control. All analysis happens locally",
-                lottie: securityAnimation,
+                lottie: securityAnimationData,
               },
             ].map((benefit, idx) => (
               <Reveal
@@ -1171,7 +1163,7 @@ export default function LandingPage() {
             >
               Three steps to clarity
             </h2>
-            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-200 text-xl max-w-2xl mx-auto">
               From grades to guidance in minutes
             </p>
           </Reveal>
@@ -1253,7 +1245,7 @@ export default function LandingPage() {
             >
               Deep analysis, clear results
             </h2>
-            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-200 text-xl max-w-2xl mx-auto">
               Everything you need to make informed decisions about your future
             </p>
           </Reveal>
@@ -1293,10 +1285,10 @@ export default function LandingPage() {
                       </div>
                     ))}
                   </div>
-                  {subjectAnalysisAnimation && (
+                  {subjectAnalysisAnimationData && (
                     <div className="flex items-center justify-center subject-analysis-lottie-container">
                       <Lottie
-                        animationData={subjectAnalysisAnimation}
+                        animationData={subjectAnalysisAnimationData}
                         loop={true}
                         autoplay={true}
                         style={{ width: "100%", maxWidth: 350, height: "auto" }}
@@ -1324,10 +1316,10 @@ export default function LandingPage() {
                   Get majors, careers, and universities with match scores and
                   detailed breakdowns
                 </p>
-                {recommendationEngineAnimation && (
+                {recommendationEngineAnimationData && (
                   <div className="mt-auto flex justify-center items-center">
                     <Lottie
-                      animationData={recommendationEngineAnimation}
+                      animationData={recommendationEngineAnimationData}
                       loop={true}
                       autoplay={true}
                       style={{ width: "100%", maxWidth: 150, height: "auto" }}
@@ -1353,10 +1345,10 @@ export default function LandingPage() {
                 <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Current vs target levels with improvement plans
                 </p>
-                {skillDevelopmentAnimation && (
+                {skillDevelopmentAnimationData && (
                   <div className="mt-auto flex justify-center items-center">
                     <Lottie
-                      animationData={skillDevelopmentAnimation}
+                      animationData={skillDevelopmentAnimationData}
                       loop={true}
                       autoplay={true}
                       style={{ width: "100%", maxWidth: 220, height: "auto" }}
@@ -1382,10 +1374,10 @@ export default function LandingPage() {
                 <p className="text-gray-500 text-sm leading-relaxed mb-4">
                   Specialized recommendations for Cambodian universities
                 </p>
-                {cambodiaAnimation && (
+                {cambodiaAnimationData && (
                   <div className="mt-auto flex justify-center items-center">
                     <Lottie
-                      animationData={cambodiaAnimation}
+                      animationData={cambodiaAnimationData}
                       loop={true}
                       autoplay={true}
                       style={{ width: "100%", maxWidth: 150, height: "auto" }}
@@ -1414,7 +1406,7 @@ export default function LandingPage() {
             >
               Top Cambodian Universities
             </h2>
-            <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+            <p className="text-gray-200 text-xl max-w-2xl mx-auto">
               Based on your recommended major, we match you with the best
               universities in Cambodia
             </p>
@@ -1626,20 +1618,21 @@ export default function LandingPage() {
             >
               Ready to discover your path?
             </h2>
-            <p className="text-xl text-gray-500 mb-12 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-200 mb-12 max-w-2xl mx-auto">
               Join thousands of Cambodian students who have found clarity in
               their academic journey
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button
                 onClick={
-                  hasToken ? () => router.push("/Input") : handleGetStarted
+                  hasToken ? () => router.push("/dashboard") : handleGetStarted
                 }
                 size="lg"
-                className="group px-8 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600"
+                disabled={authLoading}
+                className="group px-8 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? "Start Analysis" : "Start Free Analysis"}
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {!authLoading && <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
           </Reveal>
@@ -1664,7 +1657,7 @@ export default function LandingPage() {
                   }}
                 />
               </div>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs footer-description">
                 AI-powered career guidance platform designed specifically for
                 Cambodian BacII students. Transform your grades into
                 personalized major and university recommendations.
@@ -1680,7 +1673,7 @@ export default function LandingPage() {
                     <li>
                       <button
                         onClick={() => router.push("/landing")}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Home
                       </button>
@@ -1688,7 +1681,7 @@ export default function LandingPage() {
                     <li>
                       <button
                         onClick={() => router.push("/how-it-works")}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         How it Works
                       </button>
@@ -1696,7 +1689,7 @@ export default function LandingPage() {
                     <li>
                       <button
                         onClick={() => router.push("/about")}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         About
                       </button>
@@ -1709,7 +1702,7 @@ export default function LandingPage() {
                     <li>
                       <button
                         onClick={() => router.push("/login")}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Login
                       </button>
@@ -1717,7 +1710,7 @@ export default function LandingPage() {
                     <li>
                       <button
                         onClick={() => router.push("/signup")}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Register
                       </button>
@@ -1726,7 +1719,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10 footer-copyright">
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-300 text-sm">
                   © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights
                   reserved.
                 </p>

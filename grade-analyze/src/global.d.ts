@@ -10,6 +10,11 @@ declare module '*.png' {
   export default value;
 }
 
+declare module '*.json' {
+  const value: any;
+  export default value;
+}
+
 declare module 'meshline' {
   export const MeshLineGeometry: any;
   export const MeshLineMaterial: any;

@@ -34,6 +34,8 @@ export default function InputPage() {
         
         if (data.user) {
           setUser(data.user)
+          localStorage.removeItem('just_logged_out')
+          // Don't remove just_logged_in here - let it persist
         } else {
           // Also check for cookie directly as fallback
           const cookies = document.cookie
@@ -47,6 +49,8 @@ export default function InputPage() {
                 .then(retryData => {
                   if (retryData.user) {
                     setUser(retryData.user)
+                    localStorage.removeItem('just_logged_out')
+                    // Don't set just_logged_in here - let it persist
                   } else {
                     router.push('/login')
                   }
@@ -136,7 +140,7 @@ export default function InputPage() {
             backgroundSize: 'cover',
             backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
-            filter: 'brightness(0.5)',
+            filter: 'brightness(0.8)',
             zIndex: 0,
             pointerEvents: 'none'
           }}
@@ -173,9 +177,15 @@ export default function InputPage() {
   }
 
   const handleLogout = async () => {
+    // Clear cookie client-side immediately for instant UI update
+    document.cookie = 'auth-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    // Set logout flag for instant UI update across pages
+    localStorage.setItem('just_logged_out', 'true')
+    localStorage.removeItem('just_logged_in') // Clear login flag
+    
     await fetch('/api/auth/logout', { method: 'POST' })
     // Use window.location for a hard redirect to ensure cookie is cleared
-    window.location.href = '/landing'
+    window.location.href = '/landing?logout=true'
   }
 
   return (
@@ -198,8 +208,7 @@ export default function InputPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
-          zIndex: 0,
+          filter: 'brightness(0.8)',
           pointerEvents: 'none'
         }}
       />
@@ -239,7 +248,7 @@ export default function InputPage() {
                 </svg>
               </button>
               <button
-                onClick={() => router.push('/Input')}
+                onClick={() => router.push('/landing')}
                 className="hover:opacity-80 transition-opacity"
                 style={{ background: 'transparent', border: 'none', padding: 0}}
               >
@@ -310,7 +319,7 @@ export default function InputPage() {
                       border: '1px solid #374151',
                       borderRadius: '8px',
                       minWidth: '160px',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)',
+                      boxShadow: '0 5px 10px rgba(0, 0, 0, 0.5)',
                       zIndex: 1000,
                       overflow: 'hidden'
                     }}
@@ -359,7 +368,7 @@ export default function InputPage() {
             className="absolute top-0 left-0 h-full w-72 max-w-[80%] text-white border-r border-white/10 shadow-2xl overflow-y-auto"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -519,8 +528,7 @@ export default function InputPage() {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center center',
                 backgroundRepeat: 'no-repeat',
-                filter: 'brightness(0.5)',
-                zIndex: 0,
+                filter: 'brightness(0.8)',
                 pointerEvents: 'none'
               }}
             />
@@ -617,7 +625,7 @@ export default function InputPage() {
                   backgroundSize: 'cover',
                   backgroundPosition: 'center center',
                   backgroundRepeat: 'no-repeat',
-                  filter: 'brightness(0.5)',
+                  filter: 'brightness(0.8)',
                   zIndex: 0,
                   pointerEvents: 'none'
                 }}
@@ -646,7 +654,7 @@ export default function InputPage() {
                     <h3 className="text-xl font-semibold text-white mb-2">
                       Ready for Analysis
                     </h3>
-                    <p className="text-gray-300 max-w-sm mt-2">
+                    <p className="text-gray-200 max-w-sm mt-2">
                       Fill out the form on the right to get your personalized academic insights recommendations.
                     </p>
                   </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { FileSpreadsheet, SlidersHorizontal, Sparkles, MessageSquare } from "lucide-react";
@@ -39,17 +39,62 @@ const steps = [
 
 export default function HowItWorksPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [hasToken, setHasToken] = useState(() => {
+    // Initialize based on localStorage flags immediately (client-side only)
+    if (typeof window !== 'undefined') {
+      const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+      return justLoggedIn && !justLoggedOut;
+    }
+    return false; // Default for server-side rendering
+  });
+  const [authLoading, setAuthLoading] = useState(false);
   const [metrics, setMetrics] = useState<number[]>([]);
   const [progressPct, setProgressPct] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    const cookies = document.cookie;
-    const hasAuthToken = cookies.includes("auth-token=");
-    setHasToken(hasAuthToken);
+    const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
+    const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
+    
+    if (justLoggedOut) {
+      setHasToken(false);
+      setAuthLoading(false);
+      localStorage.removeItem('just_logged_in'); // Clear login flag on logout
+      return;
+    }
+    
+    if (justLoggedIn) {
+      setHasToken(true);
+      setAuthLoading(false);
+      return;
+    }
+
+    // Check if user is authenticated via API
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        
+        if (data.user) {
+          setHasToken(true);
+          localStorage.setItem('just_logged_in', 'true'); // Set flag for future page visits
+        } else {
+          setHasToken(false);
+          localStorage.removeItem('just_logged_in'); // Clear flag if not authenticated
+        }
+      } catch (error) {
+        setHasToken(false);
+        localStorage.removeItem('just_logged_in'); // Clear flag on error
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const ids = useMemo(() => steps.map((s) => s.id), []);
@@ -241,10 +286,11 @@ export default function HowItWorksPage() {
             {/* Get Started/Analyze Button */}
             <div className="absolute right-0 hidden md:block">
               <Button
-                onClick={hasToken ? () => router.push('/Input') : () => router.push('/login')}
-                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                onClick={hasToken ? () => router.push('/dashboard') : () => router.push('/login')}
+                disabled={authLoading}
+                className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? 'Start Analysis' : 'Get Started'}
+                {authLoading ? "Loading..." : (hasToken ? 'Go Dashboard' : 'Get Started')}
               </Button>
             </div>
             {/* Mobile Menu trigger */}
@@ -290,7 +336,7 @@ export default function HowItWorksPage() {
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -353,15 +399,16 @@ export default function HowItWorksPage() {
               <Button
                 onClick={() => {
                   if (hasToken) {
-                    router.push("/Input");
+                    router.push("/dashboard");
                   } else {
                     router.push("/login");
                   }
                   setIsMenuOpen(false);
                 }}
-                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
+                disabled={authLoading}
+                className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {hasToken ? "Start Analysis" : "Get Started"}
+                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
               </Button>
             </div>
           </aside>
@@ -382,7 +429,7 @@ export default function HowItWorksPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
+          filter: 'brightness(0.8)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -401,7 +448,7 @@ export default function HowItWorksPage() {
           <h2 className="text-5xl md:text-6xl text-white" style={{ marginBottom: '2rem' }}>
             How it works
           </h2>
-          <p className="text-gray-500 text-xl max-w-2xl mx-auto">
+          <p className="text-gray-200 text-xl max-w-2xl mx-auto">
             Built specifically for Cambodian BacII students with cutting-edge AI technology
           </p>
         </div>
@@ -563,7 +610,7 @@ export default function HowItWorksPage() {
                 }}
               />
             </div>
-              <p className="text-gray-500 text-sm leading-relaxed max-w-xs footer-description">
+              <p className="text-gray-300 text-sm leading-relaxed max-w-xs footer-description">
                 AI-powered career guidance platform designed specifically for Cambodian BacII students. Transform your grades into personalized major and university recommendations.
               </p>
             </div>
@@ -577,7 +624,7 @@ export default function HowItWorksPage() {
                     <li>
                       <button
                         onClick={() => router.push('/landing')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Home
                       </button>
@@ -585,7 +632,7 @@ export default function HowItWorksPage() {
                     <li>
                       <button
                         onClick={() => router.push('/how-it-works')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         How it Works
                       </button>
@@ -593,7 +640,7 @@ export default function HowItWorksPage() {
                     <li>
                       <button
                         onClick={() => router.push('/about')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         About
                       </button>
@@ -606,7 +653,7 @@ export default function HowItWorksPage() {
                     <li>
                       <button
                         onClick={() => router.push('/login')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Login
                       </button>
@@ -614,7 +661,7 @@ export default function HowItWorksPage() {
                     <li>
                       <button
                         onClick={() => router.push('/signup')}
-                        className="text-gray-500 hover:text-blue-500 transition-colors text-sm"
+                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
                       >
                         Register
                       </button>
@@ -623,7 +670,7 @@ export default function HowItWorksPage() {
                 </div>
               </div>
               <div className="pt-4 border-t border-white/10 footer-copyright">
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-300 text-sm">
               © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>
               </div>

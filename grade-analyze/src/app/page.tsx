@@ -7,17 +7,8 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if user is authenticated via cookie
-    const cookies = document.cookie
-    const hasAuthToken = cookies.includes('auth-token=')
-    
-    if (hasAuthToken) {
-      // Redirect authenticated users to input form
-      router.push('/Input')
-    } else {
-      // Redirect non-authenticated users to landing page
-      router.push('/landing')
-    }
+    // Always redirect to landing page
+    router.push('/landing')
   }, [router])
 
   // Show loading while redirecting
@@ -42,7 +33,7 @@ export default function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.5)',
+          filter: 'brightness(0.8)',
           zIndex: 0,
           pointerEvents: 'none'
         }}

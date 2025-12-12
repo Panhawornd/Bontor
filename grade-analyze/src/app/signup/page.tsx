@@ -278,19 +278,33 @@ export default function Signup() {
         zIndex: 10
       }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <h1 style={{ 
-            fontSize: '36px', 
-            fontWeight: 'bold', 
-            marginBottom: '8px',
-            color: '#ffffff'
-          }}>
-            Create Account
-          </h1>
-          <p style={{ color: '#cccccc' }}>Join us to start your career journey</p>
-        </div>
+          {/* Signup Card */}
+          <div className="bg-[#111111] border border-[#1f1f1f] rounded-lg p-8 hover:border-[#2a2a2a] transition-colors">
+            {/* Bontor Logo inside the card */}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <img 
+                src="/image/Bontor-logo.png" 
+                alt="Bontor" 
+                style={{ 
+                  height: '28px',
+                  width: 'auto',
+                  display: 'block',
+                  margin: '0 auto'
+                }}
+              />
+            </div>
 
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-lg p-8 hover:border-[#2a2a2a] transition-colors">
+            {/* Sign up text inside the card */}
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <h2 style={{ 
+                fontSize: '15px', 
+                fontWeight: '500',
+                color: '#cccccc',
+                margin: 0
+              }}>
+                Sign up to your account to continue
+              </h2>
+            </div>
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {error && (
               <div style={{

@@ -40,6 +40,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Routes that authenticated users should not access
+  const authOnlyBlockedRoutes = ['/login', '/signup']
+  const isAuthOnlyBlockedRoute = authOnlyBlockedRoutes.includes(pathname)
+
+  // If user has valid token and tries to access login/signup, redirect to Input
+  if (token && isAuthOnlyBlockedRoute) {
+    const payload = verifyToken(token)
+    if (payload) {
+      // Valid token, redirect authenticated user away from login/signup
+      return NextResponse.redirect(new URL('/Input', request.url))
+    }
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = ['/login', '/signup', '/landing', '/how-it-works', '/about']
   const isPublicRoute = publicRoutes.includes(pathname)

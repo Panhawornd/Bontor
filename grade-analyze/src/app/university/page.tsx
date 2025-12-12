@@ -97,6 +97,8 @@ export default function UniversityPage() {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
+    localStorage.setItem('just_logged_out', 'true');
+    localStorage.removeItem('just_logged_in');
     window.location.href = "/landing";
   };
 
@@ -209,20 +211,22 @@ export default function UniversityPage() {
         className="bg-white/2 backdrop-blur-md"
         style={{
           padding: "16px 0",
+          minHeight: "4rem",
           position: "sticky",
           top: 0,
           zIndex: 100,
         }}
       >
         <div
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px" }}
+          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: '100%' }}
         >
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
+              display: "grid",
+              gridTemplateColumns: "auto 1fr auto",
               alignItems: "center",
-              position: "relative",
+              height: '100%',
+              position: 'relative'
             }}
           >
             {/* Logo and mobile menu */}
@@ -269,11 +273,7 @@ export default function UniversityPage() {
             {/* Navigation Links - Centered - Hidden on mobile */}
             <div
               className="hidden lg:flex items-center space-x-8"
-              style={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-50%)",
-              }}
+              style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}
             >
               <button
                 onClick={() => router.push("/Input")}
@@ -306,8 +306,9 @@ export default function UniversityPage() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "8px",
                 position: "relative",
+                justifySelf: 'end'
               }}
             >
               <div ref={profileMenuRef} style={{ position: "relative" }}>
@@ -319,8 +320,8 @@ export default function UniversityPage() {
                   }}
                 >
                   <User size={16} />
-                  <span className="hidden sm:inline">
-                    {user?.name}
+                  <span className="hidden sm:inline max-w-[120px] truncate">
+                    {user?.name ?? '\u00A0'}
                   </span>
                   <ChevronDown
                     size={14}

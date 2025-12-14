@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, Suspense } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import { Code, Database, Monitor, Target, Lightbulb, Heart, Globe } from "lucide-react";
@@ -12,7 +12,7 @@ import StarBorder from "@/components/ui/StarBorder";
 
 const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
-export default function AboutPage() {
+function AboutPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [hasToken, setHasToken] = useState(() => {
@@ -201,7 +201,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 disabled={authLoading}
                 className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? 'Go Dashboard' : 'Get Started')}
+                {hasToken ? 'Go Dashboard' : 'Get Started'}
               </Button>
             </div>
 
@@ -311,7 +311,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 disabled={authLoading}
                 className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {hasToken ? "Go Dashboard" : "Get Started"}
               </Button>
             </div>
           </aside>
@@ -334,7 +334,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.8)',
+          filter: 'brightness(0.9)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -404,10 +404,10 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               rootMargin="-50px"
             >
               <p className="text-gray-200 text-lg leading-relaxed mb-6">
-                Finishing the BacII exam is one of the biggest milestones in a student's life but it also comes with uncertainty. Many students feel lost, unsure of what major to choose, which university to apply to, or what career path fits them best.
+                Finishing the BacII exam is one of the biggest milestones in a student&apos;s life but it also comes with uncertainty. Many students feel lost, unsure of what major to choose, which university to apply to, or what career path fits them best.
               </p>
               <p className="text-gray-300 text-lg leading-relaxed font-medium mb-6">
-                We've been there too. After completing our BacII exams, we faced the same questions:
+                We&apos;ve been there too. After completing our BacII exams, we faced the same questions:
               </p>
             </Reveal>
 
@@ -426,6 +426,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                     loop={false}
                     autoplay={true}
                     style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onEnterFrame={(evt: any) => {
                       // Stop at 70% of total frames (before it ends)
                       if (confusionAnimationData && evt && evt.currentFrame !== undefined) {
@@ -816,5 +817,13 @@ function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: num
         </p>
       </div>
     </Reveal>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <AboutPageContent />
+    </Suspense>
   );
 }

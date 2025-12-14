@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import {
@@ -27,7 +27,7 @@ import skillDevelopmentAnimationData from "@/lib/lottie/Skill-development.json";
 import cambodiaAnimationData from "@/lib/lottie/Cambodia.json";
 import InfiniteScroll from "@/components/InfiniteScroll";
 
-export default function LandingPage() {
+function LandingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [hasToken, setHasToken] = useState(() => {
@@ -133,7 +133,7 @@ export default function LandingPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.8)",
+          filter: "brightness(0.9)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -189,7 +189,7 @@ export default function LandingPage() {
                 disabled={authLoading}
                 className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {hasToken ? "Go Dashboard" : "Get Started"}
               </Button>
             </div>
             {/* Mobile Menu trigger */}
@@ -307,7 +307,7 @@ export default function LandingPage() {
                 disabled={authLoading}
                 className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {hasToken ? "Go Dashboard" : "Get Started"}
               </Button>
             </div>
           </aside>
@@ -336,7 +336,7 @@ export default function LandingPage() {
           />
 
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/70 hero-bg-overlay" />
+          <div className="absolute inset-0 bg-black/60 hero-bg-overlay" />
 
           {/* Content positioned within the image container */}
           <div className="absolute inset-0 flex items-center justify-center hero-content-wrapper">
@@ -387,7 +387,7 @@ export default function LandingPage() {
                     disabled={authLoading}
                     className="group hero-cta-button rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                    {hasToken ? "Go Dashboard" : "Get Started"}
                     {!authLoading && <ArrowRight className="hero-cta-icon ml-2 group-hover:translate-x-1 transition-transform" />}
                   </Button>
                 </Reveal>
@@ -557,7 +557,7 @@ export default function LandingPage() {
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundRepeat: "no-repeat",
-                        filter: "brightness(0.8)",
+                        filter: "brightness(0.9)",
                         zIndex: 0,
                       }}
                     />
@@ -846,7 +846,7 @@ export default function LandingPage() {
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       backgroundRepeat: "no-repeat",
-                      filter: "brightness(0.8)",
+                      filter: "brightness(0.9)",
                       zIndex: 0,
                     }}
                   />
@@ -1631,7 +1631,7 @@ export default function LandingPage() {
                 disabled={authLoading}
                 className="group px-8 py-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {hasToken ? "Go Dashboard" : "Get Started"}
                 {!authLoading && <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </div>
@@ -1729,5 +1729,13 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <LandingPageContent />
+    </Suspense>
   );
 }

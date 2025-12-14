@@ -115,7 +115,7 @@ export default function Signup() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.8)',
+          filter: 'brightness(0.9)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -212,7 +212,7 @@ export default function Signup() {
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}

@@ -11,6 +11,7 @@ import {
   Search,
   Paperclip,
   ArrowUp,
+  Bot,
 } from "lucide-react";
 
 export default function AgentPage() {
@@ -22,7 +23,10 @@ export default function AgentPage() {
   );
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
-  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ title: string; messages: { role: 'user' | 'assistant'; content: string }[] }[]>([]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const chatAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -66,6 +70,78 @@ export default function AgentPage() {
     };
   }, [showProfileMenu]);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (chatAreaRef.current) {
+      chatAreaRef.current.scrollTop = chatAreaRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const getMockResponse = (userMessage: string) => {
+    const lowerMessage = userMessage.toLowerCase();
+    if (lowerMessage.includes('software engineering')) {
+      return `Software Engineering is the application of engineering principles to software development. It involves designing, developing, testing, and maintaining software systems.
+
+Fundamental skills to prepare before enrolling:
+- Programming languages: Python, Java, C++
+- Data structures and algorithms
+- Version control (Git)
+- Problem-solving and logical thinking
+- Basic understanding of databases and web development`;
+    } else if (lowerMessage.includes('data science')) {
+      return `Data Science combines statistics, programming, and domain expertise to extract insights from data. It involves collecting, processing, and analyzing large datasets to inform decision-making.
+
+Fundamental skills to prepare before enrolling:
+- Programming: Python or R
+- Statistics and mathematics
+- Data manipulation (Pandas, SQL)
+- Machine learning basics
+- Data visualization (Matplotlib, Tableau)`;
+    } else if (lowerMessage.includes('telecom') || lowerMessage.includes('networking')) {
+      return `Telecommunications and Networking involves the transmission of information over distances using electronic means. It covers network design, protocols, and infrastructure for data, voice, and video communication.
+
+Fundamental skills to prepare before enrolling:
+- Computer networking basics (TCP/IP, OSI model)
+- Programming: Python or Java
+- Understanding of network security
+- Knowledge of wireless technologies
+- Basic electronics and signal processing`;
+    } else if (lowerMessage.includes('cybersecurity') || lowerMessage.includes('cyber security')) {
+      return `Cybersecurity focuses on protecting systems, networks, and data from digital attacks. It involves implementing security measures to prevent unauthorized access, data breaches, and cyber threats.
+
+Fundamental skills to prepare before enrolling:
+- Networking fundamentals
+- Programming: Python, Bash scripting
+- Understanding of encryption and cryptography
+- Knowledge of operating systems (Linux, Windows)
+- Ethical hacking and penetration testing basics`;
+    } else {
+      return `I'm here to help with information about majors and skills to prepare. Please ask about one of these areas for specific details and preparation skills!`;
+    }
+  };
+
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+    
+    // Add user message
+    const userMessage = { role: 'user' as const, content: inputValue };
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    
+    // Simulate assistant response after 1 second
+    setTimeout(() => {
+      const responseContent = getMockResponse(userMessage.content);
+      const assistantMessage = { role: 'assistant' as const, content: responseContent };
+      setMessages(prev => [...prev, assistantMessage]);
+    }, 1000);
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    // Optionally add to chat history
+    setChatHistory(prev => [...prev, { title: `Chat ${prev.length + 1}`, messages: [] }]);
+  };
+
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     localStorage.setItem('just_logged_out', 'true');
@@ -87,7 +163,7 @@ export default function AgentPage() {
           backgroundSize: "cover",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          filter: "brightness(0.8)",
+          filter: "brightness(0.9)",
           zIndex: 0,
           pointerEvents: "none",
         }}
@@ -375,12 +451,13 @@ export default function AgentPage() {
       )}
 
       {/* Main content area - ready for chatbot implementation */}
-      <div className="relative z-10 flex min-h-screen">
+      <div className="relative z-10 flex" style={{ height: 'calc(100vh - 5rem - 10rem)' }}>
         {/* Sidebar for chat history - background only */}
-        <aside className="hidden md:block fixed left-0 top-18 w-64 bg-[#111111] border-r border-[#1f1f1f] h-[calc(100vh-4rem)] overflow-auto z-20">
+        <aside className="hidden md:block fixed left-0 top-18 w-64 bg-[#111111] border-r border-[#1f1f1f] h-[calc(100vh-4.5rem)] overflow-auto z-20">
           <div className="p-4">
             <button
               type="button"
+              onClick={handleNewChat}
               className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 transition-colors text-gray-100"
             >
               <Edit className="w-4 h-4" />
@@ -420,14 +497,36 @@ export default function AgentPage() {
           </div>
         </aside>
         {/* Main Content */}
-        <div className="flex-1 md:ml-64">
-          {/* Chatbot interface will go here */}
+        <div className="flex-1 flex flex-col">
+          <div ref={chatAreaRef} className={`flex-1 ml-4 mr-4 md:ml-75 md:mr-8 p-4 flex flex-col ${messages.length > 0 ? 'overflow-auto scrollbar-hide' : ''}`}>
+            {messages.length === 0 ? (
+              <div className="fixed top-1/2 left-4 right-4 md:left-80 md:right-8 transform -translate-y-1/2 flex flex-col items-center justify-center text-gray-200 z-50">
+                <Bot className="w-16 h-16 text-blue-500 mb-6" />
+                <p className="text-center text-lg">Ask me about major and skills that you want to prepare for the major</p>
+              </div>
+            ) : (
+              <div className="flex-1 space-y-4">
+                {messages.map((msg, idx) => (
+                  <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                      msg.role === 'user' ? 'bg-gray-800 text-white' : 'bg-gray-800 text-white'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         {/* Floating chat input (centered) */}
         <div className="fixed left-4 right-4 bottom-6 md:left-80 md:right-8 z-40">
           <div className="mx-auto max-w-full md:max-w-[900px]">
             <div className="w-full bg-[#111111] rounded-2xl p-3 py-[2px] shadow-lg border border-[#1f1f1f] focus-within:ring-1 focus-within:ring-blue-500 transition-all duration-200">
               <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
                 placeholder="Ask agent a question..."
                 className="w-full bg-[#111111] placeholder-gray-500 text-gray-200 px-4 py-3 rounded-lg focus:outline-none text-sm h-12 resize-none"
               />
@@ -437,7 +536,7 @@ export default function AgentPage() {
                   <Paperclip className="w-5 h-5" />
                 </button>
 
-                <button className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md">
+                <button onClick={handleSend} className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md">
                   <ArrowUp className="w-5 h-5 text-white" />
                 </button>
               </div>

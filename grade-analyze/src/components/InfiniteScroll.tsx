@@ -1,9 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-// @ts-ignore
 import { gsap } from 'gsap';
-// @ts-ignore
 import { Observer } from 'gsap/Observer';
 
 if (typeof window !== 'undefined') {
@@ -73,13 +71,13 @@ export default function InfiniteScroll({
       target: container,
       type: 'wheel,touch,pointer',
       preventDefault: true,
-      onPress: ({ target }: { target: any }) => {
+      onPress: ({ target }: { target: EventTarget }) => {
         (target as HTMLElement).style.cursor = 'grabbing';
       },
-      onRelease: ({ target }: { target: any }) => {
+      onRelease: ({ target }: { target: EventTarget }) => {
         (target as HTMLElement).style.cursor = 'grab';
       },
-      onChange: ({ deltaY, isDragging, event }: { deltaY: number; isDragging: boolean; event: any }) => {
+      onChange: ({ deltaY, isDragging, event }: { deltaY: number; isDragging: boolean; event: Event }) => {
         const d = event.type === 'wheel' ? -deltaY : deltaY;
         const distance = isDragging ? d * 5 : d * 10;
         divItems.forEach(child => {
@@ -127,12 +125,12 @@ export default function InfiniteScroll({
           container.removeEventListener('mouseenter', stopTicker);
           container.removeEventListener('mouseleave', startTicker);
         };
-      } else {
-        return () => {
-          observer.kill();
-          rafId && cancelAnimationFrame(rafId);
-        };
       }
+      // No pause on hover, just return cleanup for autoplay
+      return () => {
+        observer.kill();
+        rafId && cancelAnimationFrame(rafId);
+      };
     }
 
     return () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -8,7 +8,7 @@ import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
 import Link from 'next/link'
 
-export default function Login() {
+function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
@@ -99,7 +99,7 @@ export default function Login() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.8)',
+          filter: 'brightness(0.9)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -192,7 +192,7 @@ export default function Login() {
             className="absolute top-0 right-0 h-full w-72 max-w-[80%] text-white border-l border-white/10 shadow-2xl"
             style={{
               backgroundImage:
-                "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(/image/Ultravib.png)",
+                "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(/image/Ultravib.png)",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
@@ -478,4 +478,12 @@ export default function Login() {
       </div>
     </div>
   )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <LoginContent />
+    </Suspense>
+  );
 }

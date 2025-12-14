@@ -33,7 +33,7 @@ export default function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.8)',
+          filter: 'brightness(0.9)',
           zIndex: 0,
           pointerEvents: 'none'
         }}

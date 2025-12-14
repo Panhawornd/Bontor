@@ -220,17 +220,23 @@ export default function Lanyard({
 }
 
 function Band({ maxSpeed = 50, minSpeed = 0 }: { maxSpeed?: number; minSpeed?: number }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const band = useRef<THREE.Mesh>(null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fixed = useRef<any>(null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     j1 = useRef<any>(null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     j2 = useRef<any>(null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     j3 = useRef<any>(null),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     card = useRef<any>(null);
   const vec = new THREE.Vector3(),
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3();
-  const segmentProps: any = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 4, linearDamping: 4 };
+  const segmentProps = { type: 'dynamic' as const, canSleep: true, angularDamping: 4, linearDamping: 4 };
   
   // Placeholder - replace with actual GLB when available
   // const { nodes, materials } = useGLTF(cardGLB);
@@ -281,12 +287,12 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: { maxSpeed?: number; minSpeed?: n
     }
     if (fixed.current) {
       [j1, j2].forEach(ref => {
-        if (ref.current && !(ref.current as any).lerped) {
-          (ref.current as any).lerped = new THREE.Vector3().copy(ref.current.translation());
+        if (ref.current && !(ref.current as THREE.Mesh & { lerped?: THREE.Vector3 }).lerped) {
+          (ref.current as THREE.Mesh & { lerped?: THREE.Vector3 }).lerped = new THREE.Vector3().copy(ref.current.translation());
         }
-        if (ref.current && (ref.current as any).lerped) {
-          const clampedDistance = Math.max(0.1, Math.min(1, (ref.current as any).lerped.distanceTo(ref.current.translation())));
-          (ref.current as any).lerped.lerp(
+        if (ref.current && (ref.current as THREE.Mesh & { lerped?: THREE.Vector3 }).lerped) {
+          const clampedDistance = Math.max(0.1, Math.min(1, (ref.current as THREE.Mesh & { lerped?: THREE.Vector3 }).lerped!.distanceTo(ref.current.translation())));
+          (ref.current as THREE.Mesh & { lerped?: THREE.Vector3 }).lerped!.lerp(
             ref.current.translation(),
             delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
           );
@@ -294,10 +300,10 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: { maxSpeed?: number; minSpeed?: n
       });
       if (j3.current && card.current && band.current) {
         curve.points[0].copy(j3.current.translation());
-        curve.points[1].copy((j2.current as any)?.lerped || new THREE.Vector3());
-        curve.points[2].copy((j1.current as any)?.lerped || new THREE.Vector3());
+        curve.points[1].copy((j2.current as THREE.Mesh & { lerped?: THREE.Vector3 })?.lerped || new THREE.Vector3());
+        curve.points[2].copy((j1.current as THREE.Mesh & { lerped?: THREE.Vector3 })?.lerped || new THREE.Vector3());
         curve.points[3].copy(fixed.current.translation());
-        (band.current as any).geometry.setPoints(curve.getPoints(32));
+        (band.current as THREE.Mesh & { geometry: { setPoints: (points: THREE.Vector3[]) => void } }).geometry.setPoints(curve.getPoints(32));
         if (card.current.angvel) {
           ang.copy(card.current.angvel());
           rot.copy(card.current.rotation());
@@ -330,14 +336,15 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: { maxSpeed?: number; minSpeed?: n
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
-            onPointerUp={(e: any) => {
-              e.target.releasePointerCapture(e.pointerId);
+            onPointerUp={(e: React.PointerEvent) => {
+              e.currentTarget.releasePointerCapture(e.pointerId);
               drag(false);
             }}
-            onPointerDown={(e: any) => {
-              e.target.setPointerCapture(e.pointerId);
+            onPointerDown={(e: React.PointerEvent) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
               const cardPos = card.current?.translation?.() || new THREE.Vector3();
-              drag(new THREE.Vector3().copy(e.point).sub(vec.copy(cardPos)));
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              drag(new THREE.Vector3().copy((e as any).point).sub(vec.copy(cardPos)));
             }}
           >
             {/* Placeholder card - replace with GLB when available */}
@@ -357,9 +364,9 @@ function Band({ maxSpeed = 50, minSpeed = 0 }: { maxSpeed?: number; minSpeed?: n
         </RigidBody>
       </group>
       <mesh ref={band}>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error Custom mesh line geometry for 3D line rendering */}
         <meshLineGeometry />
-        {/* @ts-ignore */}
+        {/* @ts-expect-error Custom mesh line material for 3D line rendering */}
         <meshLineMaterial
           color="white"
           depthTest={false}

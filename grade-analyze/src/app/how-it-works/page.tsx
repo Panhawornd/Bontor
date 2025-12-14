@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
@@ -37,7 +37,7 @@ const steps = [
   },
 ];
 
-export default function HowItWorksPage() {
+function HowItWorksContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -290,7 +290,7 @@ export default function HowItWorksPage() {
                 disabled={authLoading}
                 className="px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? 'Go Dashboard' : 'Get Started')}
+                {hasToken ? 'Go Dashboard' : 'Get Started'}
               </Button>
             </div>
             {/* Mobile Menu trigger */}
@@ -408,7 +408,7 @@ export default function HowItWorksPage() {
                 disabled={authLoading}
                 className="w-full justify-center px-4 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? "Loading..." : (hasToken ? "Go Dashboard" : "Get Started")}
+                {hasToken ? "Go Dashboard" : "Get Started"}
               </Button>
             </div>
           </aside>
@@ -429,7 +429,7 @@ export default function HowItWorksPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.8)',
+          filter: 'brightness(0.9)',
           zIndex: 0,
           pointerEvents: 'none'
         }}
@@ -679,5 +679,13 @@ export default function HowItWorksPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function HowItWorksPage() {
+  return (
+    <Suspense fallback={<div></div>}>
+      <HowItWorksContent />
+    </Suspense>
   );
 }

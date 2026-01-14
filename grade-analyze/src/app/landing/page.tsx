@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import Image from "next/image";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
 import {
@@ -12,6 +13,7 @@ import {
   CheckCircle2,
   BarChart3,
   Globe,
+  Microscope,
   Zap,
   ArrowRight,
   Award,
@@ -515,8 +517,8 @@ function LandingPageContent() {
                   <div className="grid grid-cols-3 gap-25 justify-items-center">
                     {[
                       { name: "Mathematics", icon: BarChart3 },
-                      { name: "Sciences", icon: Globe },
-                      { name: "Languages", icon: CheckCircle2 },
+                      { name: "Sciences", icon: Microscope },
+                      { name: "Languages", icon: Globe },
                     ].map((subject, i) => (
                       <div
                         key={i}
@@ -1179,6 +1181,7 @@ function LandingPageContent() {
                 description:
                   "Input your BacII exam results and tell us about your interests and goals",
                 icon: BarChart3,
+                image: "enter-grade.png",
               },
               {
                 step: "02",
@@ -1186,6 +1189,7 @@ function LandingPageContent() {
                 description:
                   "Our AI analyzes your strengths, preferences, and career aspirations",
                 icon: Brain,
+                image: "analysis.png",
               },
               {
                 step: "03",
@@ -1193,6 +1197,7 @@ function LandingPageContent() {
                 description:
                   "Receive personalized majors, careers, and universities with skill-gap guidance",
                 icon: Target,
+                image: "recommendation.png",
               },
             ].map((step, idx) => (
               <Reveal
@@ -1201,7 +1206,7 @@ function LandingPageContent() {
                 delay={idx * 200}
                 className="relative"
               >
-                <div className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group">
+                <div className="relative p-6 rounded-lg bg-[#111111] border border-[#1f1f1f] hover:border-[#2a2a2a] transition-colors group h-full">
                   {/* Step Number */}
                   <div className="relative flex items-center justify-center w-12 h-12 mb-6 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a]">
                     <span className="text-lg text-gray-600">{step.step}</span>
@@ -1219,10 +1224,14 @@ function LandingPageContent() {
                     {step.description}
                   </p>
                   {/* Image in bordered container */}
-                  <div className="mt-4 h-80 rounded-lg border border-[#2a2a2a] bg-transparent overflow-hidden">
-                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
-                      {`Image ${idx + 1}`}
-                    </div>
+                  <div className="mt-8 rounded-lg bg-transparent overflow-hidden relative">
+                    <Image
+                      src={`/image/${step.image}`}
+                      alt={step.title}
+                      width={400}
+                      height={320}
+                      className="object-contain rounded-lg"
+                    />
                   </div>
                 </div>
               </Reveal>
@@ -1273,17 +1282,41 @@ function LandingPageContent() {
                   breakdowns and insights.
                 </p>
                 <div className="mt-auto flex flex-col gap-4">
-                  <div className="space-y-2">
-                    {[
-                      "Mathematics: Strong",
-                      "Physics: Moderate",
-                      "English: Strong",
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-2">
+                  <div className="flex gap-4">
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                        <span className="text-sm text-gray-600">{item}</span>
+                        <span className="text-sm text-gray-600">Mathematics: Strong</span>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">Physics: Moderate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">Khmer Literature: Strong</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">Chemistry: Moderate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">Biology: Moderate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">English: Strong</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span className="text-sm text-gray-600">History: Moderate</span>
+                      </div>
+                    </div>
                   </div>
                   {subjectAnalysisAnimationData && (
                     <div className="flex items-center justify-center subject-analysis-lottie-container">
@@ -1437,7 +1470,7 @@ function LandingPageContent() {
                     <h4 className="text-white font-semibold mb-1">
                       Accredited Programs
                     </h4>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-400 text-sm">
                       All universities offer internationally recognized degrees
                       and certifications
                     </p>
@@ -1452,7 +1485,7 @@ function LandingPageContent() {
                     <h4 className="text-white font-semibold mb-1">
                       Specialized Excellence
                     </h4>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-400 text-sm">
                       Each institution excels in specific fields matching your
                       interests
                     </p>
@@ -1467,7 +1500,7 @@ function LandingPageContent() {
                     <h4 className="text-white font-semibold mb-1">
                       Career-Focused
                     </h4>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-400 text-sm">
                       Strong industry connections and high graduate employment
                       rates
                     </p>

@@ -56,15 +56,12 @@ const UNIVERSITY_DATABASE = {
     country: "Cambodia",
     location: "Phnom Penh",
     programs: [
-      "Computer Science",
-      "Digital Technology",
-      "Artificial Intelligence",
+      "Software Engineering",
       "Data Science",
       "Cybersecurity",
       "Digital Business",
       "Telecommunications and Networking",
-      "UX/UI Design",
-      "Digital Design",
+      
     ],
     imageUrl: "https://cadt.edu.kh/wp-content/uploads/2025/08/IMG_4219-copy-scaled.webp", 
     requirements: {

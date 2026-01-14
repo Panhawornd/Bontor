@@ -12,6 +12,7 @@ import {
   Paperclip,
   ArrowUp,
   Bot,
+  Trash2,
 } from "lucide-react";
 
 export default function AgentPage() {
@@ -26,7 +27,50 @@ export default function AgentPage() {
   const [chatHistory, setChatHistory] = useState<{ title: string; messages: { role: 'user' | 'assistant'; content: string }[] }[]>([]);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [inputValue, setInputValue] = useState('');
+  const [activeChatIndex, setActiveChatIndex] = useState<number | null>(null);
   const chatAreaRef = useRef<HTMLDivElement>(null);
+
+  // Load chat history and active chat index from localStorage on component mount
+  useEffect(() => {
+    const savedChatHistory = localStorage.getItem('chatHistory');
+    const savedActiveChatIndex = localStorage.getItem('activeChatIndex');
+    
+    if (savedChatHistory) {
+      try {
+        const parsedHistory = JSON.parse(savedChatHistory);
+        // Filter out chats with no messages
+        const filteredHistory = parsedHistory.filter((chat: { title: string; messages: { role: 'user' | 'assistant'; content: string }[] }) => chat.messages && chat.messages.length > 0);
+        setChatHistory(filteredHistory);
+        
+        // If we have a saved active chat index and it's valid, load those messages
+        if (savedActiveChatIndex !== null) {
+          const activeIndex = parseInt(savedActiveChatIndex);
+          if (!isNaN(activeIndex) && activeIndex >= 0 && activeIndex < filteredHistory.length) {
+            setActiveChatIndex(activeIndex);
+            setMessages(filteredHistory[activeIndex].messages);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      }
+    }
+  }, []);
+
+  // Save chat history to localStorage whenever it changes
+  useEffect(() => {
+    // Filter out chats with no messages before saving
+    const filteredHistory = chatHistory.filter(chat => chat.messages && chat.messages.length > 0);
+    localStorage.setItem('chatHistory', JSON.stringify(filteredHistory));
+  }, [chatHistory]);
+
+  // Save active chat index to localStorage whenever it changes
+  useEffect(() => {
+    if (activeChatIndex !== null) {
+      localStorage.setItem('activeChatIndex', activeChatIndex.toString());
+    } else {
+      localStorage.removeItem('activeChatIndex');
+    }
+  }, [activeChatIndex]);
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -122,24 +166,96 @@ Fundamental skills to prepare before enrolling:
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
-    
+
     // Add user message
     const userMessage = { role: 'user' as const, content: inputValue };
-    setMessages(prev => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInputValue('');
-    
+
+    // Handle chat history update
+    if (chatHistory.length === 0) {
+      // Create first chat synchronously
+      const newChat = { title: 'Chat 1', messages: newMessages };
+      setChatHistory([newChat]);
+      setActiveChatIndex(0);
+    } else {
+      // Update existing chat
+      setChatHistory(prev => {
+        const updatedHistory = [...prev];
+        if (activeChatIndex !== null && updatedHistory[activeChatIndex]) {
+          updatedHistory[activeChatIndex].messages = newMessages;
+        }
+        return updatedHistory;
+      });
+    }
+
     // Simulate assistant response after 1 second
     setTimeout(() => {
       const responseContent = getMockResponse(userMessage.content);
       const assistantMessage = { role: 'assistant' as const, content: responseContent };
-      setMessages(prev => [...prev, assistantMessage]);
+      const finalMessages = [...newMessages, assistantMessage];
+      setMessages(finalMessages);
+
+      // Update chat history with assistant response
+      setChatHistory(prev => {
+        const updatedHistory = [...prev];
+        const currentActiveIndex = activeChatIndex !== null ? activeChatIndex : (prev.length > 0 ? prev.length - 1 : 0);
+        if (updatedHistory[currentActiveIndex]) {
+          updatedHistory[currentActiveIndex].messages = finalMessages;
+        }
+        return updatedHistory;
+      });
     }, 1000);
   };
 
   const handleNewChat = () => {
+    // Don't create new chat if there are no chats yet
+    if (chatHistory.length === 0) return;
+
+    // Save current messages to the active chat in history if it exists and has messages
+    if (messages.length > 0 && activeChatIndex !== null) {
+      setChatHistory(prev => {
+        const updatedHistory = [...prev];
+        if (updatedHistory[activeChatIndex]) {
+          updatedHistory[activeChatIndex].messages = messages;
+        }
+        return updatedHistory;
+      });
+    }
+
+    // Start new chat
     setMessages([]);
-    // Optionally add to chat history
+    const newChatIndex = chatHistory.length;
     setChatHistory(prev => [...prev, { title: `Chat ${prev.length + 1}`, messages: [] }]);
+    setActiveChatIndex(newChatIndex);
+  };
+
+  const handleLoadChat = (chatIndex: number) => {
+    const selectedChat = chatHistory[chatIndex];
+    if (selectedChat) {
+      setMessages(selectedChat.messages);
+      setActiveChatIndex(chatIndex);
+    }
+  };
+
+  const handleDeleteChat = (chatIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the load chat function
+    
+    setChatHistory(prev => {
+      const updatedHistory = prev.filter((_, idx) => idx !== chatIndex);
+      
+      // If we deleted the currently active chat, clear messages and reset active index
+      if (activeChatIndex === chatIndex) {
+        setMessages([]);
+        setActiveChatIndex(null);
+      } else if (activeChatIndex !== null && activeChatIndex > chatIndex) {
+        // If we deleted a chat before the active one, adjust the active index
+        setActiveChatIndex(activeChatIndex - 1);
+      }
+      
+      return updatedHistory;
+    });
   };
 
   const handleLogout = async () => {
@@ -487,8 +603,23 @@ Fundamental skills to prepare before enrolling:
                 <div>
                   {/* Chat items */}
                   {chatHistory.map((c, idx) => (
-                    <div key={idx} className="mt-2 px-1 py-1 text-sm text-gray-100 truncate">
-                      {c.title || `Chat ${idx + 1}`}
+                    <div
+                      key={idx}
+                      className="group relative mt-2 px-3 py-2 text-sm text-gray-100 hover:bg-gray-800 rounded-md transition-colors"
+                    >
+                      <button
+                        onClick={() => handleLoadChat(idx)}
+                        className="w-full text-left truncate pr-8"
+                      >
+                        {c.title || `Chat ${idx + 1}`}
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteChat(idx, e)}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-700 rounded transition-all duration-200"
+                        title="Delete chat"
+                      >
+                        <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />
+                      </button>
                     </div>
                   ))}
                 </div>

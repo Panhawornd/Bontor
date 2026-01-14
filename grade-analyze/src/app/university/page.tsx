@@ -577,7 +577,7 @@ export default function UniversityPage() {
           {filterType === "recommended" ? (
             <div className="text-center py-20">
               <BookOpen className="w-16 h-16 text-blue-500 mx-auto mb-6" />
-              <p className="text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+              <p className="text-lg text-gray-200 mb-6 max-w-2xl mx-auto">
                 Complete your academic analysis on the Analyze page to receive university recommendations.
               </p>
               <button

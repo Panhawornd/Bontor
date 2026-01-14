@@ -1,0 +1,151 @@
+"""Expanded career database with comprehensive information"""
+
+CAREER_DATABASE = {
+    "Software Engineer": {
+        "description": "Design, develop, and maintain software applications and systems",
+        "required_skills": ["Programming", "Problem Solving", "Algorithms", "System Design", "Version Control"],
+        "avg_salary": "$70,000 - $120,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Data Scientist": {
+        "description": "Extract insights from data using statistical and machine learning techniques",
+        "required_skills": ["Statistics", "Python/R", "Machine Learning", "Data Visualization", "SQL"],
+        "avg_salary": "$80,000 - $130,000",
+        "education_level": "Bachelor's/Master's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "AI Engineer": {
+        "description": "Develop artificial intelligence and machine learning systems",
+        "required_skills": ["Machine Learning", "Deep Learning", "Python", "TensorFlow/PyTorch", "Mathematics"],
+        "avg_salary": "$90,000 - $150,000",
+        "education_level": "Master's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Web Developer": {
+        "description": "Build and maintain websites and web applications",
+        "required_skills": ["HTML/CSS", "JavaScript", "React/Vue", "Backend Development", "APIs"],
+        "avg_salary": "$60,000 - $110,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Very Good"
+    },
+    "Doctor": {
+        "description": "Diagnose and treat medical conditions and diseases",
+        "required_skills": ["Medical Knowledge", "Patient Care", "Diagnostics", "Communication", "Empathy"],
+        "avg_salary": "$150,000 - $300,000",
+        "education_level": "Medical Degree",
+        "growth_outlook": "Good"
+    },
+    "Surgeon": {
+        "description": "Perform surgical procedures to treat injuries and diseases",
+        "required_skills": ["Surgical Skills", "Precision", "Medical Knowledge", "Decision Making", "Stamina"],
+        "avg_salary": "$200,000 - $400,000",
+        "education_level": "Medical Degree + Residency",
+        "growth_outlook": "Good"
+    },
+    "Pharmacist": {
+        "description": "Dispense medications and provide pharmaceutical care",
+        "required_skills": ["Pharmaceutical Knowledge", "Attention to Detail", "Patient Counseling", "Chemistry"],
+        "avg_salary": "$90,000 - $140,000",
+        "education_level": "Pharmacy Degree",
+        "growth_outlook": "Good"
+    },
+    "Civil Engineer": {
+        "description": "Design and oversee infrastructure projects",
+        "required_skills": ["Structural Analysis", "CAD", "Project Management", "Math", "Physics"],
+        "avg_salary": "$65,000 - $110,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Electrical Engineer": {
+        "description": "Design electrical systems, electronics, and power systems",
+        "required_skills": ["Circuit Design", "Electronics", "Power Systems", "CAD", "Programming"],
+        "avg_salary": "$70,000 - $115,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Mechanical Engineer": {
+        "description": "Design and develop mechanical systems and machines",
+        "required_skills": ["Mechanics", "Thermodynamics", "CAD", "Manufacturing", "Materials Science"],
+        "avg_salary": "$68,000 - $112,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Business Manager": {
+        "description": "Lead teams and manage business operations",
+        "required_skills": ["Leadership", "Strategy", "Communication", "Finance", "Decision Making"],
+        "avg_salary": "$60,000 - $150,000",
+        "education_level": "Bachelor's/MBA",
+        "growth_outlook": "Good"
+    },
+    "Financial Analyst": {
+        "description": "Analyze financial data and provide investment recommendations",
+        "required_skills": ["Financial Modeling", "Excel", "Analysis", "Economics", "Communication"],
+        "avg_salary": "$65,000 - $120,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Marketing Manager": {
+        "description": "Develop and execute marketing strategies",
+        "required_skills": ["Marketing Strategy", "Digital Marketing", "Analytics", "Communication", "Creativity"],
+        "avg_salary": "$70,000 - $130,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Teacher": {
+        "description": "Educate students and develop curriculum",
+        "required_skills": ["Communication", "Patience", "Subject Expertise", "Classroom Management", "Empathy"],
+        "avg_salary": "$40,000 - $70,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Stable"
+    },
+    "School Counselor": {
+        "description": "Provide guidance and support to students",
+        "required_skills": ["Counseling", "Communication", "Empathy", "Problem Solving", "Psychology"],
+        "avg_salary": "$45,000 - $75,000",
+        "education_level": "Master's Degree",
+        "growth_outlook": "Good"
+    },
+    "Psychologist": {
+        "description": "Study human behavior and provide therapy",
+        "required_skills": ["Psychology", "Counseling", "Research", "Communication", "Empathy"],
+        "avg_salary": "$60,000 - $110,000",
+        "education_level": "Doctoral Degree",
+        "growth_outlook": "Good"
+    },
+    "Lawyer": {
+        "description": "Represent clients in legal matters",
+        "required_skills": ["Legal Knowledge", "Research", "Communication", "Critical Thinking", "Writing"],
+        "avg_salary": "$80,000 - $200,000",
+        "education_level": "Law Degree",
+        "growth_outlook": "Good"
+    },
+    "Architect": {
+        "description": "Design buildings and structures",
+        "required_skills": ["Design", "CAD", "Creativity", "Engineering Principles", "Project Management"],
+        "avg_salary": "$70,000 - $130,000",
+        "education_level": "Bachelor's/Master's Degree",
+        "growth_outlook": "Good"
+    },
+    "UX Designer": {
+        "description": "Design user experiences for digital products",
+        "required_skills": ["UX Design", "User Research", "Wireframing", "Prototyping", "Figma"],
+        "avg_salary": "$75,000 - $130,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Graphic Designer": {
+        "description": "Create visual designs for print and digital media",
+        "required_skills": ["Graphic Design", "Adobe Creative Suite", "Typography", "Branding", "Creativity"],
+        "avg_salary": "$45,000 - $85,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Diplomat": {
+        "description": "Represent country in international relations",
+        "required_skills": ["Diplomacy", "International Relations", "Communication", "Languages", "Negotiation"],
+        "avg_salary": "$60,000 - $150,000",
+        "education_level": "Master's Degree",
+        "growth_outlook": "Stable"
+    }
+}

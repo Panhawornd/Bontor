@@ -1,64 +1,166 @@
 """
-Main API Router - Complete recommendation workflow
+Main API Router - Complete Recommendation Workflow
+Uses NLP + ML + Rules pipeline
 """
 from fastapi import APIRouter, HTTPException
-from app.schemas.models import RecommendationRequest, RecommendationResponse
-from core.nlp import NLPService
-from core.features import FeatureEngine
-from core.ml_engine import MLEngine
-from core.rules import RuleEngine
-from core.career_mapper import CareerMapper
-from core.university_mapper import UniversityMapper
+from app.schemas.models import RecommendationRequest, RecommendationResponse, AnalyzeRequest, AnalyzeResponse
+from core.recommendation_service import RecommendationService
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# Initialize services (singleton pattern ensures single load)
-nlp_service = NLPService()
-feature_engine = FeatureEngine()
-ml_engine = MLEngine()
-rule_engine = RuleEngine()
-career_mapper = CareerMapper()
-university_mapper = UniversityMapper()
+# Initialize service (singleton pattern inside class)
+recommendation_service = RecommendationService()
+
 
 @router.post("/recommend", response_model=RecommendationResponse)
 async def get_recommendations(request: RecommendationRequest):
     """
-    Complete recommendation workflow
+    Complete recommendation endpoint
+    
+    Pipeline:
+    1. NLTK preprocessing
+    2. SBERT embeddings
+    3. Rule-based filtering (before ML)
+    4. Random Forest prediction
+    5. Post-processing
+    
+    Returns:
+    - major_recommendations
+    - universities
+    - career_recommendations
+    - skill_gaps
+    - match_percentage
     """
     try:
-        # Parse user input
+        # Parse grades
         grades = {g.subject.lower(): g.score for g in request.grades}
-        interests = request.interests
-        career_goals = request.career_goals or ""
         
-        # Feature engineering
-        features = feature_engine.build_features(grades, interests, career_goals)
-        
-        # ML prediction
-        ml_predictions = ml_engine.predict(features)
-        
-        # Rule-based filtering
-        filtered_majors = rule_engine.apply_rules(ml_predictions, grades, interests)
-        
-        # Career and skill mapping
-        careers = career_mapper.map_careers(filtered_majors)
-        
-        # Skill gaps based on top major's university fundamentals
-        top_major = filtered_majors[0] if filtered_majors else {}
-        skill_gaps = career_mapper.identify_skill_gaps(top_major, grades)
-        
-        # University matching
-        universities = university_mapper.map_universities(filtered_majors, grades)
+        # Get recommendations
+        result = recommendation_service.get_recommendations(
+            grades=grades,
+            interests=request.interests or "",
+            career_goal=request.career_goals or "",
+            strengths=request.strengths or "",
+            preferences=request.preferences or ""
+        )
         
         return RecommendationResponse(
-            majors=filtered_majors,
-            careers=careers,
-            universities=universities,
-            skill_gaps=skill_gaps
+            major_recommendations=result["major_recommendations"],
+            universities=result["universities"],
+            career_recommendations=result["career_recommendations"],
+            skill_gaps=result["skill_gaps"],
+            match_percentage=result["match_percentage"]
         )
         
     except Exception as e:
-        logger.error(f"Recommendation error: {e}")
+        logger.error(f"Recommendation error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/analyze", response_model=AnalyzeResponse)
+async def analyze(request: AnalyzeRequest):
+    """
+    Frontend-compatible analyze endpoint
+    
+    Transforms internal recommendation format to frontend-expected format:
+    - majors: [{name, score, description}]
+    - careers: [{title, match_score, description}]
+    - universities: [{name, country, programs}]
+    - skill_gaps: [{skill, current_level, required_level, suggestions}]
+    - subject_analysis: {subject: {score, normalized, strength}}
+    """
+    try:
+        # Parse grades
+        grades = {g.subject.lower(): g.score for g in request.grades}
+        
+        # Get recommendations
+        result = recommendation_service.get_recommendations(
+            grades=grades,
+            interests=request.interest_text or "",
+            career_goal=request.career_goals or "",
+            strengths=request.strengths or "",
+            preferences=request.preferences or ""
+        )
+        
+        # Transform majors
+        majors = [
+            {
+                "name": m["major"],
+                "score": m["confidence"],
+                "description": m["description"],
+                "source": m.get("source", "ML-RandomForest")
+            }
+            for m in result["major_recommendations"]
+        ]
+        
+        # Transform careers
+        careers = [
+            {
+                "title": c["name"],
+                "match_score": c.get("similarity_score", 0.5),
+                "description": c["description"]
+            }
+            for c in result["career_recommendations"]
+        ]
+        
+        # Transform universities
+        universities = [
+            {
+                "name": u["name"],
+                "country": u["location"],
+                "programs": u["matching_programs"],
+                "fit": u.get("fit", "")
+            }
+            for u in result["universities"]
+        ]
+        
+        # Transform skill gaps (already in correct format)
+        skill_gaps = [
+            {
+                "skill": s["skill"],
+                "current_level": s["current_level"],
+                "required_level": s["required_level"],
+                "suggestions": s.get("suggestions", [])
+            }
+            for s in result["skill_gaps"]
+        ]
+        
+        # Build subject analysis
+        max_scores = {
+            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
+            "english": 50, "khmer": 75, "history": 50
+        }
+        
+        subject_analysis = {}
+        for subject, score in grades.items():
+            max_score = max_scores.get(subject.lower(), 100)
+            normalized = (score / max_score) * 100
+            
+            if normalized >= 80:
+                strength = "Excellent"
+            elif normalized >= 65:
+                strength = "Good"
+            elif normalized >= 50:
+                strength = "Average"
+            else:
+                strength = "Needs Improvement"
+            
+            subject_analysis[subject] = {
+                "score": score,
+                "normalized": round(normalized, 1),
+                "strength": strength
+            }
+        
+        return AnalyzeResponse(
+            majors=majors,
+            careers=careers,
+            universities=universities,
+            skill_gaps=skill_gaps,
+            subject_analysis=subject_analysis
+        )
+        
+    except Exception as e:
+        logger.error(f"Analyze error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,6 +1,13 @@
 """
 FastAPI Main Application
-Clean, minimal entry point
+NLP + ML Recommendation System
+
+Pipeline:
+1. NLTK preprocessing
+2. SBERT embeddings (all-MiniLM-L6-v2)
+3. Rule-based filtering (BEFORE ML)
+4. Random Forest prediction
+5. Post-processing
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,8 +23,8 @@ logging.basicConfig(
 # Create app
 app = FastAPI(
     title="Grade Analysis ML Service",
-    description="ML-powered educational recommendation system",
-    version="2.0.0"
+    description="NLP + ML powered educational recommendation system using NLTK, SBERT, and Random Forest",
+    version="3.0.0"
 )
 
 # CORS
@@ -31,16 +38,32 @@ app.add_middleware(
 
 # Include routers
 app.include_router(recommendations.router, prefix="/api", tags=["Recommendations"])
+# Also include at root level for frontend compatibility
+app.include_router(recommendations.router, prefix="", tags=["Root"])
+
 
 @app.get("/")
 async def root():
     return {
         "service": "Grade Analysis ML Service",
-        "version": "2.0.0",
+        "version": "3.0.0",
         "status": "operational",
+        "pipeline": [
+            "NLTK preprocessing",
+            "SBERT embeddings (all-MiniLM-L6-v2)",
+            "Rule-based eligibility filtering",
+            "Random Forest prediction",
+            "Post-processing"
+        ],
         "endpoints": ["/api/recommend", "/health"]
     }
 
+
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "version": "2.0.0"}
+    return {"status": "healthy", "version": "3.0.0"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

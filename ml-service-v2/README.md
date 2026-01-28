@@ -1,46 +1,130 @@
-# Grade Analysis ML Service v2
+# ML Service v3.0 - NLP + ML Recommendation System
 
-## ✅ Clean, Professional ML Service
+An intelligent educational recommendation system using **NLTK** for text preprocessing, **SBERT** for semantic embeddings, and **Random Forest** for major prediction.
 
-### 🎯 7-Step Workflow
-
-1. **User Input** → Student grades & interests
-2. **NLP Processing** → Sentence Transformer + Zero-Shot
-3. **Feature Engineering** → Combines all features
-4. **ML Prediction** → Random Forest classifier
-5. **Rule-Based Filtering** → Validates results
-6. **Career Mapping** → Skills & career recommendations
-7. **Final Output** → Complete recommendations
-
-### 📁 Structure
+## 🏗️ Architecture
 
 ```
-ml-service-v2/
-├── app/main.py              # FastAPI entry
-├── app/routers/             # API endpoints
-├── core/                    # 6 clean modules (Steps 2-6)
-├── data/                    # Databases
-└── models/                  # ML models
+backend/
+├── nlp/                    # NLP Pipeline
+│   ├── preprocess.py      # NLTK text cleaning
+│   ├── sbert.py           # SBERT encoder (all-MiniLM-L6-v2)
+│   └── similarity.py      # Cosine similarity computation
+├── ml/                     # Machine Learning
+│   ├── train_rf.py        # Random Forest training
+│   ├── predict.py         # Prediction engine
+│   └── models/            # Saved models
+├── rules/                  # Rule-Based Filtering
+│   └── eligibility.py     # Subject-aware rules
+├── data/                   # Data Sources
+│   ├── majors.py/json     # Major database
+│   ├── careers.py/json    # Career database
+│   └── universities.py/json # University database
+├── core/                   # Core Logic
+│   ├── feature_builder.py # Feature engineering
+│   └── recommendation_service.py # Main service
+└── app/                    # FastAPI Application
+    ├── main.py            # Entry point
+    ├── routers/           # API routes
+    └── schemas/           # Pydantic models
 ```
 
-### 🚀 Quick Start
+## 🔧 Pipeline Flow
+
+1. **INPUT FEATURES**
+   - Academic Subjects: Math, Physics, Chemistry, Biology, Khmer, English, History
+   - Student Attributes: Strengths, Preferences, Career Goals
+
+2. **NLP PIPELINE**
+   - NLTK preprocessing (lowercase, tokenize, stopwords, lemmatize)
+   - SBERT encoding (all-MiniLM-L6-v2 - NOT retrained)
+   - Cosine similarity scores
+
+3. **RULE-BASED FILTERING (BEFORE ML)**
+   - Math < threshold → exclude Engineering/CS
+   - Khmer < threshold → penalize social sciences
+   - History < threshold → penalize humanities
+   - English < threshold → exclude international programs
+
+4. **MACHINE LEARNING**
+   - Random Forest Classifier
+   - Probability per major
+   - Ranked major list
+
+5. **POST-PROCESSING**
+   - Major recommendations (top-N)
+   - University matching
+   - Career recommendations (SBERT ranked)
+   - Skill gap analysis
+
+## 📦 Installation
 
 ```bash
-cd ml-service-v2
+# Install dependencies
 pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+
+# Download NLTK data
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+
+# Train the model
+python train_model.py
+
+# Run the server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 📌 API
+## 🚀 API Usage
 
-**POST /api/recommend**
+### POST /api/recommend
 
-- Input: grades, interests, career_goals
-- Output: majors, careers, skill_gaps, processing_steps
+**Request:**
 
-### ✨ Features
+```json
+{
+  "grades": [
+    { "subject": "math", "score": 100 },
+    { "subject": "physics", "score": 65 },
+    { "subject": "chemistry", "score": 60 },
+    { "subject": "biology", "score": 55 },
+    { "subject": "english", "score": 40 },
+    { "subject": "khmer", "score": 60 },
+    { "subject": "history", "score": 35 }
+  ],
+  "interests": "I like coding and building software applications",
+  "career_goals": "I want to become a software engineer",
+  "strengths": "logic, problem-solving",
+  "preferences": "coding, analysis"
+}
+```
 
-- Clean code (each module <100 lines)
-- Type hints throughout
-- Comprehensive logging
-- Production-ready
+**Response:**
+
+```json
+{
+  "major_recommendations": [...],
+  "universities": [...],
+  "career_recommendations": [...],
+  "skill_gaps": [...],
+  "match_percentage": 85.5
+}
+```
+
+## ⚠️ Hard Constraints
+
+- **SBERT Model**: `all-MiniLM-L6-v2` (DO NOT retrain)
+- **NLTK runs BEFORE SBERT**
+- **Rules OVERRIDE ML**
+- **ML only sees numbers**
+- **Output ONLY recommendation results**
+
+## 📊 Subjects & Max Scores
+
+| Subject   | Max Score |
+| --------- | --------- |
+| Math      | 125       |
+| Physics   | 75        |
+| Chemistry | 75        |
+| Biology   | 75        |
+| English   | 50        |
+| Khmer     | 75        |
+| History   | 50        |

@@ -147,5 +147,33 @@ CAREER_DATABASE = {
         "avg_salary": "$60,000 - $150,000",
         "education_level": "Master's Degree",
         "growth_outlook": "Stable"
+    },
+    "Chemical Engineer": {
+        "description": "Design and develop chemical manufacturing processes",
+        "required_skills": ["Chemical Engineering", "Process Design", "Mathematics", "Chemistry", "Problem Solving"],
+        "avg_salary": "$75,000 - $125,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Process Engineer": {
+        "description": "Optimize and oversee industrial production processes",
+        "required_skills": ["Process Optimization", "Data Analysis", "Industrial Safety", "Chemical Engineering", "Quality Control"],
+        "avg_salary": "$70,000 - $115,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Plant Engineer": {
+        "description": "Manage operations and maintenance of manufacturing plants",
+        "required_skills": ["Operations Management", "Equipment Maintenance", "Safety Regulations", "Engineering Principles", "Leadership"],
+        "avg_salary": "$72,000 - $110,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Stable"
+    },
+    "Petroleum Engineer": {
+        "description": "Develop methods for retrieving oil and gas from beneath the earth's surface",
+        "required_skills": ["Drilling Engineering", "Reservoir Engineering", "Geology", "Mathematics", "Environmental Safety"],
+        "avg_salary": "$90,000 - $160,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Stable"
     }
 }

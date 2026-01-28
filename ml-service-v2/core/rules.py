@@ -2,6 +2,7 @@
 Rule-Based Filtering and Enhancement
 Validates predictions against academic and domain constraints
 """
+import re
 from typing import List, Dict
 from data.majors import MAJOR_DATABASE
 
@@ -67,7 +68,13 @@ class RuleEngine:
         # Re-sort
         filtered.sort(key=lambda x: x['probability'], reverse=True)
         
-        return filtered[:10]  # Top 10
+        # Limit to max 4 and apply high-relevance threshold
+        top_recommendations = [p for p in filtered if p['probability'] > 0.05][:4]
+        
+        # If there's an extremely strong single match (e.g. > 70%), maybe just show that one?
+        # For now, stick to top 4 of high quality.
+        
+        return top_recommendations
     
     def _check_eligibility(self, grades: Dict[str, float], major_info: Dict) -> bool:
         """Check if user meets minimum grade requirements"""
@@ -80,9 +87,15 @@ class RuleEngine:
         return True
     
     def _check_keyword_match_count(self, interests: str, major_info: Dict) -> int:
-        """Count how many keywords match the interests"""
+        """Count how many keywords match the interests (using whole words only)"""
         keywords = major_info.get('keywords', [])
         interests_lower = interests.lower()
         
-        matches = sum(1 for kw in keywords if kw.lower() in interests_lower)
+        matches = 0
+        for kw in keywords:
+            # Use regex to find whole word matches only
+            # This prevents "logic" from matching "biological"
+            pattern = rf"\b{re.escape(kw.lower())}\b"
+            if re.search(pattern, interests_lower):
+                matches += 1
         return matches

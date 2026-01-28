@@ -44,7 +44,10 @@ async def get_recommendations(request: RecommendationRequest):
         
         # Career and skill mapping
         careers = career_mapper.map_careers(filtered_majors)
-        skill_gaps = career_mapper.identify_skill_gaps(careers, grades)
+        
+        # Skill gaps based on top major's university fundamentals
+        top_major = filtered_majors[0] if filtered_majors else {}
+        skill_gaps = career_mapper.identify_skill_gaps(top_major, grades)
         
         # University matching
         universities = university_mapper.map_universities(filtered_majors, grades)

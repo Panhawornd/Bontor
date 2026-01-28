@@ -10,13 +10,13 @@ UNIVERSITY_DATABASE = {
     "Royal University of Phnom Penh (RUPP)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Computer Science", "Mathematics", "Physics", "Chemistry", "Biology", "Business Administration", "Information Technology", "Social Sciences", "Foreign Languages", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Graphic Design"],
+        "programs": ["Computer Science", "Mathematics", "Physics", "Chemistry", "Biology", "Business Administration", "Information Technology", "Social Sciences", "Foreign Languages", "Electrical Engineering", "Mechanical Engineering", "Civil Engineering", "Graphic Design", "Chemical Engineering"],
         "requirements": {"min_grade": 70, "preferred_subjects": ["math", "english"]}
     },
     "Institute of Technology of Cambodia (ITC)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Civil Engineering", "Electrical Engineering", "Mechanical Engineering", "Industrial Engineering", "Computer Science", "Telecommunications", "Information Technology"],
+        "programs": ["Civil Engineering", "Electrical Engineering", "Mechanical Engineering", "Industrial Engineering", "Computer Science", "Telecommunications", "Information Technology", "Chemical Engineering"],
         "requirements": {"min_grade": 75, "preferred_subjects": ["math", "physics"]}
     },
     "Phnom Penh International University (PPIU)": {

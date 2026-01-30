@@ -135,16 +135,29 @@ class ModelTrainer:
                     if "tech" in desc: strength_vec[7] = 1 # technical
                 
                 # 4. SBERT Similarity (CRITICAL FEATURE)
-                # Force very high similarity for target major
+                # Use overlapping distributions to avoid label leakage
                 sim_scores = []
                 for m in self.majors_list:
                     if m == major_name:
-                        sim_scores.append(np.random.uniform(0.7, 0.99))
+                        # Target major: higher mean but with overlap
+                        score = np.clip(np.random.normal(0.6, 0.15), 0.0, 1.0)
                     else:
-                        sim_scores.append(np.random.uniform(0.0, 0.2))
+                        # Non-target majors: lower mean but with overlap
+                        score = np.clip(np.random.normal(0.4, 0.15), 0.0, 1.0)
+                    sim_scores.append(score)
                 
-                # 5. Eligibility (Assume 1.0)
-                elig_flags = np.ones(len(self.majors_list))
+                # 5. Eligibility (stochastic based on grade thresholds)
+                elig_flags = []
+                math_elig = 1.0 if grades["math"] / 125 >= 0.5 else np.random.choice([0.0, 0.6], p=[0.3, 0.7])
+                eng_elig = 1.0 if grades["english"] / 50 >= 0.5 else np.random.choice([0.0, 0.6], p=[0.3, 0.7])
+                for m in self.majors_list:
+                    # Apply eligibility based on major type
+                    if "Engineering" in m or "Software" in m or "Data Science" in m:
+                        elig_flags.append(math_elig)
+                    elif "International" in m or "Business" in m:
+                        elig_flags.append(eng_elig)
+                    else:
+                        elig_flags.append(1.0)
                 
                 # Combine
                 features = np.concatenate([

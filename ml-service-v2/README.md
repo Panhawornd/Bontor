@@ -16,10 +16,10 @@ backend/
 │   └── models/            # Saved models
 ├── rules/                  # Rule-Based Filtering
 │   └── eligibility.py     # Subject-aware rules
-├── data/                   # Data Sources
-│   ├── majors.py/json     # Major database
-│   ├── careers.py/json    # Career database
-│   └── universities.py/json # University database
+├── data/                   # Data Sources (Python modules)
+│   ├── majors.py          # Major database (required)
+│   ├── careers.py         # Career database (required)
+│   └── universities.py    # University database (required)
 ├── core/                   # Core Logic
 │   ├── feature_builder.py # Feature engineering
 │   └── recommendation_service.py # Main service
@@ -41,10 +41,15 @@ backend/
    - Cosine similarity scores
 
 3. **RULE-BASED FILTERING (BEFORE ML)**
-   - Math < threshold → exclude Engineering/CS
-   - Khmer < threshold → penalize social sciences
-   - History < threshold → penalize humanities
-   - English < threshold → exclude international programs
+   
+   Thresholds are percentage-based (0-100 scale after normalization). See `rules/eligibility.py` for constants.
+   
+   | Subject | Threshold | Action |
+   |---------|-----------|--------|
+   | Math    | < 50%     | Exclude Engineering/CS majors |
+   | Khmer   | < 45%     | Penalize social science majors (0.6x multiplier) |
+   | History | < 40%     | Penalize humanities majors (0.6x multiplier) |
+   | English | < 50%     | Exclude international programs |
 
 4. **MACHINE LEARNING**
    - Random Forest Classifier
@@ -67,7 +72,7 @@ pip install -r requirements.txt
 python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
 
 # Train the model
-python train_model.py
+python ml/train_rf.py
 
 # Run the server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000

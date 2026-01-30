@@ -8,6 +8,97 @@ CAREER_DATABASE = {
         "education_level": "Bachelor's Degree",
         "growth_outlook": "Excellent"
     },
+    "Full Stack Developer": {
+        "description": "Build complete web applications including frontend and backend",
+        "required_skills": ["Frontend Development", "Backend Development", "APIs", "Databases", "Problem Solving"],
+        "avg_salary": "$75,000 - $130,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Backend Developer": {
+        "description": "Develop server-side logic, databases, and APIs",
+        "required_skills": ["Programming", "Databases", "APIs", "System Architecture", "Security"],
+        "avg_salary": "$70,000 - $125,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Frontend Developer": {
+        "description": "Create user interfaces and experiences for web applications",
+        "required_skills": ["UI Development", "User Experience", "Responsive Design", "Problem Solving", "Creativity"],
+        "avg_salary": "$65,000 - $115,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Very Good"
+    },
+    "App Developer": {
+        "description": "Build mobile applications for iOS and Android platforms",
+        "required_skills": ["Mobile Development", "UI/UX", "APIs", "Problem Solving", "Testing"],
+        "avg_salary": "$70,000 - $120,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "System Architect": {
+        "description": "Design complex software systems and infrastructure",
+        "required_skills": ["System Design", "Architecture Patterns", "Cloud Services", "Leadership", "Problem Solving"],
+        "avg_salary": "$120,000 - $180,000",
+        "education_level": "Bachelor's/Master's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Cybersecurity Analyst": {
+        "description": "Protect organizations from cyber threats and security breaches",
+        "required_skills": ["Security Analysis", "Network Security", "Threat Detection", "Risk Assessment", "Problem Solving"],
+        "avg_salary": "$75,000 - $130,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Security Engineer": {
+        "description": "Build and maintain security infrastructure and tools",
+        "required_skills": ["Security Engineering", "Programming", "Network Security", "Cryptography", "System Design"],
+        "avg_salary": "$90,000 - $150,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Ethical Hacker": {
+        "description": "Test system security through authorized penetration testing",
+        "required_skills": ["Penetration Testing", "Security Tools", "Programming", "Network Security", "Problem Solving"],
+        "avg_salary": "$80,000 - $140,000",
+        "education_level": "Bachelor's Degree + Certifications",
+        "growth_outlook": "Excellent"
+    },
+    "Network Engineer": {
+        "description": "Design and manage computer networks and communication systems",
+        "required_skills": ["Networking", "Network Security", "System Administration", "Problem Solving", "Communication"],
+        "avg_salary": "$65,000 - $110,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Good"
+    },
+    "Cloud Engineer": {
+        "description": "Design and manage cloud infrastructure and services",
+        "required_skills": ["Cloud Platforms", "Infrastructure", "Automation", "Security", "Problem Solving"],
+        "avg_salary": "$90,000 - $150,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "DevOps Engineer": {
+        "description": "Bridge development and operations through automation and CI/CD",
+        "required_skills": ["Automation", "CI/CD", "Cloud Services", "Programming", "System Administration"],
+        "avg_salary": "$85,000 - $145,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Machine Learning Engineer": {
+        "description": "Build and deploy machine learning models and systems",
+        "required_skills": ["Machine Learning", "Programming", "Mathematics", "Data Engineering", "Problem Solving"],
+        "avg_salary": "$95,000 - $160,000",
+        "education_level": "Master's Degree",
+        "growth_outlook": "Excellent"
+    },
+    "Data Analyst": {
+        "description": "Analyze data to provide business insights and recommendations",
+        "required_skills": ["Data Analysis", "Statistics", "Data Visualization", "Communication", "Problem Solving"],
+        "avg_salary": "$55,000 - $95,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Very Good"
+    },
     "Data Scientist": {
         "description": "Extract insights from data using statistical and machine learning techniques",
         "required_skills": ["Statistics", "Python/R", "Machine Learning", "Data Visualization", "SQL"],

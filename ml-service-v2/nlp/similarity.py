@@ -63,7 +63,7 @@ class SimilarityEngine:
         Returns:
             Array of similarity scores (N,)
         """
-        if query_embedding is None or len(candidate_embeddings) == 0:
+        if query_embedding is None or candidate_embeddings is None or len(candidate_embeddings) == 0:
             return np.array([])
         
         query = query_embedding.reshape(1, -1)
@@ -82,7 +82,16 @@ class SimilarityEngine:
             
         Returns:
             Cosine similarity score
+            
+        Raises:
+            ValueError: If text1 or text2 is None or empty after stripping
         """
+        # Validate inputs
+        if text1 is None or not isinstance(text1, str) or not text1.strip():
+            raise ValueError("text1 must be a non-empty string")
+        if text2 is None or not isinstance(text2, str) or not text2.strip():
+            raise ValueError("text2 must be a non-empty string")
+        
         # NLTK preprocessing runs BEFORE SBERT
         clean1 = clean_text(text1)
         clean2 = clean_text(text2)

@@ -4,6 +4,7 @@ NLTK runs BEFORE SBERT - as per requirements
 """
 import re
 import logging
+import threading
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -12,32 +13,38 @@ logger = logging.getLogger(__name__)
 _nltk_initialized = False
 _stopwords = None
 _lemmatizer = None
+_nltk_init_lock = threading.Lock()
 
 def _init_nltk():
-    """Initialize NLTK components on first use"""
+    """Initialize NLTK components on first use (thread-safe)"""
     global _nltk_initialized, _stopwords, _lemmatizer
     
     if _nltk_initialized:
         return
     
-    import nltk
-    
-    # Download required NLTK data quietly
-    try:
-        nltk.download('punkt', quiet=True)
-        nltk.download('punkt_tab', quiet=True)
-        nltk.download('stopwords', quiet=True)
-        nltk.download('wordnet', quiet=True)
-    except Exception as e:
-        logger.warning(f"NLTK download warning: {e}")
-    
-    from nltk.corpus import stopwords
-    from nltk.stem import WordNetLemmatizer
-    
-    _stopwords = set(stopwords.words('english'))
-    _lemmatizer = WordNetLemmatizer()
-    _nltk_initialized = True
-    logger.info("NLTK components initialized")
+    with _nltk_init_lock:
+        # Double-check pattern inside lock
+        if _nltk_initialized:
+            return
+        
+        import nltk
+        
+        # Download required NLTK data quietly
+        try:
+            nltk.download('punkt', quiet=True)
+            nltk.download('punkt_tab', quiet=True)
+            nltk.download('stopwords', quiet=True)
+            nltk.download('wordnet', quiet=True)
+        except Exception as e:
+            logger.warning(f"NLTK download warning: {e}")
+        
+        from nltk.corpus import stopwords
+        from nltk.stem import WordNetLemmatizer
+        
+        _stopwords = set(stopwords.words('english'))
+        _lemmatizer = WordNetLemmatizer()
+        _nltk_initialized = True
+        logger.info("NLTK components initialized")
 
 
 def clean_text(text: str) -> str:
@@ -57,6 +64,9 @@ def clean_text(text: str) -> str:
     """
     if not text or not text.strip():
         return ""
+    
+    # Capture original for fallback
+    orig_text = text
     
     _init_nltk()
     
@@ -84,7 +94,7 @@ def clean_text(text: str) -> str:
         
     except Exception as e:
         logger.error(f"Text cleaning failed: {e}")
-        return text.lower()  # Fallback to simple lowercase
+        return orig_text.lower()  # Fallback to original text lowercased
 
 
 class TextPreprocessor:
@@ -109,12 +119,19 @@ class TextPreprocessor:
         return [clean_text(t) for t in texts]
     
     def tokenize(self, text: str) -> List[str]:
-        """Tokenize text without full preprocessing"""
+        """Tokenize text using clean_text preprocessing"""
+        # Validate input
+        if text is None or not isinstance(text, str) or not text.strip():
+            return []
+        
         if not self._initialized:
             _init_nltk()
             self._initialized = True
         
         from nltk.tokenize import word_tokenize
-        text = text.lower()
-        text = re.sub(r'[^a-zA-Z\s]', ' ', text)
-        return word_tokenize(text)
+        
+        # Use clean_text for preprocessing then tokenize
+        cleaned = clean_text(text)
+        if not cleaned:
+            return []
+        return word_tokenize(cleaned)

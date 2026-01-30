@@ -25,7 +25,7 @@ export default function PerformanceChart({ subjects }: PerformanceChartProps) {
     datasets: [
       {
         label: 'Normalized Score',
-        data: subjectEntries.map(([, d]) => d.normalized * 100),
+        data: subjectEntries.map(([, d]) => d.normalized),
         backgroundColor: 'rgba(59, 130, 246, 0.8)',
         borderColor: 'rgba(59, 130, 246, 1)',
         borderWidth: 1,

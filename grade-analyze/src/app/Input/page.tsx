@@ -23,6 +23,12 @@ export default function InputPage() {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false)
+  const [lastFormData, setLastFormData] = useState<{
+    grades: Record<string, string>
+    interestText: string
+    careerGoals: string
+    examType: 'science' | 'social-science'
+  } | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -196,7 +202,7 @@ export default function InputPage() {
       flexDirection: 'column',
       zIndex: 10
     }}>
-      {/* Ultravib image background with dark overlay */}
+      {/* Full page background for header blur effect */}
       <div
         style={{ 
           position: 'fixed',
@@ -209,6 +215,7 @@ export default function InputPage() {
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
           filter: 'brightness(0.9)',
+          zIndex: 0,
           pointerEvents: 'none'
         }}
       />
@@ -515,8 +522,8 @@ export default function InputPage() {
             </div>
           )}
 
-          {/* Mobile: hero with toggleable slide-up form */}
-          <div className="lg:hidden relative flex-1 overflow-hidden">
+          {/* Mobile: hero with toggleable slide-up form - shows below 1200px */}
+          <div className="block min-[1200px]:hidden relative flex-1 overflow-hidden">
             <div
               style={{
                 position: 'absolute',
@@ -533,49 +540,59 @@ export default function InputPage() {
               }}
             />
 
-            <div className="relative h-full flex flex-col items-center justify-center px-6 text-center" style={{ zIndex: 1 }}>
+            <div className="relative h-full flex flex-col px-4 py-6 overflow-y-auto" style={{ zIndex: 1 }}>
               {analysisResult ? (
-                <div className="w-full space-y-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Your AI Recommendations</h3>
-                    <p className="text-gray-300 text-sm">Personalized insights based on your profile</p>
+                <div className="w-full space-y-4">
+                  <div className="text-center">
+                    <h3 className="text-lg font-bold text-white mb-1">Your AI Recommendations</h3>
+                    <p className="text-gray-300 text-xs">Personalized insights based on your profile</p>
                   </div>
-                  <RecommendationDashboard data={analysisResult} />
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setAnalysisResult(null)}
-                      className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md border border-gray-600 transition-colors font-medium"
-                    >
-                      Edit inputs
-                    </button>
-                    <button
-                      onClick={() => setIsMobileFormOpen(true)}
-                      className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
-                    >
-                      Refine form
-                    </button>
+                  
+                  {/* Scrollable recommendations container */}
+                  <div className="pb-24">
+                    <RecommendationDashboard data={analysisResult} />
+                  </div>
+                  
+                  {/* Fixed bottom buttons */}
+                  <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent" style={{ zIndex: 40 }}>
+                    <div className="flex gap-3 max-w-md mx-auto">
+                      <button
+                        onClick={() => setAnalysisResult(null)}
+                        className="flex-1 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md border border-gray-600 transition-colors font-medium text-sm"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        onClick={() => setIsMobileFormOpen(true)}
+                        className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium text-sm"
+                      >
+                        Edit Form
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <div className="w-20 h-20 flex items-center justify-center mx-auto">
-                    <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">Ready for Analysis</h3>
-                    <p className="text-gray-300 mt-2 text-sm leading-6">
-                      Fill out the form to get your personalized academic insights recommendations.
-                    </p>
-                  </div>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => setIsMobileFormOpen(true)}
-                      className="px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full text-sm font-semibold transition-colors shadow-lg"
-                    >
-                      Open input form
-                    </button>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="space-y-6 text-center">
+                    <div className="w-20 h-20 flex items-center justify-center mx-auto">
+                      <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-white">Ready for Analysis</h3>
+                      <p className="text-gray-300 mt-2 text-sm leading-6">
+                        Fill out the form to get your personalized academic insights recommendations.
+                      </p>
+                    </div>
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => setIsMobileFormOpen(true)}
+                        className="px-5 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full text-sm font-semibold transition-colors shadow-lg"
+                      >
+                        Open input form
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -601,36 +618,27 @@ export default function InputPage() {
                     </div>
                   </div>
                 </div>
-                <GradeInputForm onSubmit={handleSubmit} loading={loading} />
+                {isMobileFormOpen && (
+                  <GradeInputForm 
+                    onSubmit={handleSubmit} 
+                    loading={loading} 
+                    initialData={lastFormData || undefined}
+                    onFormChange={setLastFormData}
+                  />
+                )}
               </div>
             </div>
           </div>
 
-          {/* Desktop: two-column stays familiar */}
-          <div className="hidden lg:grid lg:grid-cols-2 gap-0" style={{ flex: 1, height: '100%' }}>
+          {/* Desktop: two-column - shows at 1200px and above */}
+          <div className="hidden min-[1200px]:grid min-[1200px]:grid-cols-2 gap-0" style={{ flex: 1, minHeight: '100%' }}>
             <div 
-              className="h-full overflow-y-auto relative"
+              className="min-h-full overflow-y-auto relative"
               style={{
                 position: 'relative'
               }}
             >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundImage: "url(/image/Ultravib.png)",
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center center',
-                  backgroundRepeat: 'no-repeat',
-                  filter: 'brightness(0.9)',
-                  zIndex: 0,
-                  pointerEvents: 'none'
-                }}
-              />
-              <div style={{ position: 'relative', zIndex: 10, height: '100%' }}>
+              <div style={{ position: 'relative', zIndex: 10, minHeight: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
               {analysisResult ? (
                 <div className="p-8">
                   <div className="mb-6 text-center">
@@ -644,9 +652,9 @@ export default function InputPage() {
                   <RecommendationDashboard data={analysisResult} />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full p-8">
+                <div className="flex items-center justify-center p-8" style={{ flex: 1 }}>
                   <div className="text-center">
-                    <div className="w-20 h-20  flex items-center justify-center mx-auto mb-2 ">
+                    <div className="w-20 h-20 flex items-center justify-center mx-auto mb-2">
                       <svg className="w-18 h-18 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -675,7 +683,12 @@ export default function InputPage() {
                   </p>
                 </div>
                 
-                <GradeInputForm onSubmit={handleSubmit} loading={loading} />
+                <GradeInputForm 
+                  onSubmit={handleSubmit} 
+                  loading={loading} 
+                  initialData={lastFormData || undefined}
+                  onFormChange={setLastFormData}
+                />
               </div>
             </div>
           </div>

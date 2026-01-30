@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface GradeAnalysisData {
   grades: Array<{ subject: string; score: number }>
@@ -11,6 +11,18 @@ interface GradeAnalysisData {
 interface GradeInputFormProps {
   onSubmit: (data: GradeAnalysisData) => void
   loading: boolean
+  initialData?: {
+    grades: Record<string, string>
+    interestText: string
+    careerGoals: string
+    examType: 'science' | 'social-science'
+  }
+  onFormChange?: (data: {
+    grades: Record<string, string>
+    interestText: string
+    careerGoals: string
+    examType: 'science' | 'social-science'
+  }) => void
 }
 
 type ExamType = 'science' | 'social-science'
@@ -35,12 +47,19 @@ const SOCIAL_SCIENCE_SUBJECTS = [
   { id: 'english', name: 'English', category: 'Language', maxScore: 50 },
 ]
 
-export default function GradeInputForm({ onSubmit, loading }: GradeInputFormProps) {
-  const [examType, setExamType] = useState<ExamType>('science')
-  const [grades, setGrades] = useState<Record<string, string>>({})
+export default function GradeInputForm({ onSubmit, loading, initialData, onFormChange }: GradeInputFormProps) {
+  const [examType, setExamType] = useState<ExamType>(initialData?.examType || 'science')
+  const [grades, setGrades] = useState<Record<string, string>>(initialData?.grades || {})
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [interestText, setInterestText] = useState('')
-  const [careerGoals, setCareerGoals] = useState('')
+  const [interestText, setInterestText] = useState(initialData?.interestText || '')
+  const [careerGoals, setCareerGoals] = useState(initialData?.careerGoals || '')
+
+  // Notify parent of form changes
+  useEffect(() => {
+    if (onFormChange) {
+      onFormChange({ grades, interestText, careerGoals, examType })
+    }
+  }, [grades, interestText, careerGoals, examType])
 
   const SUBJECTS = examType === 'science' ? SCIENCE_SUBJECTS : SOCIAL_SCIENCE_SUBJECTS
 

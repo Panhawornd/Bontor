@@ -87,7 +87,7 @@ class EligibilityRules:
         math_pct = self.normalize_grade("math", math_score)
         
         if math_pct < self.thresholds["math"]:
-            logger.info(f"Math ({math_pct:.1f}%) below threshold - excluding STEM majors")
+            logger.info(f"Math ({math_pct:.1f}%) below threshold - excluding engineering majors")
             return False, ENGINEERING_MAJORS.copy()
         
         return True, set()
@@ -269,7 +269,9 @@ class EligibilityRules:
         
         filtered = []
         for pred in predictions:
-            major = pred['major']
+            # Make a shallow copy to avoid mutating caller's data
+            pred_copy = dict(pred)
+            major = pred_copy['major']
             flag = eligibility_flags.get(major, 1.0)
             
             if flag == 0.0:
@@ -277,9 +279,9 @@ class EligibilityRules:
                 continue
             
             # Apply penalty to probability
-            pred['probability'] *= flag
-            pred['rule_applied'] = flag < 1.0
-            filtered.append(pred)
+            pred_copy['probability'] *= flag
+            pred_copy['rule_applied'] = flag < 1.0
+            filtered.append(pred_copy)
         
         # Re-sort by probability
         filtered.sort(key=lambda x: x['probability'], reverse=True)

@@ -150,7 +150,9 @@ class RecommendationService:
         # RULES OVERRIDE ML
         filtered_predictions = []
         for pred in ml_predictions:
-            major = pred['major']
+            # Make a shallow copy to avoid mutating cached/reused objects
+            pred_copy = dict(pred)
+            major = pred_copy['major']
             eligibility = eligibility_flags.get(major, 1.0)
             
             if eligibility == 0.0:
@@ -158,33 +160,41 @@ class RecommendationService:
                 continue
             
             # Apply eligibility penalty
-            pred['probability'] *= eligibility
+            pred_copy['probability'] *= eligibility
             
             # Boost based on SBERT similarity (if available)
             # When user provides clear text input, semantic match should be trusted
             similarity_score = major_similarities.get(major, 0.0)
             
             if has_text_input and max_similarity > 0.25:
-                # User provided text input - blend ML + SBERT
-                # Give SBERT significant weight when there's a match
+                # User provided clear text input - SBERT should drive recommendations
+                # Strong semantic match = big boost
                 if similarity_score > 0.35:
-                    # Good SBERT match - add significant probability
-                    # This allows SBERT to override weak ML predictions
-                    sbert_boost = similarity_score * 0.5  # Add up to 0.5 probability
-                    pred['probability'] += sbert_boost
-                elif similarity_score < 0.1:
-                    # No SBERT match - penalize this major when text was provided
-                    pred['probability'] *= 0.5
+                    # Good SBERT match - significant boost
+                    sbert_boost = similarity_score * 1.5
+                    pred_copy['probability'] += sbert_boost
+                elif similarity_score > 0.25:
+                    # Moderate match - small boost
+                    pred_copy['probability'] *= 1.3
+                elif similarity_score > 0.20:
+                    # Weak match - slight penalty
+                    pred_copy['probability'] *= 0.3
+                else:
+                    # No semantic match to user's stated interests
+                    # EXCLUDE unrelated majors entirely when user clearly stated interest
+                    pred_copy['probability'] = 0.0
             else:
                 # No text input - rely more on ML + grade-inferred boosts
                 if not has_text_input and major in grade_inferred_majors:
                     grade_boost = grade_inferred_majors[major]
-                    pred['probability'] *= (1 + grade_boost * 2.0)
+                    pred_copy['probability'] *= (1 + grade_boost * 2.0)
             
-            pred['similarity_score'] = similarity_score
-            pred['rule_penalty'] = eligibility < 1.0
+            pred_copy['similarity_score'] = similarity_score
+            pred_copy['rule_penalty'] = eligibility < 1.0
             
-            filtered_predictions.append(pred)
+            # Only include if probability > 0
+            if pred_copy['probability'] > 0:
+                filtered_predictions.append(pred_copy)
         
         # Re-normalize probabilities
         total_prob = sum(p['probability'] for p in filtered_predictions)
@@ -199,10 +209,20 @@ class RecommendationService:
         # STEP 5: Post-Processing
         # ========================================
         
-        # 5.1 Major Recommendations (Top-N)
-        major_recommendations = self._build_major_recommendations(
-            filtered_predictions[:top_n]
-        )
+        # 5.1 Major Recommendations - Only return majors that actually match
+        # If user provided interest, only return majors with semantic match
+        if has_text_input and max_similarity > 0.25:
+            # Filter to only show majors with meaningful similarity (related to user's interests)
+            relevant_predictions = [
+                p for p in filtered_predictions 
+                if p.get('similarity_score', 0) >= 0.22
+            ]
+            # Use relevant predictions, limit to top_n
+            predictions_to_use = relevant_predictions[:top_n] if relevant_predictions else filtered_predictions[:1]
+        else:
+            predictions_to_use = filtered_predictions[:top_n]
+        
+        major_recommendations = self._build_major_recommendations(predictions_to_use)
         
         # Calculate match percentage (top major probability as percentage)
         match_percentage = 0.0
@@ -255,6 +275,10 @@ class RecommendationService:
             "business": "business administration management finance marketing entrepreneur company corporate",
             "tech": "technology software engineering programming coding developer computer science",
             "computer": "computer science programming software developer coding technology apps applications",
+            "code": "coding programming software engineering developer apps python javascript backend frontend algorithm technology computer science data science cybersecurity network security machine learning artificial intelligence database sql api systems",
+            "coding": "coding programming software engineering developer apps python javascript backend frontend algorithm technology computer science data science cybersecurity network security machine learning artificial intelligence database sql api systems",
+            "programming": "programming coding software engineering developer apps python javascript backend frontend algorithm technology computer science data science cybersecurity network machine learning artificial intelligence database systems",
+            "software": "software engineering programming coding developer apps applications technology computer science backend frontend cybersecurity data science machine learning systems architecture",
             "law": "law legal lawyer justice court attorney advocate litigation",
             "design": "design creative visual graphics art user interface architecture",
             "art": "art creative design visual graphics illustration artistic",
@@ -264,9 +288,8 @@ class RecommendationService:
             "teaching": "teaching education teacher school classroom learning pedagogy",
             "engineering": "engineering software electrical mechanical civil chemical technical math physics",
             "medicine": "medicine medical doctor hospital patient healthcare surgery physician",
-            
-            # Career goal keywords - more specific to match major keywords
-            "engineer": "software engineering electrical engineering mechanical engineering civil engineering chemical engineering technical programming coding developer",
+            "python": "python programming coding software engineering developer backend data science machine learning algorithm technology",
+            "javascript": "javascript programming coding software engineering developer frontend web development technology",
             "developer": "software engineering developer programming coding apps applications technology computer science",
             "doctor": "medicine medical physician healthcare patient hospital surgery treatment anatomy",
             "lawyer": "law legal lawyer justice court attorney advocate litigation rights",
@@ -352,10 +375,14 @@ class RecommendationService:
         self,
         predictions: List[Dict]
     ) -> List[Dict]:
-        """Build formatted major recommendations"""
+        """Build formatted major recommendations - only include majors with meaningful confidence"""
         recommendations = []
         
         for pred in predictions:
+            # Skip majors with very low confidence (less than 5%)
+            if pred['probability'] < 0.05:
+                continue
+                
             major_name = pred['major']
             major_info = self.majors_db.get(major_name, {})
             
@@ -456,7 +483,7 @@ class RecommendationService:
         major_recommendations: List[Dict],
         career_similarities: Dict[str, float]
     ) -> List[Dict]:
-        """Build career recommendations prioritizing top major's careers"""
+        """Build career recommendations prioritizing top major's careers - only include meaningful matches"""
         careers = []
         seen = set()
         
@@ -494,11 +521,19 @@ class RecommendationService:
         # Sort by combined score (prioritizes top major's careers)
         careers.sort(key=lambda x: x['_combined_score'], reverse=True)
         
+        # Filter out careers with very low scores (less than 5%)
+        # Keep minimum of 3 careers even if they're low
+        filtered_careers = [c for c in careers if c['_combined_score'] >= 0.05]
+        if len(filtered_careers) < 3 and len(careers) >= 3:
+            filtered_careers = careers[:3]
+        elif len(filtered_careers) < len(careers) and len(filtered_careers) < 3:
+            filtered_careers = careers[:min(3, len(careers))]
+        
         # Remove internal score and limit results
-        for career in careers:
+        for career in filtered_careers:
             del career['_combined_score']
         
-        return careers[:10]
+        return filtered_careers[:10]
     
     def _analyze_skill_gaps(
         self,
@@ -509,8 +544,9 @@ class RecommendationService:
     ) -> List[Dict]:
         """
         Analyze skill gaps with numeric current/goal levels for visualization.
-        Uses fundamental skills from major database + career required skills.
-        Intelligently estimates current level based on grades and strengths.
+        Only shows FUNDAMENTAL skills (not programming languages).
+        - If student has experience: current_level <= required_level
+        - If student wants to learn/fascinated: current_level is low
         """
         gaps = []
         
@@ -522,27 +558,51 @@ class RecommendationService:
         major_name = top_major.get('major', '')
         major_info = self.majors_db.get(major_name, {})
         
-        # Parse student strengths into keywords
-        strength_keywords = set()
-        if strengths:
-            strength_keywords = set(word.lower().strip() for word in strengths.replace(',', ' ').split())
+        # Parse student strengths and interests
+        strengths_lower = strengths.lower() if strengths else ""
+        strength_keywords = set(word.lower().strip() for word in strengths.replace(',', ' ').split()) if strengths else set()
+        
+        # Detect "want to learn" or "fascinated" phrases (low experience)
+        learning_phrases = ["want to learn", "interested in", "fascinated", "curious about", "new to", "beginner", "learning"]
+        is_learning = any(phrase in strengths_lower for phrase in learning_phrases)
+        
+        # Detect "experience" or "skilled" phrases (has experience)
+        experience_phrases = ["experience", "experienced", "skilled", "good at", "proficient", "know how", "familiar with"]
+        has_experience = any(phrase in strengths_lower for phrase in experience_phrases)
         
         # Get grade-based skill indicators
         grade_skill_map = self._map_grades_to_skills(grades)
+        
+        # Skills to exclude (programming languages - not fundamental)
+        excluded_keywords = {"python", "javascript", "java", "c++", "r ", " r", "/r", "r/", "sql", "html", "css", "react", "node", "photoshop", "illustrator", "figma", "autocad", "adobe", "git", "github"}
+        
+        def is_excluded_skill(skill: str) -> bool:
+            """Check if skill name contains any programming language keywords"""
+            skill_lower = skill.lower()
+            # Check for exact match or keyword in skill name
+            for kw in excluded_keywords:
+                if kw in skill_lower:
+                    return True
+            return False
         
         # 1. Process fundamental skills from the major
         fundamental_skills = major_info.get('fundamental_skills', {})
         
         for skill_name, skill_info in fundamental_skills.items():
+            # Skip programming language-specific skills
+            if is_excluded_skill(skill_name):
+                continue
+            
             importance = skill_info.get('importance', 'medium')
             description = skill_info.get('description', '')
             
             # Calculate required level based on importance
             required_level = self._get_required_level(importance)
             
-            # Estimate current level based on grades and strengths
-            current_level = self._estimate_current_level(
-                skill_name, strength_keywords, grade_skill_map, grades
+            # Estimate current level
+            current_level = self._estimate_current_level_v2(
+                skill_name, strength_keywords, grade_skill_map, grades,
+                is_learning, has_experience, required_level
             )
             
             # Generate smart suggestions
@@ -560,61 +620,35 @@ class RecommendationService:
                 "skill_type": "fundamental"
             })
         
-        # 2. Add career-specific skills not already covered
+        # 2. Add career-specific fundamental skills (not languages)
         top_careers = career_recommendations[:2] if career_recommendations else []
         existing_skills = {g['skill'].lower() for g in gaps}
         
         for career in top_careers:
-            for skill in career.get('required_skills', [])[:3]:  # Top 3 skills per career
-                if skill.lower() not in existing_skills:
-                    current_level = self._estimate_current_level(
-                        skill, strength_keywords, grade_skill_map, grades
-                    )
-                    required_level = 7.0  # Career skills are typically high requirement
+            for skill in career.get('required_skills', [])[:3]:
+                skill_lower = skill.lower()
+                # Skip if already exists or is a programming language
+                if skill_lower in existing_skills or is_excluded_skill(skill):
+                    continue
                     
-                    gaps.append({
-                        "skill": skill,
-                        "current_level": round(current_level, 1),
-                        "required_level": round(required_level, 1),
-                        "importance": "high",
-                        "description": f"Required for {career.get('name', 'career')}",
-                        "suggestions": self._generate_skill_suggestions(
-                            skill, current_level, required_level, career.get('name', '')
-                        ),
-                        "skill_type": "career"
-                    })
-                    existing_skills.add(skill.lower())
-        
-        # 3. Add academic subject gaps for required subjects
-        max_scores = {
-            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
-            "english": 50, "khmer": 75, "history": 50
-        }
-        
-        for subject in top_major.get('required_subjects', []):
-            subject_lower = subject.lower()
-            score = grades.get(subject_lower, 0)
-            max_score = max_scores.get(subject_lower, 100)
-            
-            # Convert to 0-10 scale
-            current_level = (score / max_score) * 10
-            required_level = 7.5  # 75% is the target
-            
-            # Only add if significantly below requirement
-            if current_level < required_level - 1:
+                current_level = self._estimate_current_level_v2(
+                    skill, strength_keywords, grade_skill_map, grades,
+                    is_learning, has_experience, 7.0
+                )
+                required_level = 7.0
+                
                 gaps.append({
-                    "skill": f"{subject.capitalize()}",
+                    "skill": skill,
                     "current_level": round(current_level, 1),
                     "required_level": round(required_level, 1),
-                    "importance": "critical",
-                    "description": f"Academic foundation for {major_name}",
-                    "suggestions": [
-                        f"Focus on strengthening your {subject} fundamentals",
-                        f"Practice more {subject} problems regularly",
-                        f"Consider tutoring or extra classes in {subject}"
-                    ],
-                    "skill_type": "academic"
+                    "importance": "high",
+                    "description": f"Required for {career.get('name', 'career')}",
+                    "suggestions": self._generate_skill_suggestions(
+                        skill, current_level, required_level, career.get('name', '')
+                    ),
+                    "skill_type": "career"
                 })
+                existing_skills.add(skill_lower)
         
         # Sort by gap size (biggest gaps first) then by importance
         importance_order = {"critical": 0, "high": 1, "medium": 2}
@@ -626,65 +660,48 @@ class RecommendationService:
         # Return top 6 most relevant skills for clean visualization
         return gaps[:6]
     
-    def _map_grades_to_skills(self, grades: Dict[str, float]) -> Dict[str, float]:
-        """Map academic grades to skill indicators (0-10 scale)"""
-        max_scores = {
-            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
-            "english": 50, "khmer": 75, "history": 50
-        }
-        
-        # Calculate normalized scores
-        normalized = {}
-        for subject, score in grades.items():
-            max_score = max_scores.get(subject.lower(), 100)
-            normalized[subject.lower()] = (score / max_score) * 10
-        
-        # Map to skill categories
-        skill_indicators = {
-            "mathematics": normalized.get('math', 5),
-            "programming": normalized.get('math', 5) * 0.7 + normalized.get('physics', 5) * 0.3,
-            "problem solving": normalized.get('math', 5) * 0.6 + normalized.get('physics', 5) * 0.4,
-            "critical thinking": (normalized.get('math', 5) + normalized.get('english', 5)) / 2,
-            "communication": normalized.get('english', 5) * 0.7 + normalized.get('khmer', 5) * 0.3,
-            "writing": normalized.get('english', 5) * 0.6 + normalized.get('khmer', 5) * 0.4,
-            "research skills": (normalized.get('english', 5) + normalized.get('history', 5)) / 2,
-            "biology": normalized.get('biology', 5),
-            "chemistry": normalized.get('chemistry', 5),
-            "physics": normalized.get('physics', 5),
-            "creativity": normalized.get('english', 5) * 0.5 + 5,  # Baseline + english
-            "analytics": normalized.get('math', 5) * 0.8 + normalized.get('physics', 5) * 0.2,
-        }
-        
-        return skill_indicators
-    
-    def _get_required_level(self, importance: str) -> float:
-        """Get required level based on skill importance"""
-        levels = {
-            "critical": 8.5,
-            "high": 7.0,
-            "medium": 5.5
-        }
-        return levels.get(importance, 6.0)
-    
-    def _estimate_current_level(
+    def _estimate_current_level_v2(
         self,
         skill_name: str,
         strength_keywords: set,
         grade_skill_map: Dict[str, float],
-        grades: Dict[str, float]
+        grades: Dict[str, float],
+        is_learning: bool,
+        has_experience: bool,
+        required_level: float
     ) -> float:
-        """Estimate student's current skill level based on available data"""
+        """
+        Estimate student's current skill level with smart logic:
+        - If "want to learn" / "fascinated" → low level (2-4)
+        - If "experience" → good level but NOT higher than required
+        - Otherwise → estimate from grades
+        """
         skill_lower = skill_name.lower()
         
         # Check if skill matches a strength keyword
-        strength_bonus = 0
-        for kw in strength_keywords:
-            if kw in skill_lower or skill_lower in kw:
-                strength_bonus = 2.5
-                break
+        skill_mentioned = any(kw in skill_lower or skill_lower in kw for kw in strength_keywords)
         
-        # Check grade-based skill indicators
-        base_level = 3.0  # Default baseline
+        # Case 1: Student wants to learn this → low level
+        if is_learning and skill_mentioned:
+            return min(3.5, required_level - 3)  # Low but not zero
+        
+        # Case 2: Student wants to learn (general) → slightly low
+        if is_learning:
+            base_level = 3.0
+            # Still use grades for base estimation
+            for indicator, level in grade_skill_map.items():
+                if indicator in skill_lower or skill_lower in indicator:
+                    base_level = max(base_level, level * 0.6)  # 60% of grade estimate
+                    break
+            return min(base_level, required_level - 1)
+        
+        # Case 3: Student has experience in this skill → good but capped
+        if has_experience and skill_mentioned:
+            # Cap at required level (never exceed target)
+            return min(required_level - 0.5, 7.5)
+        
+        # Case 4: Default - estimate from grades
+        base_level = 3.0
         
         for indicator, level in grade_skill_map.items():
             if indicator in skill_lower or skill_lower in indicator:
@@ -706,13 +723,54 @@ class RecommendationService:
                 score = grades.get(subject, 0)
                 max_score = max_scores.get(subject, 100)
                 inferred_level = (score / max_score) * 10
-                base_level = max(base_level, inferred_level * 0.8)  # 80% of grade-based estimate
+                base_level = max(base_level, inferred_level * 0.8)
                 break
         
-        # Apply strength bonus and clamp to valid range
-        final_level = min(10.0, max(1.0, base_level + strength_bonus))
+        # CRITICAL: Current level should NEVER exceed required level
+        # Cap at required_level - 0.5 to always show room for improvement
+        capped_level = min(base_level, required_level - 0.5)
         
-        return final_level
+        # Clamp to valid range (minimum 1.0)
+        return max(1.0, capped_level)
+    
+    def _map_grades_to_skills(self, grades: Dict[str, float]) -> Dict[str, float]:
+        """Map academic grades to skill indicators (0-10 scale)"""
+        max_scores = {
+            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
+            "english": 50, "khmer": 75, "history": 50
+        }
+        
+        # Calculate normalized scores
+        normalized = {}
+        for subject, score in grades.items():
+            max_score = max_scores.get(subject.lower(), 100)
+            normalized[subject.lower()] = (score / max_score) * 10
+        
+        # Map to skill categories
+        skill_indicators = {
+            "mathematics": normalized.get('math', 5),
+            "problem solving": normalized.get('math', 5) * 0.6 + normalized.get('physics', 5) * 0.4,
+            "critical thinking": (normalized.get('math', 5) + normalized.get('english', 5)) / 2,
+            "communication": normalized.get('english', 5) * 0.7 + normalized.get('khmer', 5) * 0.3,
+            "writing": normalized.get('english', 5) * 0.6 + normalized.get('khmer', 5) * 0.4,
+            "research skills": (normalized.get('english', 5) + normalized.get('history', 5)) / 2,
+            "biology": normalized.get('biology', 5),
+            "chemistry": normalized.get('chemistry', 5),
+            "physics": normalized.get('physics', 5),
+            "creativity": normalized.get('english', 5) * 0.5 + 5,
+            "analytics": normalized.get('math', 5) * 0.8 + normalized.get('physics', 5) * 0.2,
+        }
+        
+        return skill_indicators
+    
+    def _get_required_level(self, importance: str) -> float:
+        """Get required level based on skill importance"""
+        levels = {
+            "critical": 8.5,
+            "high": 7.0,
+            "medium": 5.5
+        }
+        return levels.get(importance, 6.0)
     
     def _generate_skill_suggestions(
         self,

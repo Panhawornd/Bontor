@@ -38,8 +38,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(recommendations.router, prefix="/api", tags=["Recommendations"])
-# Also include at root level for frontend compatibility
-app.include_router(recommendations.router, prefix="", tags=["Root"])
 
 
 @app.get("/")
@@ -55,7 +53,7 @@ async def root():
             "Random Forest prediction",
             "Post-processing"
         ],
-        "endpoints": ["/api/recommend", "/health"]
+        "endpoints": ["/api/recommend", "/api/analyze", "/health"]
     }
 
 

@@ -3,7 +3,8 @@ SBERT Embedding Module
 Model: all-MiniLM-L6-v2 (DO NOT retrain - load once, reuse)
 """
 import logging
-from typing import List, Optional, Dict
+import threading
+from typing import List, Optional, Dict, Union
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -20,17 +21,26 @@ class SBERTEncoder:
     _instance = None
     _model = None
     _device = None
+    _instance_lock = threading.Lock()
+    _model_lock = threading.Lock()
     
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
+            with cls._instance_lock:
+                # Double-check pattern
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
         return cls._instance
     
     def __init__(self):
         if SBERTEncoder._model is not None:
             return
         
-        self._load_model()
+        with SBERTEncoder._model_lock:
+            # Double-check inside lock
+            if SBERTEncoder._model is not None:
+                return
+            self._load_model()
     
     def _load_model(self):
         """Load SBERT model (all-MiniLM-L6-v2) - DO NOT retrain"""
@@ -64,7 +74,7 @@ class SBERTEncoder:
         """Get the current device"""
         return SBERTEncoder._device
     
-    def encode(self, text: str, convert_to_numpy: bool = True) -> np.ndarray:
+    def encode(self, text: str, convert_to_numpy: bool = True) -> Union[np.ndarray, 'torch.Tensor']:
         """
         Encode single text into embedding vector
         
@@ -76,8 +86,12 @@ class SBERTEncoder:
             Embedding vector (384-dimensional for MiniLM)
         """
         if not text or not text.strip():
-            # Return zero vector for empty text
-            return np.zeros(384) if convert_to_numpy else None
+            # Return zero vector for empty text - consistent type based on convert_to_numpy
+            if convert_to_numpy:
+                return np.zeros(384)
+            else:
+                import torch
+                return torch.zeros(384)
         
         try:
             embedding = self.model.encode(
@@ -89,7 +103,11 @@ class SBERTEncoder:
             
         except Exception as e:
             logger.error(f"Encoding failed: {e}")
-            return np.zeros(384) if convert_to_numpy else None
+            if convert_to_numpy:
+                return np.zeros(384)
+            else:
+                import torch
+                return torch.zeros(384)
     
     def encode_batch(self, texts: List[str], convert_to_numpy: bool = True) -> np.ndarray:
         """
@@ -103,7 +121,8 @@ class SBERTEncoder:
             Embedding matrix (N x 384)
         """
         if not texts:
-            return np.array([])
+            # Return properly shaped empty array
+            return np.zeros((0, 384), dtype=np.float32)
         
         # Filter empty texts, keep track of indices
         valid_texts = []
@@ -117,10 +136,11 @@ class SBERTEncoder:
             return np.zeros((len(texts), 384))
         
         try:
+            # Always request numpy to simplify reconstruction
             valid_embeddings = self.model.encode(
                 valid_texts,
-                convert_to_tensor=not convert_to_numpy,
-                convert_to_numpy=convert_to_numpy,
+                convert_to_tensor=False,
+                convert_to_numpy=True,
                 show_progress_bar=False
             )
             

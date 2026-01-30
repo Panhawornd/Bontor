@@ -12,6 +12,7 @@ Features include:
 ML ONLY SEES NUMBERS
 """
 import logging
+import re
 import numpy as np
 from typing import Dict, List, Optional
 
@@ -85,8 +86,13 @@ class FeatureBuilder:
             return vector
         
         text_lower = strengths_text.lower()
+        # Tokenize into words for word-boundary matching
+        words = set(re.findall(r'\b\w+\b', text_lower))
+        
         for strength, idx in STRENGTHS_MAP.items():
-            if strength in text_lower:
+            # Check if strength is in words set or matches with word boundary regex
+            strength_pattern = re.compile(r'\b' + re.escape(strength) + r'\b')
+            if strength in words or strength_pattern.search(text_lower):
                 vector[idx] = 1.0
         
         return vector
@@ -107,8 +113,13 @@ class FeatureBuilder:
             return vector
         
         text_lower = preferences_text.lower()
+        # Tokenize into words for word-boundary matching
+        words = set(re.findall(r'\b\w+\b', text_lower))
+        
         for pref, idx in PREFERENCES_MAP.items():
-            if pref in text_lower:
+            # Check if preference is in words set or matches with word boundary regex
+            pref_pattern = re.compile(r'\b' + re.escape(pref) + r'\b')
+            if pref in words or pref_pattern.search(text_lower):
                 vector[idx] = 1.0
         
         return vector
@@ -138,7 +149,7 @@ class FeatureBuilder:
         # NLTK preprocessing happens inside similarity engine
         major_descriptions = self._get_major_descriptions()
         similarity_scores = self.similarity.compute_major_similarity_scores(
-            combined_text, MAJOR_DATABASE
+            combined_text, {m: {'description': d, 'keywords': []} for m, d in major_descriptions.items()}
         )
         
         # Convert to array in consistent order
@@ -204,13 +215,13 @@ class FeatureBuilder:
             score = grades_lower.get(subject, 0)
             grade_features.append(self.normalize_grade(subject, score))
         
-        # 2. Grade statistics
-        non_zero_grades = [v for v in grades_lower.values() if v > 0]
-        if non_zero_grades:
+        # 2. Grade statistics (derived from normalized grade_features)
+        non_zero_normalized = [g for g in grade_features if g > 0]
+        if non_zero_normalized:
             grade_stats = [
-                np.mean(non_zero_grades) / 100,  # normalized mean
-                np.std(non_zero_grades) / 50,    # normalized std
-                max(non_zero_grades) / 125       # normalized max
+                np.mean(non_zero_normalized),  # mean of normalized values
+                np.std(non_zero_normalized),   # std of normalized values
+                max(non_zero_normalized)       # max of normalized values
             ]
         else:
             grade_stats = [0.0, 0.0, 0.0]

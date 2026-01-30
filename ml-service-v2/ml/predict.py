@@ -6,6 +6,7 @@ Input: Numeric feature vector only
 Output: Probability per major, ranked list
 """
 import logging
+import threading
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -30,11 +31,15 @@ class MLPredictor:
     """
     
     _instance = None
+    _lock = threading.Lock()
     
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
+            with cls._lock:
+                # Double-check pattern
+                if cls._instance is None:
+                    cls._instance = super().__new__(cls)
+                    cls._instance._initialized = False
         return cls._instance
     
     def __init__(self):
@@ -73,15 +78,17 @@ class MLPredictor:
         if self.model is None:
             logger.warning("No trained model available - predictions will fail")
     
-    def predict(self, features: np.ndarray) -> List[Dict]:
+    def predict(self, features: np.ndarray, strict: bool = False) -> List[Dict]:
         """
         Predict major recommendations from feature vector
         
         Args:
             features: Numeric feature vector (from FeatureBuilder)
+            strict: If True, raise ValueError on feature dimension mismatch.
+                   If False, auto-pad/truncate and include warning in results.
             
         Returns:
-            List of {major, probability, source} dicts sorted by probability
+            List of {major, probability, source, warning?} dicts sorted by probability
         """
         if self.model is None:
             logger.error("No model loaded - cannot predict")
@@ -90,11 +97,18 @@ class MLPredictor:
         try:
             # Reshape for single prediction
             X = features.reshape(1, -1)
+            warning_msg = None
             
             # Handle feature dimension mismatch
             expected_features = self.model.n_features_in_
             if X.shape[1] != expected_features:
-                logger.warning(f"Feature mismatch: got {X.shape[1]}, expected {expected_features}")
+                mismatch_msg = f"Feature mismatch: got {X.shape[1]}, expected {expected_features}"
+                
+                if strict:
+                    raise ValueError(mismatch_msg)
+                
+                logger.warning(mismatch_msg)
+                warning_msg = f"feature mismatch: {'padded' if X.shape[1] < expected_features else 'truncated'}"
                 
                 if X.shape[1] < expected_features:
                     # Pad with zeros
@@ -111,11 +125,14 @@ class MLPredictor:
             # Build results
             results = []
             for major, prob in zip(classes, probabilities):
-                results.append({
+                result = {
                     "major": str(major),
                     "probability": float(prob),
                     "source": "ML-RandomForest"
-                })
+                }
+                if warning_msg:
+                    result["warning"] = warning_msg
+                results.append(result)
             
             # Sort by probability descending
             results.sort(key=lambda x: x["probability"], reverse=True)

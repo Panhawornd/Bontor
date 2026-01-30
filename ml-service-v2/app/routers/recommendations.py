@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from app.schemas.models import RecommendationRequest, RecommendationResponse, AnalyzeRequest, AnalyzeResponse
 from core.recommendation_service import RecommendationService
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -55,8 +56,9 @@ async def get_recommendations(request: RecommendationRequest):
         )
         
     except Exception as e:
-        logger.error(f"Recommendation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        error_id = str(uuid.uuid4())[:8]
+        logger.error(f"Recommendation error (ref: {error_id}): {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error - reference {error_id}")
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -162,5 +164,6 @@ async def analyze(request: AnalyzeRequest):
         )
         
     except Exception as e:
-        logger.error(f"Analyze error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        error_id = str(uuid.uuid4())[:8]
+        logger.error(f"Analyze error (ref: {error_id}): {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal server error - reference {error_id}")

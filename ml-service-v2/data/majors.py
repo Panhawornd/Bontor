@@ -3,7 +3,7 @@ Major database with keywords, descriptions, career paths, and fundamental skills
 """
 MAJOR_DATABASE = {
     "Software Engineering": {
-        "keywords": ["software", "programming", "coding", "developer", "apps", "python", "javascript", "backend", "frontend", "algorithm"],
+        "keywords": ["software", "programming", "coding", "code", "developer", "apps", "python", "javascript", "backend", "frontend", "algorithm", "learn to code", "want to code", "build software", "create apps", "web development", "mobile development", "technology", "computer science", "tech", "IT"],
         "required_subjects": ["math", "physics"],
         "description": "Study of software development life cycle, programming, and system architecture",
         "career_paths": ["Software Engineer", "Full Stack Developer", "Backend Developer", "Frontend Developer", "App Developer", "System Architect"],
@@ -101,9 +101,9 @@ MAJOR_DATABASE = {
         }
     },
     "Data Science": {
-        "keywords": ["data science", "data scientist", "big data", "data patterns", "analytics", "statistics", "python", " r ", "sql", "data mining", "predictive modeling", "intelligence", "datasets"],
+        "keywords": ["data science", "data scientist", "big data", "data patterns", "analytics", "statistics", "python", "r", "sql", "data mining", "predictive modeling", "intelligence", "datasets", "coding", "programming", "machine learning", "artificial intelligence", "deep learning", "neural networks", "algorithm", "technology", "computer science"],
         "required_subjects": ["math", "physics"],
-        "description": "Extract insights from data using statistical and computational methods",
+        "description": "Extract insights from data using programming, statistical and computational methods",
         "career_paths": ["Data Scientist", "Data Analyst", "Machine Learning Engineer", "Data Engineer"],
         "fundamental_skills": {
             "Statistics": {"importance": "critical", "description": "Statistical analysis and inference"},
@@ -269,9 +269,9 @@ MAJOR_DATABASE = {
         }
     },
     "Cybersecurity": {
-        "keywords": ["cybersecurity", "security", "hacking", "encryption", "network security", "privacy", "protecting data", "puzzles", "hidden weaknesses", "staying invisible", "ethical hacking", "digital safety", "firewall", "cyber", "security analyst", "information security"],
+        "keywords": ["cybersecurity", "security", "hacking", "encryption", "network security", "privacy", "protecting data", "puzzles", "hidden weaknesses", "staying invisible", "ethical hacking", "digital safety", "firewall", "cyber", "security analyst", "information security", "coding", "programming", "python", "scripting", "technology", "computer science", "penetration testing", "vulnerability"],
         "required_subjects": ["math", "physics"],
-        "description": "Protection of computer systems and networks from information disclosure, theft, or damage",
+        "description": "Protection of computer systems and networks from information disclosure, theft, or damage using programming and security tools",
         "career_paths": ["Cybersecurity Analyst", "Security Engineer", "Ethical Hacker", "Information Security Manager", "Network Security Architect", "Incident Responder"],
         "fundamental_skills": {
             "Network Security": {"importance": "critical", "description": "Network protocols and defense"},
@@ -283,16 +283,16 @@ MAJOR_DATABASE = {
         }
     },
     "Telecommunication and Networking": {
-        "keywords": ["telecommunication", "networking", "network engineer", "cisco", "routing", "switching", "internet protocol", "ip", "transmission", "signals", "5g", "wireless", "telecom", "infrastructure", "connectivity", "fiber optics", "network administration"],
+        "keywords": ["telecommunication", "networking", "network engineer", "cisco", "routing", "switching", "internet protocol", "ip", "transmission", "signals", "5g", "wireless", "telecom", "infrastructure", "connectivity", "fiber optics", "network administration", "programming", "coding", "python", "automation", "scripting", "devops", "cloud", "backend", "server", "technology"],
         "required_subjects": ["math", "physics"],
-        "description": "Study of network architecture, data transmission, and communication systems",
-        "career_paths": ["Network Engineer", "Telecom Engineer", "Network Administrator", "Systems Engineer", "Connectivity Specialist"],
+        "description": "Study of network architecture, data transmission, and communication systems with programming for network automation",
+        "career_paths": ["Network Engineer", "Telecom Engineer", "Network Administrator", "Systems Engineer", "Connectivity Specialist", "DevOps Engineer", "Cloud Engineer"],
         "fundamental_skills": {
             "Networking": {"importance": "critical", "description": "TCP/IP and routing protocols"},
+            "Programming": {"importance": "critical", "description": "Python and network automation"},
             "Mathematics": {"importance": "high", "description": "Signal processing"},
             "Problem Solving": {"importance": "high", "description": "Network troubleshooting"},
             "Hardware": {"importance": "medium", "description": "Network equipment"},
-            "Programming": {"importance": "medium", "description": "Network automation"},
             "Wireless Tech": {"importance": "medium", "description": "5G and wireless systems"}
         }
     }

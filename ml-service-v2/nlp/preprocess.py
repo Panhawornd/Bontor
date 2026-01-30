@@ -96,9 +96,28 @@ def clean_text(text: str, return_tokens: bool = False) -> str | List[str]:
         
     except Exception as e:
         logger.error(f"Text cleaning failed: {e}")
-        if return_tokens:
-            return orig_text.lower().split()
-        return orig_text.lower()  # Fallback to original text lowercased
+        # Fallback: run minimal safe preprocessing pipeline
+        try:
+            # Minimal pipeline: lowercase, clean special chars, tokenize, filter
+            fallback_text = orig_text.lower()
+            fallback_text = re.sub(r'[^a-zA-Z\s]', ' ', fallback_text)
+            fallback_tokens = fallback_text.split()  # Simple split instead of word_tokenize
+            # Filter stopwords and single chars (if _stopwords available)
+            if _stopwords is not None:
+                fallback_tokens = [t for t in fallback_tokens if t not in _stopwords and len(t) > 1]
+            # Lemmatize if available
+            if _lemmatizer is not None:
+                fallback_tokens = [_lemmatizer.lemmatize(t) for t in fallback_tokens]
+            # Return based on return_tokens flag
+            if return_tokens:
+                return fallback_tokens
+            return ' '.join(fallback_tokens)
+        except Exception as fallback_e:
+            logger.error(f"Fallback preprocessing also failed: {fallback_e}")
+            # Ultimate fallback: just lowercase and split
+            if return_tokens:
+                return orig_text.lower().split()
+            return orig_text.lower()
 
 
 class TextPreprocessor:

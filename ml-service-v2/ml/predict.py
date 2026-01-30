@@ -140,6 +140,9 @@ class MLPredictor:
             logger.debug(f"Prediction complete: {len(results)} majors ranked")
             return results
             
+        except ValueError:
+            # Re-raise ValueError (e.g., from strict mode) without suppression
+            raise
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
             return []

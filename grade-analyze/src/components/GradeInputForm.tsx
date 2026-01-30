@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface GradeAnalysisData {
   grades: Array<{ subject: string; score: number }>
@@ -53,13 +53,18 @@ export default function GradeInputForm({ onSubmit, loading, initialData, onFormC
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [interestText, setInterestText] = useState(initialData?.interestText || '')
   const [careerGoals, setCareerGoals] = useState(initialData?.careerGoals || '')
+  
+  // Ref to track initial mount
+  const isInitialMount = useRef(true)
 
-  // Notify parent of form changes
+  // Notify parent of form changes (skip initial mount)
   useEffect(() => {
-    if (onFormChange) {
-      onFormChange({ grades, interestText, careerGoals, examType })
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
     }
-  }, [grades, interestText, careerGoals, examType])
+    onFormChange?.({ grades, interestText, careerGoals, examType })
+  }, [grades, interestText, careerGoals, examType, onFormChange])
 
   const SUBJECTS = examType === 'science' ? SCIENCE_SUBJECTS : SOCIAL_SCIENCE_SUBJECTS
 

@@ -47,23 +47,24 @@ def _init_nltk():
         logger.info("NLTK components initialized")
 
 
-def clean_text(text: str) -> str:
+def clean_text(text: str, return_tokens: bool = False) -> str | List[str]:
     """
     Clean text using NLTK preprocessing pipeline:
     1. Lowercase
     2. Tokenize
     3. Remove stopwords
     4. Lemmatize
-    5. Return cleaned string
+    5. Return cleaned string or token list
     
     Args:
         text: Raw input text
+        return_tokens: If True, return list of tokens instead of joined string
         
     Returns:
-        Cleaned, preprocessed text string
+        Cleaned, preprocessed text string or list of tokens
     """
     if not text or not text.strip():
-        return ""
+        return [] if return_tokens else ""
     
     # Capture original for fallback
     orig_text = text
@@ -88,12 +89,15 @@ def clean_text(text: str) -> str:
         # Step 5: Lemmatize
         tokens = [_lemmatizer.lemmatize(t) for t in tokens]
         
-        # Step 6: Return cleaned string
-        cleaned = ' '.join(tokens)
-        return cleaned
+        # Step 6: Return tokens or cleaned string
+        if return_tokens:
+            return tokens
+        return ' '.join(tokens)
         
     except Exception as e:
         logger.error(f"Text cleaning failed: {e}")
+        if return_tokens:
+            return orig_text.lower().split()
         return orig_text.lower()  # Fallback to original text lowercased
 
 
@@ -119,7 +123,7 @@ class TextPreprocessor:
         return [clean_text(t) for t in texts]
     
     def tokenize(self, text: str) -> List[str]:
-        """Tokenize text using clean_text preprocessing"""
+        """Tokenize text using clean_text preprocessing (returns preprocessed tokens)"""
         # Validate input
         if text is None or not isinstance(text, str) or not text.strip():
             return []
@@ -128,10 +132,5 @@ class TextPreprocessor:
             _init_nltk()
             self._initialized = True
         
-        from nltk.tokenize import word_tokenize
-        
-        # Use clean_text for preprocessing then tokenize
-        cleaned = clean_text(text)
-        if not cleaned:
-            return []
-        return word_tokenize(cleaned)
+        # Use clean_text with return_tokens=True to avoid double-tokenization
+        return clean_text(text, return_tokens=True)

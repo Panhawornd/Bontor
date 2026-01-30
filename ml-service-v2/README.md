@@ -42,14 +42,19 @@ backend/
 
 3. **RULE-BASED FILTERING (BEFORE ML)**
    
-   Thresholds are percentage-based (0-100 scale after normalization). See `rules/eligibility.py` for constants.
+   Thresholds are percentage-based (0-100 scale after normalization). See `rules/eligibility.py` for authoritative threshold constants.
    
-   | Subject | Threshold | Action |
-   |---------|-----------|--------|
-   | Math    | < 50%     | Exclude Engineering/CS majors |
-   | Khmer   | < 45%     | Penalize social science majors (0.6x multiplier) |
-   | History | < 40%     | Penalize humanities majors (0.6x multiplier) |
-   | English | < 50%     | Exclude international programs |
+   | Subject   | Threshold | Action |
+   |-----------|-----------|--------|
+   | Math      | < 50%     | Exclude Engineering/CS majors |
+   | Physics   | < 45%     | *(Used for grade-based inference, no exclusion rule)* |
+   | Chemistry | < 45%     | *(Used for grade-based inference, no exclusion rule)* |
+   | Biology   | < 45%     | *(Used for grade-based inference, no exclusion rule)* |
+   | Khmer     | < 45%     | Penalize social science majors (0.6x multiplier) |
+   | History   | < 40%     | Penalize humanities majors (0.6x multiplier) |
+   | English   | < 50%     | Exclude international programs |
+   
+   *Note: Physics, Chemistry, and Biology thresholds are defined in `SUBJECT_THRESHOLDS` but currently only used for grade normalization, not for major exclusion/penalty rules.*
 
 4. **MACHINE LEARNING**
    - Random Forest Classifier

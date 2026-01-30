@@ -87,7 +87,7 @@ class EligibilityRules:
         math_pct = self.normalize_grade("math", math_score)
         
         if math_pct < self.thresholds["math"]:
-            logger.info(f"Math ({math_pct:.1f}%) below threshold - excluding engineering majors")
+            logger.info(f"Math ({math_pct:.1f}%) below threshold - excluding Engineering/CS majors")
             return False, ENGINEERING_MAJORS.copy()
         
         return True, set()

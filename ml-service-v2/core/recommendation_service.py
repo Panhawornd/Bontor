@@ -574,12 +574,24 @@ class RecommendationService:
         grade_skill_map = self._map_grades_to_skills(grades)
         
         # Skills to exclude (programming languages - not fundamental)
-        excluded_keywords = {"python", "javascript", "java", "c++", "r ", " r", "/r", "r/", "sql", "html", "css", "react", "node", "photoshop", "illustrator", "figma", "autocad", "adobe", "git", "github"}
+        # Multi-character keywords for substring matching
+        excluded_keywords = {"python", "javascript", "java", "sql", "html", "css", "react", "node", "photoshop", "illustrator", "figma", "autocad", "adobe", "git", "github"}
+        # Single-letter or symbol languages requiring word-boundary matching
+        import re
+        special_language_patterns = [
+            re.compile(r'\br\b', re.IGNORECASE),  # R language
+            re.compile(r'\bc\b', re.IGNORECASE),  # C language
+            re.compile(r'c\+\+', re.IGNORECASE),  # C++
+        ]
         
         def is_excluded_skill(skill: str) -> bool:
             """Check if skill name contains any programming language keywords"""
             skill_lower = skill.lower()
-            # Check for exact match or keyword in skill name
+            # First check word-boundary patterns for single-letter/symbol languages
+            for pattern in special_language_patterns:
+                if pattern.search(skill_lower):
+                    return True
+            # Then check multi-character keywords with substring matching
             for kw in excluded_keywords:
                 if kw in skill_lower:
                     return True
@@ -681,9 +693,14 @@ class RecommendationService:
         # Check if skill matches a strength keyword
         skill_mentioned = any(kw in skill_lower or skill_lower in kw for kw in strength_keywords)
         
+        # Safety floor for all paths
+        def apply_safety_clamp(level: float) -> float:
+            return max(1.0, level)
+        
         # Case 1: Student wants to learn this → low level
         if is_learning and skill_mentioned:
-            return min(3.5, required_level - 3)  # Low but not zero
+            provisional_level = min(3.5, required_level - 3)  # Low but not zero
+            return apply_safety_clamp(provisional_level)
         
         # Case 2: Student wants to learn (general) → slightly low
         if is_learning:
@@ -693,12 +710,14 @@ class RecommendationService:
                 if indicator in skill_lower or skill_lower in indicator:
                     base_level = max(base_level, level * 0.6)  # 60% of grade estimate
                     break
-            return min(base_level, required_level - 1)
+            provisional_level = min(base_level, required_level - 1)
+            return apply_safety_clamp(provisional_level)
         
         # Case 3: Student has experience in this skill → good but capped
         if has_experience and skill_mentioned:
             # Cap at required level (never exceed target)
-            return min(required_level - 0.5, 7.5)
+            provisional_level = min(required_level - 0.5, 7.5)
+            return apply_safety_clamp(provisional_level)
         
         # Case 4: Default - estimate from grades
         base_level = 3.0

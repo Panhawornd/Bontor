@@ -194,18 +194,6 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                   }}>
                     {(major.score * 100).toFixed(0)}% Match
                   </span>
-                  {major.source && (
-                    <span className="rec-source-badge" style={{
-                      fontSize: '10px',
-                      background: 'var(--bg-primary)',
-                      color: 'var(--text-muted)',
-                      padding: '3px 6px',
-                      borderRadius: '7px',
-                      border: '1px solid var(--border-primary)'
-                    }}>
-                      {major.source}
-                    </span>
-                  )}
                 </div>
               </div>
               <p style={{ 

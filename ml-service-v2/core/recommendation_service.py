@@ -16,6 +16,7 @@ from typing import Dict, List, Optional
 from nlp.preprocess import clean_text
 from nlp.sbert import SBERTEncoder
 from nlp.similarity import SimilarityEngine
+from nlp.semantic_intent import get_semantic_detector
 from rules.eligibility import EligibilityRules
 from ml.predict import MLPredictor
 from core.feature_builder import FeatureBuilder
@@ -60,7 +61,7 @@ class RecommendationService:
         career_goal: str = "",
         strengths: str = "",
         preferences: str = "",
-        top_n: int = 4
+        top_n: int = 2
     ) -> Dict:
         """
         Complete recommendation workflow
@@ -71,7 +72,7 @@ class RecommendationService:
             career_goal: Career goal text (optional)
             strengths: Strengths description
             preferences: Preferences description
-            top_n: Number of top majors to return
+            top_n: Number of top majors to return (default: 2)
             
         Returns:
             {
@@ -115,18 +116,20 @@ class RecommendationService:
         if not has_text_input:
             grade_inferred_majors = self._infer_majors_from_grades(grades_lower)
         
-        # Detect subject-specific interests (e.g., "I love chemistry")
-        subject_interest_boosts = self._detect_subject_interests(combined_text)
+        # ========================================
+        # SEMANTIC INTENT DETECTION (Elegant approach)
+        # Uses SBERT to understand meaning, not pattern matching
+        # ========================================
+        raw_text = f"{interests} {career_goal} {strengths} {preferences}".strip()
+        semantic_boosts = self._detect_intent_semantically(raw_text)
         
-        # Detect skill-based interests (e.g., "good at coding") - use raw text
-        raw_text = f"{interests} {career_goal}".strip()
-        skill_boosts = self._detect_skill_interests(raw_text, strengths)
+        # Also detect exclusions/negative statements
+        exclusion_penalties = self._detect_exclusions(raw_text)
         
-        # Detect work preferences (e.g., "work alone", "work with people") - use raw text
-        preference_boosts = self._detect_work_preferences(raw_text, preferences)
-        
-        # Detect exclusions/negative statements (e.g., "don't like math")
-        exclusion_penalties = self._detect_exclusions(f"{interests} {career_goal} {strengths} {preferences}")
+        # Combine semantic boosts into unified boost maps
+        subject_interest_boosts = semantic_boosts
+        skill_boosts = semantic_boosts  # Same source now
+        preference_boosts = semantic_boosts  # Same source now
         
         # ========================================
         # STEP 2: Rule-Based Filtering (BEFORE ML)
@@ -446,10 +449,41 @@ class RecommendationService:
         
         return boosts
     
-    def _detect_subject_interests(self, text: str) -> Dict[str, float]:
+    def _detect_intent_semantically(self, text: str) -> Dict[str, float]:
         """
-        Detect when user mentions wanting to learn/study specific subjects
-        Returns boost factors for majors that require those subjects
+        Elegant semantic detection using SBERT.
+        Replaces hundreds of hardcoded patterns with semantic understanding.
+        
+        The semantic detector:
+        - Pre-computes embeddings for concept phrases
+        - Compares user text against all concepts
+        - Returns major boosts based on semantic similarity
+        
+        This handles variations naturally:
+        - "I love physics" matches physics concept
+        - "fascinated by how things work" also matches physics
+        - "want to learn something about physics" matches too!
+        """
+        if not text or not text.strip():
+            return {}
+        
+        try:
+            detector = get_semantic_detector()
+            boosts = detector.detect_intent(text)
+            
+            if boosts:
+                logger.info(f"Semantic intent boosts: {dict(list(boosts.items())[:5])}...")
+            
+            return boosts
+        except Exception as e:
+            logger.warning(f"Semantic detection failed, using fallback: {e}")
+            # Fallback to keyword-based detection
+            return self._detect_subject_interests_fallback(text)
+    
+    def _detect_subject_interests_fallback(self, text: str) -> Dict[str, float]:
+        """
+        Fallback keyword-based detection (simplified).
+        Only used if semantic detection fails.
         """
         if not text:
             return {}
@@ -457,330 +491,30 @@ class RecommendationService:
         text_lower = text.lower()
         boosts = {}
         
-        # Subject detection patterns with related phrases (including stemmed versions)
-        subject_patterns = {
-            "math": [
-                "love math", "like math", "enjoy math", "good at math",
-                "interested in math", "want to learn math", "study math",
-                "mathematics", "mathematic", "calculus", "algebra", "statistics",
-                "love numbers", "good with numbers", "enjoy numbers"
-            ],
-            "physics": [
-                "love physics", "like physics", "enjoy physics", "good at physics",
-                "interested in physics", "want to learn physics", "study physics",
-                "love physic", "like physic", "enjoy physic", "good at physic",  # stemmed
-                "mechanics", "mechanic", "electricity", "forces", "motion", "force"
-            ],
-            "chemistry": [
-                "love chemistry", "like chemistry", "enjoy chemistry", "good at chemistry",
-                "interested in chemistry", "want to learn chemistry", "study chemistry",
-                "chemical", "chemicals", "reactions", "molecules", "compounds",
-                "love chem", "like chem", "enjoy chem", "chemistri"  # stemmed
-            ],
-            "biology": [
-                "love biology", "like biology", "enjoy biology", "good at biology",
-                "interested in biology", "want to learn biology", "study biology",
-                "love biolog", "like biolog", "enjoy biolog",  # stemmed
-                "living things", "organisms", "organism", "anatomy", "genetics", "genetic", "cells", "cell",
-                "love bio", "like bio", "enjoy bio", "human body"
-            ],
-            "english": [
-                "love english", "like english", "enjoy english", "good at english",
-                "interested in english", "want to learn english", "study english",
-                "love english", "like english",  # stemmed (english stays same)
-                "language", "writing", "reading", "communication", "literature"
-            ],
-            "history": [
-                "love history", "like history", "enjoy history", "good at history",
-                "interested in history", "want to learn history", "study history",
-                "love histori", "like histori",  # stemmed
-                "historical", "past events", "civilization", "heritage"
-            ]
+        # Simplified keyword mappings (much fewer patterns)
+        keyword_to_majors = {
+            # Subjects
+            "physics": [("Electrical Engineering", 5.0), ("Mechanical Engineering", 5.0), ("Civil Engineering", 4.0)],
+            "chemistry": [("Pharmacy", 5.0), ("Medicine", 4.0), ("Dentistry", 3.5)],
+            "biology": [("Medicine", 5.0), ("Pharmacy", 4.5), ("Dentistry", 4.0)],
+            "math": [("Data Science", 5.0), ("Software Engineering", 4.5), ("Finance", 4.0)],
+            # Skills
+            "coding": [("Software Engineering", 5.0), ("Data Science", 4.0)],
+            "programming": [("Software Engineering", 5.0), ("Data Science", 4.0)],
+            "design": [("Graphic Design", 5.0), ("UX/UI Design", 5.0), ("Architecture", 4.0)],
+            "building": [("Architecture", 5.0), ("Civil Engineering", 4.5)],
+            "architect": [("Architecture", 5.0)],
+            # Work preferences
+            "team": [("Business Administration", 4.0), ("Medicine", 3.5)],
+            "alone": [("Software Engineering", 4.0), ("Data Science", 3.5)],
+            "people": [("Psychology", 4.5), ("Education", 4.0), ("Medicine", 4.0)],
         }
         
-        # Map subjects to majors that require them (high values = direct override)
-        subject_to_majors = {
-            "math": [
-                ("Data Science", 5.0),
-                ("Software Engineering", 4.5),
-                ("Computer Science", 4.5),
-                ("Finance", 4.0),
-                ("Electrical Engineering", 3.5),
-                ("Mechanical Engineering", 3.0),
-                ("Civil Engineering", 3.0),
-                ("Architecture", 2.5),
-                ("Cybersecurity", 3.0),
-            ],
-            "physics": [
-                ("Electrical Engineering", 5.0),
-                ("Mechanical Engineering", 5.0),
-                ("Civil Engineering", 4.0),
-                ("Architecture", 3.5),
-                ("Computer Science", 3.0),
-                ("Software Engineering", 2.5),
-            ],
-            "chemistry": [
-                ("Pharmacy", 5.0),
-                ("Chemical Engineering", 5.0),
-                ("Medicine", 4.0),
-                ("Dentistry", 3.5),
-            ],
-            "biology": [
-                ("Medicine", 5.0),
-                ("Pharmacy", 4.5),
-                ("Dentistry", 4.0),
-                ("Psychology", 3.5),
-            ],
-            "english": [
-                ("International Relations", 5.0),
-                ("Law", 4.5),
-                ("Journalism", 4.0),
-                ("Education", 3.5),
-                ("Business Administration", 3.0),
-            ],
-            "history": [
-                ("International Relations", 5.0),
-                ("Law", 4.5),
-                ("Education", 3.5),
-            ]
-        }
-        
-        # Negative patterns to check - these completely negate the subject
-        # We search for these patterns followed by subject keywords
-        negative_phrases = [
-            r"don'?t like", r"do not like", r"dont like",
-            r"hate", r"dislike", r"not interested in",
-            r"avoid", r"not into", r"bad at",
-            r"except", r"anything but", r"not want",
-            r"never want", r"wouldn'?t want", r"wouldnt want",
-            r"don'?t want", r"do not want"
-        ]
-        
-        # Subject keywords that identify each subject
-        subject_keywords = {
-            "math": ["math", "mathematic", "calculus", "algebra", "statistics", "number"],
-            "physics": ["physic", "mechanic", "electricit", "force", "motion"],
-            "chemistry": ["chemist", "chem", "chemical", "reaction", "molecule"],
-            "biology": ["bio", "biolog", "organism", "anatomy", "genetic", "cell"],
-            "english": ["english", "language", "writing", "literature"],
-            "history": ["histor", "historical", "past events", "civilization"]
-        }
-        
-        # First, detect negatively mentioned subjects
-        # Use smaller gap (0-8 chars) and exclude positive words in between
-        negated_subjects = set()
-        positive_words = ['love', 'like', 'enjoy', 'want', 'prefer', 'interested']
-        
-        for subject, keywords in subject_keywords.items():
-            for keyword in keywords:
-                for neg_phrase in negative_phrases:
-                    # Check for negative phrase followed by keyword within 8 characters
-                    # This prevents matching across "but I love" clauses
-                    pattern = neg_phrase + r".{0,8}" + keyword
-                    match = re.search(pattern, text_lower)
-                    if match:
-                        # Make sure there's no positive word between the negative phrase and keyword
-                        matched_text = match.group()
-                        has_positive_between = any(pw in matched_text for pw in positive_words)
-                        if not has_positive_between:
-                            negated_subjects.add(subject)
-                            logger.debug(f"Subject '{subject}' detected as NEGATED via '{matched_text}'")
-                            break
-                if subject in negated_subjects:
-                    break
-        
-        # Detect subjects mentioned in text (but not those that were negated)
-        detected_subjects = []
-        for subject, patterns in subject_patterns.items():
-            if subject in negated_subjects:
-                continue  # Skip subjects that were negatively referenced
-            for pattern in patterns:
-                if pattern in text_lower:
-                    detected_subjects.append(subject)
-                    break
-        
-        # Apply boosts for detected subjects
-        for subject in detected_subjects:
-            if subject in subject_to_majors:
-                for major, boost in subject_to_majors[subject]:
-                    # Accumulate boosts if multiple subjects detected
-                    current = boosts.get(major, 1.0)
-                    boosts[major] = current * boost
-        
-        if detected_subjects:
-            logger.info(f"Subject interests detected: {detected_subjects}")
-            logger.info(f"Subject-based boosts: {boosts}")
-        
-        return boosts
-
-    def _detect_skill_interests(self, text: str, strengths: str = "") -> Dict[str, float]:
-        """
-        Detect skills mentioned by user and map to relevant majors
-        e.g., "good at coding" → Software Engineering
-        """
-        if not text and not strengths:
-            return {}
-        
-        combined = f"{text} {strengths}".lower()
-        boosts = {}
-        
-        # Skill patterns mapped to majors with boost values
-        skill_to_majors = {
-            # Programming/Technical skills
-            "coding": [("Software Engineering", 5.0), ("Data Science", 4.0), ("Cybersecurity", 3.5)],
-            "programming": [("Software Engineering", 5.0), ("Data Science", 4.0), ("Cybersecurity", 3.5)],
-            "code": [("Software Engineering", 4.5), ("Data Science", 3.5)],
-            "develop": [("Software Engineering", 4.0), ("Data Science", 3.0)],
-            "debug": [("Software Engineering", 4.0)],
-            "algorithm": [("Software Engineering", 4.0), ("Data Science", 4.5)],
-            
-            # Analytical skills
-            "analysis": [("Data Science", 4.5), ("Finance", 4.0), ("Business Administration", 3.0)],
-            "analytic": [("Data Science", 4.5), ("Finance", 4.0)],
-            "analytical": [("Data Science", 4.5), ("Finance", 4.0)],
-            "research": [("Data Science", 4.0), ("Medicine", 3.5), ("Psychology", 4.0)],
-            "data": [("Data Science", 5.0), ("Finance", 3.5), ("Software Engineering", 3.0)],
-            "statistic": [("Data Science", 4.5), ("Finance", 3.5)],
-            
-            # Communication skills
-            "communication": [("International Relations", 4.0), ("Business Administration", 3.5), ("Law", 3.5), ("Education", 4.0)],
-            "speaking": [("International Relations", 4.0), ("Law", 4.0), ("Education", 3.5)],
-            "public speak": [("Law", 4.5), ("International Relations", 4.0), ("Education", 4.0)],
-            "present": [("Business Administration", 3.5), ("International Relations", 3.5)],
-            "writing": [("International Relations", 4.0), ("Law", 3.5), ("Education", 3.5)],
-            "writer": [("International Relations", 3.5), ("Education", 3.0)],
-            
-            # Creative skills
-            "creative": [("Graphic Design", 5.0), ("UX/UI Design", 4.5), ("Architecture", 4.0)],
-            "creativity": [("Graphic Design", 5.0), ("UX/UI Design", 4.5), ("Architecture", 4.0)],
-            "design": [("Graphic Design", 4.5), ("UX/UI Design", 5.0), ("Architecture", 4.0)],
-            "artistic": [("Graphic Design", 5.0), ("Architecture", 3.5)],
-            "drawing": [("Graphic Design", 4.5), ("Architecture", 4.0)],
-            "visual": [("Graphic Design", 4.5), ("UX/UI Design", 4.0)],
-            
-            # Leadership/Management
-            "leadership": [("Business Administration", 4.5), ("Business Management", 5.0), ("International Relations", 3.5)],
-            "leader": [("Business Administration", 4.5), ("Business Management", 5.0)],
-            "management": [("Business Management", 5.0), ("Business Administration", 4.5)],
-            "managing": [("Business Management", 4.5), ("Business Administration", 4.0)],
-            "organiz": [("Business Administration", 4.0), ("Business Management", 4.0)],
-            
-            # Problem solving
-            "problem solv": [("Software Engineering", 4.0), ("Data Science", 4.0), ("Mechanical Engineering", 3.5), ("Electrical Engineering", 3.5)],
-            "logical": [("Software Engineering", 4.0), ("Data Science", 4.0), ("Law", 3.5)],
-            "logic": [("Software Engineering", 4.0), ("Data Science", 3.5)],
-            "critical think": [("Law", 4.5), ("Data Science", 4.0), ("Medicine", 3.5)],
-            
-            # Helping/People skills
-            "helping": [("Medicine", 4.0), ("Psychology", 4.5), ("Education", 4.0)],
-            "caring": [("Medicine", 4.0), ("Psychology", 4.0), ("Dentistry", 3.5)],
-            "empathy": [("Psychology", 5.0), ("Medicine", 4.0), ("Education", 3.5)],
-            "counsel": [("Psychology", 5.0), ("Education", 3.5)],
-            "teaching": [("Education", 5.0)],
-            "mentor": [("Education", 4.5), ("Psychology", 3.5)],
-            
-            # Technical/Engineering
-            "building": [("Civil Engineering", 4.5), ("Architecture", 4.0), ("Mechanical Engineering", 3.5)],
-            "construct": [("Civil Engineering", 5.0), ("Architecture", 4.0)],
-            "mechanical": [("Mechanical Engineering", 5.0), ("Electrical Engineering", 3.0)],
-            "electrical": [("Electrical Engineering", 5.0), ("Mechanical Engineering", 3.0)],
-            "circuit": [("Electrical Engineering", 5.0)],
-            "machine": [("Mechanical Engineering", 4.5), ("Electrical Engineering", 3.5)],
-            
-            # Science skills
-            "experiment": [("Chemistry", 4.0), ("Medicine", 3.5), ("Pharmacy", 3.5)],
-            "laboratory": [("Pharmacy", 4.5), ("Medicine", 4.0), ("Chemical Engineering", 4.0)],
-            "lab": [("Pharmacy", 4.0), ("Medicine", 3.5), ("Chemical Engineering", 3.5)],
-        }
-        
-        for skill, majors in skill_to_majors.items():
-            if skill in combined:
-                for major, boost in majors:
-                    current = boosts.get(major, 1.0)
-                    boosts[major] = max(current, boost)  # Use max to avoid over-boosting
-        
-        if boosts:
-            logger.debug(f"Skill-based boosts: {boosts}")
-        
-        return boosts
-
-    def _detect_work_preferences(self, text: str, preferences: str = "") -> Dict[str, float]:
-        """
-        Detect work style preferences and map to relevant majors
-        e.g., "work alone" → Software Engineering, "work with people" → Psychology
-        """
-        if not text and not preferences:
-            return {}
-        
-        combined = f"{text} {preferences}".lower()
-        boosts = {}
-        
-        # Work preference patterns (higher values for stronger influence)
-        preference_patterns = {
-            # Independent work
-            "work alone": [("Software Engineering", 5.0), ("Data Science", 5.0), ("Graphic Design", 4.5)],
-            "independent": [("Software Engineering", 4.5), ("Data Science", 4.5), ("Graphic Design", 4.0)],
-            "solo": [("Software Engineering", 4.5), ("Graphic Design", 4.0)],
-            "by myself": [("Software Engineering", 4.5), ("Data Science", 4.5)],
-            
-            # Team work
-            "work in team": [("Business Administration", 5.0), ("International Relations", 5.0), ("Medicine", 4.0)],
-            "work team": [("Business Administration", 5.0), ("International Relations", 5.0), ("Medicine", 4.0)],
-            "teamwork": [("Business Administration", 5.0), ("International Relations", 5.0)],
-            "collaborat": [("Business Administration", 4.5), ("International Relations", 4.5), ("Architecture", 4.0)],
-            "work with people": [("Psychology", 5.5), ("Education", 5.0), ("Medicine", 4.5), ("Business Administration", 4.5)],
-            "work people": [("Psychology", 5.5), ("Education", 5.0), ("Medicine", 4.5), ("Business Administration", 4.5)],
-            "with people": [("Psychology", 5.0), ("Education", 4.5), ("Medicine", 4.0), ("Business Administration", 4.0)],
-            "people person": [("Psychology", 5.5), ("Education", 5.0), ("Business Administration", 4.5)],
-            "help people": [("Psychology", 5.5), ("Medicine", 5.0), ("Education", 5.0)],
-            "helping people": [("Psychology", 5.5), ("Medicine", 5.0), ("Education", 5.0)],
-            "helping other": [("Psychology", 5.5), ("Medicine", 5.0), ("Education", 5.0)],
-            "interact with people": [("Psychology", 5.0), ("Education", 4.5), ("Business Administration", 4.5)],
-            "interact people": [("Psychology", 5.0), ("Education", 4.5), ("Business Administration", 4.5)],
-            
-            # Outdoor/Field work
-            "outdoor": [("Civil Engineering", 5.5), ("Architecture", 5.0)],
-            "field work": [("Civil Engineering", 5.5)],
-            "outside": [("Civil Engineering", 5.0), ("Architecture", 4.5)],
-            "travel": [("International Relations", 5.0), ("Business Administration", 4.0)],
-            
-            # Office/Computer work
-            "computer": [("Software Engineering", 5.5), ("Data Science", 5.0), ("Cybersecurity", 5.0), ("UX/UI Design", 4.5)],
-            "desk": [("Software Engineering", 4.0), ("Finance", 4.0), ("Data Science", 4.0)],
-            "office": [("Business Administration", 4.0), ("Finance", 4.0)],
-            "remote": [("Software Engineering", 5.0), ("Data Science", 4.5), ("Graphic Design", 4.5)],
-            "work from home": [("Software Engineering", 5.0), ("Data Science", 4.5)],
-            
-            # Hands-on work
-            "hands-on": [("Mechanical Engineering", 5.0), ("Electrical Engineering", 5.0), ("Dentistry", 4.5)],
-            "practical": [("Mechanical Engineering", 4.5), ("Medicine", 4.5), ("Dentistry", 4.5)],
-            "physical": [("Mechanical Engineering", 4.5), ("Civil Engineering", 4.5)],
-            
-            # Research-oriented
-            "research": [("Data Science", 5.0), ("Psychology", 5.0), ("Medicine", 4.5)],
-            "discover": [("Data Science", 4.5), ("Medicine", 4.0)],
-            "innovate": [("Software Engineering", 4.5), ("Data Science", 4.5)],
-            
-            # Client-facing
-            "client": [("Business Administration", 5.0), ("Law", 5.0), ("Architecture", 4.5)],
-            "customer": [("Business Administration", 5.0), ("Business Management", 4.5)],
-            "patient": [("Medicine", 5.5), ("Dentistry", 5.5), ("Psychology", 5.0), ("Pharmacy", 4.5)],
-            
-            # Fast-paced vs stable
-            "fast-paced": [("Software Engineering", 4.5), ("Business Administration", 4.5), ("Medicine", 4.0)],
-            "startup": [("Software Engineering", 5.0), ("Business Administration", 4.5)],
-            "stable": [("Civil Engineering", 4.5), ("Education", 4.5), ("Finance", 4.5)],
-            "government": [("International Relations", 5.5), ("Law", 5.0), ("Civil Engineering", 4.5)],
-        }
-        
-        for pref, majors in preference_patterns.items():
-            if pref in combined:
+        for keyword, majors in keyword_to_majors.items():
+            if keyword in text_lower:
                 for major, boost in majors:
                     current = boosts.get(major, 1.0)
                     boosts[major] = max(current, boost)
-        
-        if boosts:
-            logger.debug(f"Preference-based boosts: {boosts}")
         
         return boosts
 

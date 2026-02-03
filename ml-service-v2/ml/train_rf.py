@@ -5,7 +5,6 @@ Generates "Smart" Synthetic Data and Trains Model
 import logging
 import joblib
 import numpy as np
-import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Tuple
 from sklearn.ensemble import RandomForestClassifier
@@ -86,15 +85,40 @@ class ModelTrainer:
                 # These override random generation to enforce "Common Sense"
                 
                 if "Software" in major_name or "Computer" in major_name or "Data" in major_name:
-                    # CS specific rules
-                    grades["math"] = np.random.uniform(100, 125) # Very high math
-                    grades["physics"] = np.random.uniform(50, 75)
+                    # CS/Software specific rules - VERY high math, moderate physics
+                    grades["math"] = np.random.uniform(105, 125)  # Very high math
+                    grades["physics"] = np.random.uniform(50, 70)  # Moderate physics
+                    # Lower other engineering-related subjects to differentiate
+                    grades["chemistry"] = np.random.uniform(30, 50)
+                
+                elif "Civil" in major_name:
+                    # Civil Engineering - moderate math, HIGH physics, needs chemistry for materials
+                    grades["math"] = np.random.uniform(70, 100)   # Good but not extreme math
+                    grades["physics"] = np.random.uniform(60, 75)  # HIGH physics (structures/forces)
+                    grades["chemistry"] = np.random.uniform(50, 70)  # Chemistry for materials science
+                
+                elif "Mechanical" in major_name:
+                    # Mechanical Engineering - high physics focus
+                    grades["math"] = np.random.uniform(80, 110)
+                    grades["physics"] = np.random.uniform(60, 75)  # Very high physics
+                    grades["chemistry"] = np.random.uniform(40, 60)
+                
+                elif "Electrical" in major_name:
+                    # Electrical Engineering - high math AND physics
+                    grades["math"] = np.random.uniform(90, 120)
+                    grades["physics"] = np.random.uniform(55, 75)
+                
+                elif "Chemical" in major_name:
+                    # Chemical Engineering - chemistry focused
+                    grades["math"] = np.random.uniform(80, 110)
+                    grades["chemistry"] = np.random.uniform(60, 75)
+                    grades["physics"] = np.random.uniform(45, 65)
                 
                 elif "Medicine" in major_name or "Pharmacy" in major_name:
                     # Med specific rules
                     grades["biology"] = np.random.uniform(60, 75)
                     grades["chemistry"] = np.random.uniform(60, 75)
-                    grades["math"] = np.random.uniform(80, 110) # Decent math
+                    grades["math"] = np.random.uniform(80, 110)  # Decent math
                 
                 elif "Architecture" in major_name or "Design" in major_name:
                     grades["math"] = np.random.uniform(90, 125)
@@ -128,11 +152,17 @@ class ModelTrainer:
                 if np.random.random() > 0.1:
                     if "logic" in desc or "math" in desc: strength_vec[0] = 1
                     if "creat" in desc or "design" in desc: strength_vec[2] = 1
-                    if "analy" in desc: strength_vec[4] = 1 # analytical
+                    if "analy" in desc: strength_vec[4] = 1  # analytical
                     
-                    if "code" in desc or "soft" in desc: pref_vec[0] = 1 # coding
-                    if "help" in desc: pref_vec[6] = 1 # helping
-                    if "tech" in desc: strength_vec[7] = 1 # technical
+                    # DIFFERENTIATE coding vs building preferences
+                    if "code" in desc or "soft" in desc or "programming" in desc:
+                        pref_vec[0] = 1  # coding preference
+                        pref_vec[7] = 0  # NOT physical building
+                    if "construct" in desc or "infrastructure" in desc or "structural" in desc:
+                        pref_vec[7] = 1  # physical building preference
+                        pref_vec[0] = 0  # NOT coding
+                    if "help" in desc: pref_vec[6] = 1  # helping
+                    if "tech" in desc: strength_vec[7] = 1  # technical
                 
                 # 4. SBERT Similarity (CRITICAL FEATURE)
                 # Use overlapping distributions to avoid label leakage
@@ -150,10 +180,27 @@ class ModelTrainer:
                 elig_flags = []
                 math_elig = 1.0 if grades["math"] / 125 >= 0.5 else np.random.choice([0.0, 0.6], p=[0.3, 0.7])
                 eng_elig = 1.0 if grades["english"] / 50 >= 0.5 else np.random.choice([0.0, 0.6], p=[0.3, 0.7])
+                # Higher threshold for software/data - need VERY high math
+                high_math_elig = 1.0 if grades["math"] / 125 >= 0.75 else np.random.choice([0.0, 0.4], p=[0.4, 0.6])
+                # Physics eligibility for traditional engineering
+                physics_elig = 1.0 if grades["physics"] / 75 >= 0.7 else np.random.choice([0.0, 0.5], p=[0.3, 0.7])
+                # Chemistry eligibility for civil/chemical engineering
+                chem_elig = 1.0 if grades["chemistry"] / 75 >= 0.5 else np.random.choice([0.0, 0.5], p=[0.4, 0.6])
+                
                 for m in self.majors_list:
-                    # Apply eligibility based on major type
-                    if "Engineering" in m or "Software" in m or "Data Science" in m:
-                        elig_flags.append(math_elig)
+                    # Apply eligibility based on SPECIFIC major type
+                    if "Software" in m or "Data Science" in m or "Computer" in m:
+                        # Software/Data need VERY high math, less physics
+                        elig_flags.append(high_math_elig)
+                    elif "Civil" in m:
+                        # Civil needs good physics AND some chemistry (materials)
+                        elig_flags.append(min(physics_elig, chem_elig))
+                    elif "Mechanical" in m or "Electrical" in m:
+                        # Traditional engineering needs physics
+                        elig_flags.append(physics_elig)
+                    elif "Chemical" in m:
+                        # Chemical engineering needs chemistry
+                        elig_flags.append(chem_elig)
                     elif "International" in m or "Business" in m:
                         elig_flags.append(eng_elig)
                     else:

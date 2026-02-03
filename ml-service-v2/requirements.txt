@@ -2,21 +2,16 @@
 fastapi>=0.104.1
 uvicorn>=0.24.0
 pydantic>=2.5.0
-pydantic-settings>=2.1.0
 
 # NLP - NLTK (runs BEFORE SBERT)
 nltk>=3.8.1
 
 # NLP - SBERT (all-MiniLM-L6-v2)
-sentence-transformers>=2.2.2,<3.0.0
-transformers>=4.35.0,<5.0.0
-torch>=2.2.0,<3.0.0
+sentence-transformers>=2.2.2
+transformers>=4.35.0
+torch>=2.2.0
 
 # ML - Random Forest
-scikit-learn>=1.5.0,<2.0.0
-numpy>=1.26.0,<2.0.0
-pandas>=2.1.3,<3.0.0
-joblib>=1.3.2,<2.0.0
-
-# Database (optional)
-psycopg2-binary>=2.9.9
+scikit-learn>=1.5.0
+numpy>=1.26.0
+joblib>=1.3.2

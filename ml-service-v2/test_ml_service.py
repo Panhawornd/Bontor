@@ -520,6 +520,66 @@ def run_all_tests():
         }
     )
     
+    # =========================================================================
+    # TEST 23: SUBJECT INTEREST - "I love chemistry"
+    # =========================================================================
+    test_analyze(
+        "SUBJECT INTEREST: 'I love chemistry' (Should boost Chemistry-related majors)",
+        {
+            "grades": [
+                {"subject": "math", "score": 80},
+                {"subject": "physics", "score": 50},
+                {"subject": "chemistry", "score": 65},
+                {"subject": "biology", "score": 60},
+                {"subject": "english", "score": 38},
+                {"subject": "khmer", "score": 55},
+                {"subject": "history", "score": 35}
+            ],
+            "interest_text": "I love chemistry and want to learn more about chemical reactions. I enjoy experiments in the lab.",
+            "career_goals": ""
+        }
+    )
+    
+    # =========================================================================
+    # TEST 24: SUBJECT INTEREST - "I love biology"
+    # =========================================================================
+    test_analyze(
+        "SUBJECT INTEREST: 'I love biology' (Should boost Medicine/Pharmacy)",
+        {
+            "grades": [
+                {"subject": "math", "score": 75},
+                {"subject": "physics", "score": 45},
+                {"subject": "chemistry", "score": 60},
+                {"subject": "biology", "score": 68},
+                {"subject": "english", "score": 40},
+                {"subject": "khmer", "score": 55},
+                {"subject": "history", "score": 35}
+            ],
+            "interest_text": "I love biology and the human body. I want to understand how living things work.",
+            "career_goals": ""
+        }
+    )
+    
+    # =========================================================================
+    # TEST 25: SUBJECT INTEREST - "I love math"
+    # =========================================================================
+    test_analyze(
+        "SUBJECT INTEREST: 'I love math' (Should boost Engineering/Data Science)",
+        {
+            "grades": [
+                {"subject": "math", "score": 100},
+                {"subject": "physics", "score": 55},
+                {"subject": "chemistry", "score": 45},
+                {"subject": "biology", "score": 40},
+                {"subject": "english", "score": 35},
+                {"subject": "khmer", "score": 50},
+                {"subject": "history", "score": 30}
+            ],
+            "interest_text": "I love math and solving mathematical problems. Numbers are my passion.",
+            "career_goals": ""
+        }
+    )
+    
     print("\n" + "="*60)
     print("ALL TESTS COMPLETED")
     print("="*60)

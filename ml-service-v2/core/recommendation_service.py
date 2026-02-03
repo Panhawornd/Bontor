@@ -114,6 +114,9 @@ class RecommendationService:
         if not has_text_input:
             grade_inferred_majors = self._infer_majors_from_grades(grades_lower)
         
+        # Detect subject-specific interests (e.g., "I love chemistry")
+        subject_interest_boosts = self._detect_subject_interests(combined_text)
+        
         # ========================================
         # STEP 2: Rule-Based Filtering (BEFORE ML)
         # ========================================
@@ -166,6 +169,28 @@ class RecommendationService:
             # When user provides clear text input, semantic match should be trusted
             similarity_score = major_similarities.get(major, 0.0)
             
+            # Apply subject-interest boosts (e.g., "I love chemistry" → boost Chemistry majors)
+            subject_boost = subject_interest_boosts.get(major, 1.0)
+            if subject_boost > 1.0:
+                pred_copy['probability'] *= subject_boost
+                logger.debug(f"Subject interest boost for {major}: {subject_boost}")
+            
+            # Check for explicit keyword conflicts (user says "programming" but major is Civil Engineering)
+            text_lower = combined_text.lower()
+            is_software_focused = any(kw in text_lower for kw in [
+                "programming", "coding", "software", "apps", "developer", "code", 
+                "python", "javascript", "frontend", "backend", "web development"
+            ])
+            is_non_software_engineering = major in [
+                "Civil Engineering", "Mechanical Engineering", "Chemical Engineering", "Electrical Engineering"
+            ]
+            
+            # Explicitly exclude non-software engineering when user clearly wants software
+            if is_software_focused and is_non_software_engineering:
+                pred_copy['probability'] = 0.0
+                logger.debug(f"Excluding {major} - user focused on software/programming")
+                continue
+            
             if has_text_input and max_similarity > 0.25:
                 # User provided clear text input - SBERT should drive recommendations
                 # Strong semantic match = big boost
@@ -177,12 +202,14 @@ class RecommendationService:
                     # Moderate match - small boost
                     pred_copy['probability'] *= 1.3
                 elif similarity_score > 0.20:
-                    # Weak match - slight penalty
-                    pred_copy['probability'] *= 0.3
+                    # Weak match - slight penalty (but allow subject-interest to override)
+                    if subject_boost <= 1.0:
+                        pred_copy['probability'] *= 0.3
                 else:
                     # No semantic match to user's stated interests
-                    # EXCLUDE unrelated majors entirely when user clearly stated interest
-                    pred_copy['probability'] = 0.0
+                    # But allow if user explicitly mentioned the subject
+                    if subject_boost <= 1.0:
+                        pred_copy['probability'] = 0.0
             else:
                 # No text input - rely more on ML + grade-inferred boosts
                 if not has_text_input and major in grade_inferred_majors:
@@ -371,6 +398,120 @@ class RecommendationService:
         
         return boosts
     
+    def _detect_subject_interests(self, text: str) -> Dict[str, float]:
+        """
+        Detect when user mentions wanting to learn/study specific subjects
+        Returns boost factors for majors that require those subjects
+        """
+        if not text:
+            return {}
+        
+        text_lower = text.lower()
+        boosts = {}
+        
+        # Subject detection patterns with related phrases
+        subject_patterns = {
+            "math": [
+                "love math", "like math", "enjoy math", "good at math",
+                "interested in math", "want to learn math", "study math",
+                "mathematics", "calculus", "algebra", "statistics",
+                "love numbers", "good with numbers", "enjoy numbers"
+            ],
+            "physics": [
+                "love physics", "like physics", "enjoy physics", "good at physics",
+                "interested in physics", "want to learn physics", "study physics",
+                "mechanics", "electricity", "forces", "motion"
+            ],
+            "chemistry": [
+                "love chemistry", "like chemistry", "enjoy chemistry", "good at chemistry",
+                "interested in chemistry", "want to learn chemistry", "study chemistry",
+                "chemical", "chemicals", "reactions", "molecules", "compounds",
+                "love chem", "like chem", "enjoy chem"
+            ],
+            "biology": [
+                "love biology", "like biology", "enjoy biology", "good at biology",
+                "interested in biology", "want to learn biology", "study biology",
+                "living things", "organisms", "anatomy", "genetics", "cells",
+                "love bio", "like bio", "enjoy bio", "human body"
+            ],
+            "english": [
+                "love english", "like english", "enjoy english", "good at english",
+                "interested in english", "want to learn english", "study english",
+                "language", "writing", "reading", "communication", "literature"
+            ],
+            "history": [
+                "love history", "like history", "enjoy history", "good at history",
+                "interested in history", "want to learn history", "study history",
+                "historical", "past events", "civilization", "heritage"
+            ]
+        }
+        
+        # Map subjects to majors that require them
+        subject_to_majors = {
+            "math": [
+                ("Software Engineering", 1.3),
+                ("Data Science", 1.3),
+                ("Electrical Engineering", 1.2),
+                ("Mechanical Engineering", 1.2),
+                ("Civil Engineering", 1.1),
+                ("Finance", 1.2),
+                ("Architecture", 1.0),
+                ("Cybersecurity", 1.1),
+            ],
+            "physics": [
+                ("Electrical Engineering", 1.3),
+                ("Mechanical Engineering", 1.3),
+                ("Civil Engineering", 1.2),
+                ("Architecture", 1.1),
+                ("Software Engineering", 1.0),
+            ],
+            "chemistry": [
+                ("Chemical Engineering", 1.5),
+                ("Pharmacy", 1.4),
+                ("Medicine", 1.2),
+                ("Dentistry", 1.1),
+            ],
+            "biology": [
+                ("Medicine", 1.5),
+                ("Pharmacy", 1.3),
+                ("Dentistry", 1.3),
+                ("Psychology", 1.1),
+            ],
+            "english": [
+                ("International Relations", 1.3),
+                ("Law", 1.1),
+                ("Business Administration", 1.0),
+                ("Education", 1.1),
+            ],
+            "history": [
+                ("Law", 1.2),
+                ("International Relations", 1.3),
+                ("Education", 1.1),
+            ]
+        }
+        
+        # Detect subjects mentioned in text
+        detected_subjects = []
+        for subject, patterns in subject_patterns.items():
+            for pattern in patterns:
+                if pattern in text_lower:
+                    detected_subjects.append(subject)
+                    break
+        
+        # Apply boosts for detected subjects
+        for subject in detected_subjects:
+            if subject in subject_to_majors:
+                for major, boost in subject_to_majors[subject]:
+                    # Accumulate boosts if multiple subjects detected
+                    current = boosts.get(major, 1.0)
+                    boosts[major] = current * boost
+        
+        if detected_subjects:
+            logger.info(f"Subject interests detected: {detected_subjects}")
+            logger.info(f"Subject-based boosts: {boosts}")
+        
+        return boosts
+
     def _build_major_recommendations(
         self,
         predictions: List[Dict]

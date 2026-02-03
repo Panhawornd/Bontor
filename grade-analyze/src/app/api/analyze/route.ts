@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
     
-    const res = await fetch(`${fastapiUrl}/analyze`, {
+    const res = await fetch(`${fastapiUrl}/api/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

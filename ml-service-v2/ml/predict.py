@@ -146,40 +146,4 @@ class MLPredictor:
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
             return []
-    
-    def predict_with_threshold(
-        self,
-        features: np.ndarray,
-        min_probability: float = 0.01
-    ) -> List[Dict]:
-        """
-        Predict and filter by minimum probability
-        
-        Args:
-            features: Feature vector
-            min_probability: Minimum probability to include
-            
-        Returns:
-            Filtered list of recommendations
-        """
-        all_predictions = self.predict(features)
-        return [p for p in all_predictions if p["probability"] >= min_probability]
-    
-    def get_top_n(self, features: np.ndarray, n: int = 5) -> List[Dict]:
-        """
-        Get top N major recommendations
-        
-        Args:
-            features: Feature vector
-            n: Number of top results
-            
-        Returns:
-            Top N recommendations
-        """
-        all_predictions = self.predict(features)
-        return all_predictions[:n]
-    
-    def is_ready(self) -> bool:
-        """Check if model is loaded and ready"""
-        return self.model is not None
 

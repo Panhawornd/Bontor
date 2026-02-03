@@ -118,38 +118,3 @@ def clean_text(text: str, return_tokens: bool = False) -> str | List[str]:
             if return_tokens:
                 return orig_text.lower().split()
             return orig_text.lower()
-
-
-class TextPreprocessor:
-    """Stateful text preprocessor for batch operations"""
-    
-    def __init__(self):
-        """Initialize preprocessor (lazy NLTK init)"""
-        self._initialized = False
-    
-    def preprocess(self, text: str) -> str:
-        """Clean a single text string"""
-        if not self._initialized:
-            _init_nltk()
-            self._initialized = True
-        return clean_text(text)
-    
-    def preprocess_batch(self, texts: List[str]) -> List[str]:
-        """Clean multiple texts efficiently"""
-        if not self._initialized:
-            _init_nltk()
-            self._initialized = True
-        return [clean_text(t) for t in texts]
-    
-    def tokenize(self, text: str) -> List[str]:
-        """Tokenize text using clean_text preprocessing (returns preprocessed tokens)"""
-        # Validate input
-        if text is None or not isinstance(text, str) or not text.strip():
-            return []
-        
-        if not self._initialized:
-            _init_nltk()
-            self._initialized = True
-        
-        # Use clean_text with return_tokens=True to avoid double-tokenization
-        return clean_text(text, return_tokens=True)

@@ -188,9 +188,3 @@ def get_cached_embedding(key: str, text: str, encoder: Optional[SBERTEncoder] = 
     _embedding_cache[key] = embedding
     
     return embedding
-
-
-def clear_embedding_cache():
-    """Clear the embedding cache"""
-    global _embedding_cache
-    _embedding_cache = {}

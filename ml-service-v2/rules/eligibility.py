@@ -247,46 +247,6 @@ class EligibilityRules:
                 eligible_majors.append(major)
         
         return eligible_majors, eligibility_flags
-    
-    def filter_predictions(
-        self,
-        predictions: List[Dict],
-        grades: Dict[str, float]
-    ) -> List[Dict]:
-        """
-        Filter ML predictions using eligibility rules
-        RULES OVERRIDE ML
-        
-        Args:
-            predictions: ML model predictions [{major, probability, ...}]
-            grades: User grades
-            
-        Returns:
-            Filtered predictions with rules applied
-        """
-        all_majors = [p['major'] for p in predictions]
-        eligible_majors, eligibility_flags = self.get_eligible_majors(grades, all_majors)
-        
-        filtered = []
-        for pred in predictions:
-            # Make a shallow copy to avoid mutating caller's data
-            pred_copy = dict(pred)
-            major = pred_copy['major']
-            flag = eligibility_flags.get(major, 1.0)
-            
-            if flag == 0.0:
-                # Excluded by rules - skip entirely
-                continue
-            
-            # Apply penalty to probability
-            pred_copy['probability'] *= flag
-            pred_copy['rule_applied'] = flag < 1.0
-            filtered.append(pred_copy)
-        
-        # Re-sort by probability
-        filtered.sort(key=lambda x: x['probability'], reverse=True)
-        
-        return filtered
 
 
 def apply_eligibility_rules(

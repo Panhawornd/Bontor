@@ -283,7 +283,7 @@ MAJOR_DATABASE = {
         }
     },
     "Telecommunication and Networking": {
-        "keywords": ["telecommunication", "networking", "network engineer", "cisco", "routing", "switching", "internet protocol", "ip", "transmission", "signals", "5g", "wireless", "telecom", "infrastructure", "connectivity", "fiber optics", "network administration", "programming", "coding", "python", "automation", "scripting", "devops", "cloud", "backend", "server", "technology"],
+        "keywords": ["telecommunication", "networking", "network", "network engineer", "cisco", "routing", "switching", "internet protocol", "ip", "transmission", "signals", "5g", "wireless", "telecom", "infrastructure", "connectivity", "fiber optics", "network administration", "programming", "coding", "python", "automation", "scripting", "devops", "cloud", "backend", "server", "technology", "router", "switch", "lan", "wan", "tcp", "dns", "vpn", "wifi", "internet"],
         "required_subjects": ["math", "physics"],
         "description": "Study of network architecture, data transmission, and communication systems with programming for network automation",
         "career_paths": ["Network Engineer", "Telecom Engineer", "Network Administrator", "Systems Engineer", "Connectivity Specialist", "DevOps Engineer", "Cloud Engineer"],

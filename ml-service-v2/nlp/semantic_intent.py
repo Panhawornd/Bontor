@@ -36,11 +36,14 @@ class SemanticIntentDetector:
     CONTEXTUAL_RULES = {
         # ===================== DESIGN DISAMBIGUATION =====================
         "web_design": {
-            "triggers": ["web design", "website design", "ui design", "ux design", 
+            "triggers": ["web design", "website design", "ui design", "ux design",
+                        "ux ui", "ui ux", "ux/ui", "ui/ux", "designing ux", "designing ui",
                         "user interface", "user experience", "app design", "mobile design",
-                        "design app", "design website", "design interface"],
-            "context_words": ["web", "website", "app", "ui", "ux", "user", "interface", 
-                            "digital", "mobile", "online", "responsive", "wireframe"],
+                        "design app", "design website", "design interface",
+                        "design application", "application design", "design mobile"],
+            "context_words": ["ui", "ux", "user", "interface", "wireframe",
+                            "prototype", "figma", "sketch", "responsive",
+                            "user-friendly", "usability", "layout"],
             "majors": [("UX/UI Design", 6.0), ("Software Engineering", 4.5), ("Graphic Design", 4.0)]
         },
         "building_design": {
@@ -97,11 +100,17 @@ class SemanticIntentDetector:
         # ===================== ENGINEERING SPECIFIC =====================
         "software_dev": {
             "triggers": ["software developer", "software engineer", "programmer", "coder",
-                        "build apps", "create software", "develop applications", "write code"],
-            "context_words": ["software", "code", "coding", "program", "programming", 
-                            "developer", "app", "application", "computer", "tech",
-                            "algorithm", "debug", "deploy"],
-            "majors": [("Software Engineering", 6.0), ("Data Science", 4.5), ("Cybersecurity", 4.0)]
+                        "build apps", "build app", "create software", "develop applications",
+                        "write code", "web development", "web developer", "full stack",
+                        "fullstack", "frontend", "front end", "backend", "back end",
+                        "build web", "building web", "develop apps", "developing apps",
+                        "create apps", "build mobile", "build website", "building website",
+                        "coding website", "coding app", "making app", "making website"],
+            "context_words": ["software", "code", "coding", "program", "programming",
+                            "developer", "development", "computer", "tech",
+                            "algorithm", "debug", "deploy", "website", "web",
+                            "app", "application", "fullstack", "stack"],
+            "majors": [("Software Engineering", 6.0), ("Cybersecurity", 4.0), ("Data Science", 3.5)]
         },
         "mechanical_engineer": {
             "triggers": ["mechanical engineer", "build machines", "design machines", 
@@ -119,7 +128,7 @@ class SemanticIntentDetector:
         },
         "civil_engineer": {
             "triggers": ["civil engineer", "build bridges", "build roads", "construction engineer",
-                        "infrastructure", "structural engineer"],
+                        "civil infrastructure", "structural engineer", "infrastructure project"],
             "context_words": ["bridge", "road", "highway", "infrastructure", "construction", 
                             "concrete", "steel", "structural"],
             "majors": [("Civil Engineering", 6.0), ("Architecture", 4.5)]
@@ -187,13 +196,31 @@ class SemanticIntentDetector:
             "majors": [("International Relations", 6.0), ("Law", 4.5)]
         },
         
+        # ===================== NETWORKING & TELECOM =====================
+        "network_engineer": {
+            "triggers": ["network engineer", "networking", "network administration",
+                        "network architect", "telecom engineer", "telecommunication",
+                        "work with networks", "manage networks", "build networks",
+                        "communication systems", "wireless technologies", "wireless technology",
+                        "fascinated by network", "interested in network", "love network",
+                        "communication system", "network security", "network infrastructure"],
+            "context_words": ["network", "networks", "networking", "cisco", "router", "switch",
+                            "routing", "switching", "tcp", "ip", "protocol",
+                            "internet", "lan", "wan", "5g", "wireless", "telecom",
+                            "fiber", "connectivity", "server", "infrastructure",
+                            "bandwidth", "firewall", "dns", "vpn", "wifi",
+                            "communication", "signal", "antenna", "broadcast",
+                            "satellite", "spectrum", "modem", "ethernet"],
+            "majors": [("Telecommunication and Networking", 6.0), ("Cybersecurity", 4.5), ("Software Engineering", 4.0)]
+        },
+        
         # ===================== SECURITY =====================
         "cybersecurity": {
             "triggers": ["cybersecurity", "cyber security", "hacker", "ethical hacking",
                         "security analyst", "information security", "penetration testing"],
             "context_words": ["hack", "security", "cyber", "protect", "encrypt", 
                             "firewall", "malware", "virus", "breach", "threat"],
-            "majors": [("Cybersecurity", 6.0), ("Software Engineering", 4.5)]
+            "majors": [("Cybersecurity", 6.0), ("Software Engineering", 4.5), ("Telecommunication and Networking", 4.0)]
         },
         
         # ===================== EDUCATION & HELPING =====================
@@ -334,7 +361,21 @@ class SemanticIntentDetector:
             "majors": [
                 ("Graphic Design", 4.5),
                 ("UX/UI Design", 4.5),
-                ("Architecture", 4.0),
+                ("Architecture", 3.5),
+            ]
+        },
+        "ux_ui_design": {
+            "phrases": [
+                "I love designing user interfaces and user experiences",
+                "I enjoy UX UI design and making apps easy to use",
+                "wireframes prototypes figma user interface design",
+                "I'm passionate about designing applications and digital products",
+                "I like designing mobile apps and website interfaces"
+            ],
+            "majors": [
+                ("UX/UI Design", 5.5),
+                ("Software Engineering", 4.5),
+                ("Graphic Design", 4.0),
             ]
         },
         "architecture_skills": {
@@ -404,6 +445,23 @@ class SemanticIntentDetector:
                 ("Mechanical Engineering", 5.0),
                 ("Electrical Engineering", 5.0),
                 ("Civil Engineering", 4.0),
+            ]
+        },
+        "networking_skills": {
+            "phrases": [
+                "I love networking and connecting computer systems",
+                "I enjoy configuring routers switches and servers",
+                "network infrastructure internet connectivity telecom",
+                "I'm fascinated by how the internet and networks work",
+                "I like working with network protocols and systems",
+                "I am fascinated by networks communication systems and wireless technologies",
+                "I want to work with wireless communication and signal processing",
+                "I enjoy learning about telecommunication and network engineering"
+            ],
+            "majors": [
+                ("Telecommunication and Networking", 6.0),
+                ("Cybersecurity", 4.5),
+                ("Software Engineering", 4.0),
             ]
         }
     }

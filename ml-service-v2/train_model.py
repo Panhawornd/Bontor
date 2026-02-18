@@ -1,6 +1,13 @@
 """
-Quick Training Script for Random Forest Model
+Training Script for Random Forest Model
 Run this to train the ML model before starting the service
+
+Improvements:
+- Per-major profiles (not per-category)
+- Interaction features (STEM avg, language avg, ratios)
+- StandardScaler for feature scaling
+- Cross-validation metrics
+- Per-class classification report
 """
 import sys
 from pathlib import Path
@@ -23,10 +30,9 @@ def main():
     # Train the model
     model, metrics = train_random_forest(
         majors_database=MAJOR_DATABASE,
-        n_samples=20000,
-        n_estimators=800,
-        max_depth=20,
-        save_model=True
+        n_samples=50000,
+        n_estimators=1000,
+        max_depth=30,
     )
     
     print()
@@ -34,9 +40,11 @@ def main():
     print("  Training Complete!")
     print("=" * 60)
 
-    print(f"  Test Accuracy:  {metrics['test_accuracy']:.2%}")
-    print(f"  Features:       {metrics['n_features']}")
-    print(f"  Classes:        {metrics['n_classes']}")
+    print(f"  Test Accuracy:   {metrics['test_accuracy']:.2%}")
+    print(f"  CV Accuracy:     {metrics['cv_accuracy_mean']:.2%} "
+          f"(+/- {metrics['cv_accuracy_std'] * 2:.2%})")
+    print(f"  Features:        {metrics['n_features']}")
+    print(f"  Classes:         {metrics['n_classes']}")
     print("=" * 60)
 
 

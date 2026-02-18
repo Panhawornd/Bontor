@@ -31,6 +31,10 @@ MAX_SCORES = {
     "english": 50, "khmer": 75, "history": 50
 }
 
+# Interaction feature subject groups
+STEM_SUBJECTS = ["math", "physics", "chemistry", "biology"]
+LANG_SUBJECTS = ["english", "khmer"]
+
 # Strength/Preference encoding
 STRENGTHS_MAP = {
     "logic": 0, "communication": 1, "creativity": 2, "problem-solving": 3,
@@ -226,6 +230,21 @@ class FeatureBuilder:
         else:
             grade_stats = [0.0, 0.0, 0.0]
         
+        # 2b. Interaction features (STEM vs Language signals)
+        stem_avg = float(np.mean([
+            grade_features[SUBJECTS.index(s)] for s in STEM_SUBJECTS
+        ]))
+        lang_avg = float(np.mean([
+            grade_features[SUBJECTS.index(s)] for s in LANG_SUBJECTS
+        ]))
+        stem_lang_ratio = stem_avg / (lang_avg + 1e-6)
+        math_phys = grade_features[0] * grade_features[1]   # math×physics
+        chem_bio = grade_features[2] * grade_features[3]     # chemistry×biology
+        interaction_features = [
+            stem_avg, lang_avg, stem_lang_ratio,
+            math_phys, chem_bio,
+        ]
+        
         # 3. Encode strengths
         strength_features = self.encode_strengths(strengths)
         
@@ -242,6 +261,7 @@ class FeatureBuilder:
         features = np.concatenate([
             grade_features,         # 7 features
             grade_stats,            # 3 features
+            interaction_features,   # 5 features
             strength_features,      # 8 features
             preference_features,    # 8 features
             similarity_features,    # N features (majors count)
@@ -257,6 +277,8 @@ class FeatureBuilder:
         names = (
             [f"grade_{s}" for s in SUBJECTS] +
             ["grade_mean", "grade_std", "grade_max"] +
+            ["stem_avg", "lang_avg", "stem_lang_ratio",
+             "math_phys_interaction", "chem_bio_interaction"] +
             [f"strength_{s}" for s in STRENGTHS_MAP.keys()] +
             [f"pref_{p}" for p in PREFERENCES_MAP.keys()] +
             [f"sbert_sim_{m}" for m in self.majors] +

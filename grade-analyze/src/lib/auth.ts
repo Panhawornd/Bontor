@@ -1,6 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+
 const jwt = require('jsonwebtoken')
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+
 const bcrypt = require('bcryptjs')
 
 const JWT_SECRET = process.env.JWT_SECRET

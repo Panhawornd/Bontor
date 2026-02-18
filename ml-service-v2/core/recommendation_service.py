@@ -266,6 +266,38 @@ class RecommendationService:
             if pred_copy['probability'] > 0:
                 filtered_predictions.append(pred_copy)
         
+        # ========================================
+        # INJECT: Semantically-boosted majors missing from ML predictions
+        # If a major has a strong semantic boost (> 2.0) but wasn't in
+        # the ML predictions (below MIN_CONFIDENCE_THRESHOLD), inject it
+        # so the user's stated intent is honoured.
+        # ========================================
+        ml_majors_seen = {p['major'] for p in filtered_predictions}
+        for major, boost in subject_interest_boosts.items():
+            if major in ml_majors_seen:
+                continue
+            if boost <= 2.0:
+                continue
+            # Check eligibility
+            eligibility = eligibility_flags.get(major, 1.0)
+            if eligibility == 0.0:
+                continue
+            # Check exclusion
+            if exclusion_penalties.get(major, 1.0) < 1.0:
+                continue
+            
+            similarity_score = major_similarities.get(major, 0.0)
+            injected = {
+                "major": major,
+                "probability": 0.5 * boost * boost * boost,  # Match triple-boost logic
+                "source": "semantic-intent",
+                "confidence_level": "medium",
+                "similarity_score": similarity_score,
+                "rule_penalty": eligibility < 1.0,
+            }
+            filtered_predictions.append(injected)
+            logger.info(f"Injected {major} (boost={boost}) into predictions (ML model missed it)")
+        
         # Re-normalize probabilities
         total_prob = sum(p['probability'] for p in filtered_predictions)
         if total_prob > 0:
@@ -643,11 +675,29 @@ class RecommendationService:
         major_recommendations: List[Dict],
         grades: Dict[str, float]
     ) -> List[Dict]:
-        """Match universities to recommended majors, prioritizing top major and returning all matches"""
+        """
+        Match universities to recommended majors with subject-specific
+        grade-cutoff validation.
+
+        Improvements:
+        - Validates preferred subject scores against university requirements
+        - Calculates subject-fit score based on preferred subjects
+        - Better fit categorisation (Safety / Target / Stretch)
+        """
         universities = []
         
         # Calculate average grade
         avg_grade = sum(grades.values()) / len(grades) if grades else 0
+        
+        # Normalised grades for subject-specific checks
+        max_scores = {
+            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
+            "english": 50, "khmer": 75, "history": 50,
+        }
+        normalised = {
+            s: (grades.get(s, 0) / max_scores.get(s, 100)) * 100
+            for s in max_scores
+        }
         
         # Get top major (highest priority)
         top_major = major_recommendations[0]['major'] if major_recommendations else None
@@ -675,27 +725,47 @@ class RecommendationService:
             has_top_major = top_major in programs
             
             # Calculate match score based on which majors the uni offers
-            # Higher score = matches higher-ranked major
             match_score = max(major_priority.get(m, 0) for m in matching)
             
             # Bonus for having top major
             if has_top_major:
                 match_score += 100  # Ensure top major unis come first
             
-            # Check eligibility
-            min_grade = uni_data.get('requirements', {}).get('min_grade', 0)
-            
-            if avg_grade >= min_grade + 10:
+            # ── Subject-specific grade-cutoff validation ────────────
+            requirements = uni_data.get('requirements', {})
+            min_grade = requirements.get('min_grade', 0)
+            preferred_subjects = requirements.get('preferred_subjects', [])
+
+            # Calculate preferred-subject fit score (0-100)
+            subject_fit_score = 100.0  # Perfect if no preferred subjects
+            subject_warnings = []
+            if preferred_subjects:
+                subject_scores = []
+                for subj in preferred_subjects:
+                    subj_lower = subj.lower()
+                    pct = normalised.get(subj_lower, 50.0)
+                    subject_scores.append(pct)
+                    if pct < 50:
+                        subject_warnings.append(
+                            f"{subj} ({pct:.0f}% – below recommended)"
+                        )
+                subject_fit_score = sum(subject_scores) / len(subject_scores)
+
+            # Combined eligibility: average grade + subject fit
+            if avg_grade >= min_grade + 10 and subject_fit_score >= 65:
                 fit = "Safety"
                 fit_score = 2
-            elif avg_grade >= min_grade:
+            elif avg_grade >= min_grade and subject_fit_score >= 50:
                 fit = "Target"
                 fit_score = 3  # Prefer Target
-            else:
+            elif avg_grade >= min_grade - 5 and subject_fit_score >= 40:
                 fit = "Stretch"
                 fit_score = 1
-            
-            all_matches.append({
+            else:
+                fit = "Stretch"
+                fit_score = 0  # Weak fit – show but rank low
+
+            entry: Dict = {
                 "name": uni_name,
                 "location": uni_data.get('location', ''),
                 "matching_programs": list(matching),
@@ -703,12 +773,21 @@ class RecommendationService:
                 "fit": fit,
                 "your_avg_grade": round(avg_grade, 1),
                 "has_top_major": has_top_major,
+                "preferred_subjects": preferred_subjects,
+                "subject_fit_score": round(subject_fit_score, 1),
                 "_match_score": match_score,
-                "_fit_score": fit_score
-            })
+                "_fit_score": fit_score,
+            }
+            if subject_warnings:
+                entry["subject_warnings"] = subject_warnings
+
+            all_matches.append(entry)
         
-        # Sort by: match_score (desc), then fit_score (desc)
-        all_matches.sort(key=lambda x: (x['_match_score'], x['_fit_score']), reverse=True)
+        # Sort by: match_score (desc), then fit_score (desc), then subject_fit (desc)
+        all_matches.sort(
+            key=lambda x: (x['_match_score'], x['_fit_score'], x['subject_fit_score']),
+            reverse=True,
+        )
         
         # Return ALL universities that match, remove internal scores
         for uni in all_matches:
@@ -923,16 +1002,23 @@ class RecommendationService:
         required_level: float
     ) -> float:
         """
-        Estimate student's current skill level with smart logic:
+        Estimate student's current skill level with smart logic and
+        confidence-aware scoring:
+
         - If "want to learn" / "fascinated" → low level (2-4)
         - If "experience" → good level but NOT higher than required
-        - Otherwise → estimate from grades
+        - Otherwise → estimate from grades with confidence weighting
+
+        Returns a numeric level (1.0 – 10.0).
         """
         skill_lower = skill_name.lower()
         
         # Check if skill matches a strength keyword
         skill_mentioned = any(kw in skill_lower or skill_lower in kw for kw in strength_keywords)
-        
+
+        # Confidence score: how sure are we about this estimate (0-1)
+        confidence = 0.3  # Low baseline when no evidence
+
         # Safety floor for all paths
         def apply_safety_clamp(level: float) -> float:
             return max(1.0, level)
@@ -940,6 +1026,7 @@ class RecommendationService:
         # Case 1: Student wants to learn this → low level
         if is_learning and skill_mentioned:
             provisional_level = min(3.5, required_level - 3)  # Low but not zero
+            confidence = 0.6  # Moderate: explicit mention of learning intent
             return apply_safety_clamp(provisional_level)
         
         # Case 2: Student wants to learn (general) → slightly low
@@ -949,6 +1036,7 @@ class RecommendationService:
             for indicator, level in grade_skill_map.items():
                 if indicator in skill_lower or skill_lower in indicator:
                     base_level = max(base_level, level * 0.6)  # 60% of grade estimate
+                    confidence = 0.5  # Some grade evidence
                     break
             provisional_level = min(base_level, required_level - 1)
             return apply_safety_clamp(provisional_level)
@@ -957,17 +1045,21 @@ class RecommendationService:
         if has_experience and skill_mentioned:
             # Cap at required level (never exceed target)
             provisional_level = min(required_level - 0.5, 7.5)
+            confidence = 0.8  # High: explicit experience claim
             return apply_safety_clamp(provisional_level)
         
-        # Case 4: Default - estimate from grades
+        # Case 4: Default - estimate from grades with multi-source aggregation
         base_level = 3.0
-        
+        evidence_sources = 0
+
+        # Direct skill-to-grade mapping
         for indicator, level in grade_skill_map.items():
             if indicator in skill_lower or skill_lower in indicator:
                 base_level = max(base_level, level)
+                evidence_sources += 1
                 break
         
-        # Infer from related keywords
+        # Infer from related keywords (broader matching)
         skill_grade_hints = {
             "math": ["mathematics", "calculus", "statistics", "quantitative", "analytics", "modeling"],
             "physics": ["mechanics", "thermodynamics", "electronics", "circuit", "signals"],
@@ -983,11 +1075,25 @@ class RecommendationService:
                 max_score = max_scores.get(subject, 100)
                 inferred_level = (score / max_score) * 10
                 base_level = max(base_level, inferred_level * 0.8)
+                evidence_sources += 1
                 break
+
+        # Confidence increases with more evidence
+        if evidence_sources >= 2:
+            confidence = 0.7
+        elif evidence_sources == 1:
+            confidence = 0.5
+        # else confidence stays at 0.3 (pure guess)
+
+        # Apply confidence-weighted adjustment:
+        # Low confidence → pull toward conservative middle estimate
+        # High confidence → trust the computed level
+        conservative_estimate = required_level * 0.45  # ~45% of required
+        weighted_level = confidence * base_level + (1 - confidence) * conservative_estimate
         
         # CRITICAL: Current level should NEVER exceed required level
         # Cap at required_level - 0.5 to always show room for improvement
-        capped_level = min(base_level, required_level - 0.5)
+        capped_level = min(weighted_level, required_level - 0.5)
         
         # Clamp to valid range (minimum 1.0)
         return max(1.0, capped_level)

@@ -1,37 +1,49 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aghd@%ajsakjh'
-
 interface JWTPayload {
   userId: number
   email: string
+  exp?: number
 }
 
-// Simple JWT verification for Edge Runtime
-function verifyToken(token: string): JWTPayload | null {
+// Verify JWT signature using Web Crypto API (Edge Runtime compatible)
+async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    // Split the token
     const parts = token.split('.')
-    if (parts.length !== 3) {
-      return null
-    }
+    if (parts.length !== 3) return null
 
-    // Decode the payload (base64url decode)
+    const secret = process.env.JWT_SECRET || 'aghd@%ajsakjh'
+    const encoder = new TextEncoder()
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    )
+
+    const signatureInput = encoder.encode(`${parts[0]}.${parts[1]}`)
+    const signatureBytes = Uint8Array.from(
+      atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')),
+      (c) => c.charCodeAt(0)
+    )
+
+    const valid = await crypto.subtle.verify('HMAC', key, signatureBytes, signatureInput)
+    if (!valid) return null
+
     const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
-    
-    // Check if token is expired
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return null
-    }
+
+    if (payload.exp && payload.exp < Date.now() / 1000) return null
 
     return payload as JWTPayload
-  } catch (error) {
+  } catch {
     return null
   }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value
   const { pathname } = request.nextUrl
 
@@ -46,9 +58,8 @@ export function middleware(request: NextRequest) {
 
   // If user has valid token and tries to access login/signup, redirect to Input
   if (token && isAuthOnlyBlockedRoute) {
-    const payload = verifyToken(token)
+    const payload = await verifyToken(token)
     if (payload) {
-      // Valid token, redirect authenticated user away from login/signup
       return NextResponse.redirect(new URL('/Input', request.url))
     }
   }
@@ -57,20 +68,16 @@ export function middleware(request: NextRequest) {
   const publicRoutes = ['/login', '/signup', '/landing', '/how-it-works', '/about']
   const isPublicRoute = publicRoutes.includes(pathname)
 
-  // If it's a public route, allow access
   if (isPublicRoute) {
     return NextResponse.next()
   }
 
-  // If no token and trying to access protected route, redirect to login
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Verify token
-  const payload = verifyToken(token)
+  const payload = await verifyToken(token)
   if (!payload) {
-    // Invalid token, redirect to login
     const response = NextResponse.redirect(new URL('/login', request.url))
     response.cookies.delete('auth-token')
     return response

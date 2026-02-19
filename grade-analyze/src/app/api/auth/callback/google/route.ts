@@ -8,20 +8,21 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
-    const error = searchParams.get('error')
+    const oauthError = searchParams.get('error')
     const state = searchParams.get('state')
 
-    // Handle OAuth errors
-    if (error) {
-      return NextResponse.redirect(new URL(`/login?error=${error}`, request.url))
+    // Handle OAuth errors — never reflect raw OAuth error values into the URL
+    if (oauthError) {
+      return NextResponse.redirect(new URL('/login?error=oauth_denied', request.url))
     }
 
     if (!code) {
       return NextResponse.redirect(new URL('/login?error=no_code', request.url))
     }
 
-    // Basic state validation (in production, store state in session/database)
-    if (!state || state.length < 10) {
+    // Verify state against the cookie to prevent CSRF attacks
+    const expectedState = request.cookies.get('oauth_state')?.value
+    if (!state || !expectedState || state !== expectedState) {
       return NextResponse.redirect(new URL('/login?error=invalid_state', request.url))
     }
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
         client_secret: clientSecret,
         code,
         grant_type: 'authorization_code',
-        redirect_uri: 'http://localhost:3000/api/auth/callback/google',
+        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/callback/google`,
       }),
     })
 
@@ -127,6 +128,8 @@ export async function GET(request: NextRequest) {
       sameSite: 'lax',
       maxAge: 0
     })
+    // Clear the oauth state cookie
+    response.cookies.delete('oauth_state')
 
     return response
   } catch (error) {

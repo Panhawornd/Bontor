@@ -1,7 +1,7 @@
 
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken'
 
-const bcrypt = require('bcryptjs')
+import bcrypt from 'bcryptjs'
 
 const JWT_SECRET = process.env.JWT_SECRET
 

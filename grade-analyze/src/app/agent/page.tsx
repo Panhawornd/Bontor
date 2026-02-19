@@ -32,6 +32,7 @@ export default function AgentPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const [inputHeight, setInputHeight] = useState(100); // Default bottom padding
+  const hasLoaded = useRef(false); // Prevent save effect from overwriting on initial mount
 
   // Load chat history and active chat index from localStorage on component mount
   useEffect(() => {
@@ -57,10 +58,12 @@ export default function AgentPage() {
         console.error('Error loading chat history:', error);
       }
     }
+    hasLoaded.current = true;
   }, []);
 
   // Save chat history to localStorage whenever it changes
   useEffect(() => {
+    if (!hasLoaded.current) return; // Skip save until load has completed
     // Filter out chats with no messages before saving
     const filteredHistory = chatHistory.filter(chat => chat.messages && chat.messages.length > 0);
     localStorage.setItem('chatHistory', JSON.stringify(filteredHistory));
@@ -200,18 +203,22 @@ Fundamental skills to prepare before enrolling:
     // But since inputValue controls the value, the next render will clear the text.
     // The height reset is handled by the useEffect on inputValue or the style prop.
     
-    // Handle chat history update
-    if (chatHistory.length === 0) {
-      // Create first chat synchronously
-      const newChat = { title: 'Chat 1', messages: newMessages };
-      setChatHistory([newChat]);
-      setActiveChatIndex(0);
+    // Handle chat history update — capture the resolved index for the timeout below
+    let resolvedIndex: number;
+    if (activeChatIndex === null) {
+      // No active chat (deleted or fresh start) — create a new one
+      const newChatTitle = `Chat ${chatHistory.length + 1}`;
+      const newChat = { title: newChatTitle, messages: newMessages };
+      resolvedIndex = chatHistory.length;
+      setChatHistory(prev => [...prev, newChat]);
+      setActiveChatIndex(resolvedIndex);
     } else {
-      // Update existing chat
+      resolvedIndex = activeChatIndex;
+      // Update existing active chat
       setChatHistory(prev => {
         const updatedHistory = [...prev];
-        if (activeChatIndex !== null && updatedHistory[activeChatIndex]) {
-          updatedHistory[activeChatIndex].messages = newMessages;
+        if (updatedHistory[resolvedIndex]) {
+          updatedHistory[resolvedIndex].messages = newMessages;
         }
         return updatedHistory;
       });
@@ -227,9 +234,8 @@ Fundamental skills to prepare before enrolling:
       // Update chat history with assistant response
       setChatHistory(prev => {
         const updatedHistory = [...prev];
-        const currentActiveIndex = activeChatIndex !== null ? activeChatIndex : (prev.length > 0 ? prev.length - 1 : 0);
-        if (updatedHistory[currentActiveIndex]) {
-          updatedHistory[currentActiveIndex].messages = finalMessages;
+        if (updatedHistory[resolvedIndex]) {
+          updatedHistory[resolvedIndex].messages = finalMessages;
         }
         return updatedHistory;
       });
@@ -293,7 +299,7 @@ Fundamental skills to prepare before enrolling:
   };
 
   return (
-    <div className="min-h-screen text-white relative">
+    <div className="h-screen overflow-hidden text-white relative">
       {/* Ultravib image background with dark overlay */}
       <div
         className="fixed inset-x-0"

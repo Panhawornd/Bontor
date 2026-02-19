@@ -4,6 +4,13 @@ import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
+// Helper: redirect to login with an error, always clearing the oauth_state cookie
+function errorRedirect(url: URL, errorCode: string): NextResponse {
+  const response = NextResponse.redirect(new URL(`/login?error=${errorCode}`, url))
+  response.cookies.delete('oauth_state')
+  return response
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -13,17 +20,17 @@ export async function GET(request: NextRequest) {
 
     // Handle OAuth errors — never reflect raw OAuth error values into the URL
     if (oauthError) {
-      return NextResponse.redirect(new URL('/login?error=oauth_denied', request.url))
+      return errorRedirect(new URL(request.url), 'oauth_denied')
     }
 
     if (!code) {
-      return NextResponse.redirect(new URL('/login?error=no_code', request.url))
+      return errorRedirect(new URL(request.url), 'no_code')
     }
 
     // Verify state against the cookie to prevent CSRF attacks
     const expectedState = request.cookies.get('oauth_state')?.value
     if (!state || !expectedState || state !== expectedState) {
-      return NextResponse.redirect(new URL('/login?error=invalid_state', request.url))
+      return errorRedirect(new URL(request.url), 'invalid_state')
     }
 
     // Exchange authorization code for access token
@@ -31,7 +38,7 @@ export async function GET(request: NextRequest) {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET
 
     if (!clientId || !clientSecret) {
-      return NextResponse.redirect(new URL('/login?error=config_error', request.url))
+      return errorRedirect(new URL(request.url), 'config_error')
     }
 
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -51,7 +58,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json()
 
     if (!tokenResponse.ok) {
-      return NextResponse.redirect(new URL('/login?error=token_exchange_failed', request.url))
+      return errorRedirect(new URL(request.url), 'token_exchange_failed')
     }
 
     // Get user info from Google
@@ -64,7 +71,7 @@ export async function GET(request: NextRequest) {
     const googleUser = await userResponse.json()
 
     if (!userResponse.ok) {
-      return NextResponse.redirect(new URL('/login?error=user_info_failed', request.url))
+      return errorRedirect(new URL(request.url), 'user_info_failed')
     }
 
     // Check if user exists in our database
@@ -132,7 +139,9 @@ export async function GET(request: NextRequest) {
     response.cookies.delete('oauth_state')
 
     return response
-  } catch (error) {
-    return NextResponse.redirect(new URL('/login?error=oauth_callback_failed', request.url))
+  } catch {
+    const response = NextResponse.redirect(new URL('/login?error=oauth_callback_failed', request.url))
+    response.cookies.delete('oauth_state')
+    return response
   }
 }

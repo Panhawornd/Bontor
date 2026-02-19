@@ -13,7 +13,8 @@ async function verifyToken(token: string): Promise<JWTPayload | null> {
     const parts = token.split('.')
     if (parts.length !== 3) return null
 
-    const secret = process.env.JWT_SECRET || 'aghd@%ajsakjh'
+    const secret = process.env.JWT_SECRET
+    if (!secret) throw new Error('JWT_SECRET environment variable is not configured')
     const encoder = new TextEncoder()
 
     const key = await crypto.subtle.importKey(

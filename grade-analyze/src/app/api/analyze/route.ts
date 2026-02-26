@@ -25,13 +25,19 @@ export async function POST(req: Request) {
           console.error('Auth error:', authError)
         }
 
+    // ML service API key for secure service-to-service communication
+    const mlApiKey = process.env.ML_API_KEY || 'capstone-ml-secret-key-2026'
+
     // Call ML service with timeout
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
     
     const res = await fetch(`${fastapiUrl}/api/analyze`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': mlApiKey,
+      },
       body: JSON.stringify(body),
       signal: controller.signal,
     })
@@ -94,7 +100,10 @@ export async function POST(req: Request) {
           // Send to ML service (fire and forget)
           fetch(`${fastapiUrl}/feedback`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'X-API-Key': mlApiKey,
+            },
             body: JSON.stringify(feedbackData),
           }).catch(() => {
             // Ignore errors - this is for data collection

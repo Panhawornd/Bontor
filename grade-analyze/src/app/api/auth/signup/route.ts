@@ -8,9 +8,35 @@ export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json()
 
+    // ============================================
+    // Server-side input validation
+    // (Never trust frontend validation alone!)
+    // ============================================
+    if (!name || typeof name !== 'string' || name.trim().length < 1 || name.trim().length > 100) {
+      return NextResponse.json({ error: 'Name is required and must be 1-100 characters' }, { status: 400 })
+    }
+
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
+    }
+
+    // RFC 5322 simplified email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email.trim())) {
+      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
+    }
+
+    if (!password || typeof password !== 'string' || password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
+    }
+
+    if (password.length > 128) {
+      return NextResponse.json({ error: 'Password must be less than 128 characters' }, { status: 400 })
+    }
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: email.trim().toLowerCase() }
     })
 
     if (existingUser) {

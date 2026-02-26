@@ -75,9 +75,12 @@ class SimilarityEngine:
         for major_name, major_info in majors_data.items():
             description = major_info.get('description', '')
             keywords = ' '.join(major_info.get('keywords', []))
+            careers = ' '.join(major_info.get('career_paths', []))
+            skills = ' '.join(major_info.get('fundamental_skills', {}).keys())
+            subjects = ' '.join(major_info.get('required_subjects', []))
             
-            # Combine description and keywords for richer representation
-            major_text = f"{description} {keywords}"
+            # Combine all signals for a rich AI profile
+            major_text = f"{description} {keywords} {careers} {skills} {subjects}"
             
             cache_key = f"major:{major_name}"
             clean_major = clean_text(major_text)

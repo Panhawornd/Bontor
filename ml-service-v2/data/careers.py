@@ -92,19 +92,33 @@ CAREER_DATABASE = {
         "education_level": "Master's Degree",
         "growth_outlook": "Excellent"
     },
-    "Data Analyst": {
-        "description": "Analyze data to provide business insights and recommendations",
-        "required_skills": ["Data Analysis", "Statistics", "Data Visualization", "Communication", "Problem Solving"],
-        "avg_salary": "$55,000 - $95,000",
-        "education_level": "Bachelor's Degree",
-        "growth_outlook": "Very Good"
-    },
     "Data Scientist": {
         "description": "Extract insights from data using statistical and machine learning techniques",
         "required_skills": ["Statistics", "Python/R", "Machine Learning", "Data Visualization", "SQL"],
-        "avg_salary": "$80,000 - $130,000",
+        "avg_salary": "$85,000 - $145,000",
         "education_level": "Bachelor's/Master's Degree",
         "growth_outlook": "Excellent"
+    },
+    "Data Analyst": {
+        "description": "Analyze data to provide business insights and recommendations",
+        "required_skills": ["Data Analysis", "Statistics", "Data Visualization", "Communication", "Problem Solving"],
+        "avg_salary": "$60,000 - $100,000",
+        "education_level": "Bachelor's Degree",
+        "growth_outlook": "Very Good"
+    },
+    "Dentist": {
+        "description": "Provide oral healthcare and treatment for teeth and gums",
+        "required_skills": ["Medical Knowledge", "Manual Dexterity", "Patient Care", "Oral Surgery"],
+        "avg_salary": "$120,000 - $220,000",
+        "education_level": "Doctor of Dental Surgery (DDS/DMD)",
+        "growth_outlook": "Good"
+    },
+    "Orthodontist": {
+        "description": "Specialize in correcting irregularities of the teeth and jaws",
+        "required_skills": ["Orthodontic Care", "Precision", "Patient Care", "Dental Technology"],
+        "avg_salary": "$150,000 - $280,000",
+        "education_level": "DDS + Specialized Residency",
+        "growth_outlook": "Good"
     },
     "AI Engineer": {
         "description": "Develop artificial intelligence and machine learning systems",

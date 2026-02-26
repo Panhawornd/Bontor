@@ -196,6 +196,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                   </span>
                 </div>
               </div>
+              
               <p style={{ 
                 color: 'var(--text-secondary)', 
                 fontSize: '14px',

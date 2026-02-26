@@ -86,32 +86,6 @@ export async function POST(req: Request) {
           }
         })
 
-        // Send feedback data to ML service for training dataset
-        try {
-          const feedbackData = {
-            user_id: user.id,
-            grades: body.grades,
-            interests: body.interest_text,
-            career_goals: body.career_goals,
-            recommendations: data,
-            timestamp: new Date().toISOString()
-          }
-          
-          // Send to ML service (fire and forget)
-          fetch(`${fastapiUrl}/feedback`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': mlApiKey,
-            },
-            body: JSON.stringify(feedbackData),
-          }).catch(() => {
-            // Ignore errors - this is for data collection
-          })
-        } catch (feedbackError) {
-          // Ignore feedback errors
-        }
-
       } catch (dbError) {
         console.error('Database error:', dbError)
         // Continue even if database save fails

@@ -1,9 +1,9 @@
 """
-Main API Router - Complete Recommendation Workflow
-Uses NLP + ML + Rules pipeline
+Main API Router - Analyze Endpoint
+Uses NLP + ML pipeline
 """
 from fastapi import APIRouter, HTTPException
-from app.schemas.models import RecommendationRequest, RecommendationResponse, AnalyzeRequest, AnalyzeResponse
+from app.schemas.models import AnalyzeRequest, AnalyzeResponse
 from core.recommendation_service import RecommendationService
 import logging
 import uuid
@@ -13,52 +13,6 @@ router = APIRouter()
 
 # Initialize service (singleton pattern inside class)
 recommendation_service = RecommendationService()
-
-
-@router.post("/recommend", response_model=RecommendationResponse)
-async def get_recommendations(request: RecommendationRequest):
-    """
-    Complete recommendation endpoint
-    
-    Pipeline:
-    1. NLTK preprocessing
-    2. SBERT embeddings
-    3. Rule-based filtering (before ML)
-    4. Random Forest prediction
-    5. Post-processing
-    
-    Returns:
-    - major_recommendations
-    - universities
-    - career_recommendations
-    - skill_gaps
-    - match_percentage
-    """
-    try:
-        # Parse grades
-        grades = {g.subject.lower(): g.score for g in request.grades}
-        
-        # Get recommendations
-        result = recommendation_service.get_recommendations(
-            grades=grades,
-            interests=request.interests or "",
-            career_goal=request.career_goals or "",
-            strengths=request.strengths or "",
-            preferences=request.preferences or ""
-        )
-        
-        return RecommendationResponse(
-            major_recommendations=result["major_recommendations"],
-            universities=result["universities"],
-            career_recommendations=result["career_recommendations"],
-            skill_gaps=result["skill_gaps"],
-            match_percentage=result["match_percentage"]
-        )
-        
-    except Exception as e:
-        error_id = str(uuid.uuid4())[:8]
-        logger.error(f"Recommendation error (ref: {error_id}): {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal server error - reference {error_id}")
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -101,7 +55,7 @@ async def analyze(request: AnalyzeRequest):
         careers = [
             {
                 "title": c["name"],
-                "match_score": c.get("similarity_score", 0.5),
+                "match_score": c.get("match_score", 0.5),
                 "description": c["description"]
             }
             for c in result["career_recommendations"]
@@ -129,31 +83,36 @@ async def analyze(request: AnalyzeRequest):
             for s in result["skill_gaps"]
         ]
         
-        # Build subject analysis
-        max_scores = {
-            "math": 125, "physics": 75, "chemistry": 75, "biology": 75,
-            "english": 50, "khmer": 75, "history": 50
-        }
+        # Build subject analysis — max scores from the shared constant
+        from core.feature_builder import MAX_SCORES as _MAX_SCORES
         
         subject_analysis = {}
+        norm_scores = []
         for subject, score in grades.items():
-            max_score = max_scores.get(subject.lower(), 100)
-            normalized = (score / max_score) * 100
-            
-            if normalized >= 80:
-                strength = "Excellent"
-            elif normalized >= 65:
-                strength = "Good"
-            elif normalized >= 50:
-                strength = "Average"
-            else:
-                strength = "Needs Improvement"
-            
+            max_score = _MAX_SCORES.get(subject.lower(), 100)
+            normalized = (score / max_score) * 100 if max_score > 0 else 0
+            norm_scores.append(normalized)
             subject_analysis[subject] = {
                 "score": score,
                 "normalized": round(normalized, 1),
-                "strength": strength
+                "strength": ""  # filled below
             }
+        
+        # Assign strength labels based on distribution (percentile-aware)
+        import numpy as np
+        if norm_scores:
+            mean_n = float(np.mean(norm_scores))
+            std_n = float(np.std(norm_scores)) if len(norm_scores) > 1 else 10.0
+            for subject in subject_analysis:
+                n = subject_analysis[subject]["normalized"]
+                if n >= mean_n + std_n:
+                    subject_analysis[subject]["strength"] = "Excellent"
+                elif n >= mean_n:
+                    subject_analysis[subject]["strength"] = "Good"
+                elif n >= mean_n - std_n:
+                    subject_analysis[subject]["strength"] = "Average"
+                else:
+                    subject_analysis[subject]["strength"] = "Needs Improvement"
         
         return AnalyzeResponse(
             majors=majors,

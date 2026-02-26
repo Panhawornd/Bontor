@@ -23,49 +23,8 @@ model User {
   grades          Grade[]
   inputs          Input[]
   recommendations Recommendation[]
-  feedback        Feedback[]
-  preferences     UserPreferences?
 }
 
-model UserPreferences {
-  id                Int     @id @default(autoincrement())
-  userId            Int     @unique
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workStyle         String? // "teamwork", "solo", "mixed"
-  learningStyle     String? // "theory", "practical", "mixed"
-  careerFocus       String? // "research", "industry", "entrepreneurship"
-  locationPreference String? // "local", "international", "flexible"
-  salaryExpectation String? // "high", "moderate", "flexible"
-  workLifeBalance   String? // "high", "moderate", "career-focused"
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-}
-
-model Feedback {
-  id                Int      @id @default(autoincrement())
-  userId            Int
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recommendedMajor  String
-  chosenMajor       String?
-  feedbackScore     Int?     // 1-5 rating
-  feedbackText      String?
-  wasHelpful        Boolean?
-  wouldRecommend    Boolean?
-  createdAt         DateTime @default(now())
-}
-
-model TrainingData {
-  id                Int      @id @default(autoincrement())
-  grades            Json     // Store as JSON for flexibility
-  interests         String
-  careerGoals       String?
-  studyPreference   String?
-  recommendedMajor  String
-  actualMajor       String?  // What they actually chose
-  feedbackScore     Int?     // 1-5 rating
-  createdAt         DateTime @default(now())
-  isProcessed       Boolean  @default(false) // For ML training
-}
 
 model Input {
   id            Int      @id @default(autoincrement())

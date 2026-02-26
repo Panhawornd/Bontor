@@ -173,7 +173,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(recommendations.router, prefix="/api", tags=["Recommendations"])
+app.include_router(recommendations.router, prefix="/api", tags=["Analyze"])
 
 
 # ============================================
@@ -196,7 +196,7 @@ async def root():
             "Confidence monitoring",
             "Post-processing"
         ],
-        "endpoints": ["/api/recommend", "/api/analyze", "/health", "/metrics"]
+        "endpoints": ["/api/analyze", "/health", "/metrics"]
     }
 
 

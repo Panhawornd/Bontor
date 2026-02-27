@@ -116,13 +116,30 @@ class ProfileGenerator:
 
             # --- Subject distributions ---
             subjects = {}
+            # Define primary subjects for specific fields to guide the ML model
+            primary_map = {
+                "Medicine": ["biology", "chemistry"],
+                "Pharmacy": ["biology", "chemistry"],
+                "Dentistry": ["biology", "chemistry"],
+                "Software Engineering": ["math"],
+                "Data Science": ["math"],
+                "Electrical Engineering": ["math", "physics"],
+                "Mechanical Engineering": ["math", "physics"],
+                "Civil Engineering": ["math", "physics"],
+                "Chemical Engineering": ["chemistry", "math"],
+            }
+            major_primaries = primary_map.get(major_name, required)
+
             for s in SUBJECTS:
-                if s in required:
-                    # Required → high mean, tight std
-                    subjects[s] = (0.78, 0.08)
+                if s in major_primaries:
+                    # Primary required → very high mean
+                    subjects[s] = (0.82, 0.07)
+                elif s in required:
+                    # Required but not primary → high mean
+                    subjects[s] = (0.65, 0.10)
                 else:
-                    # Not required → average mean, wider std
-                    subjects[s] = (0.48, 0.14)
+                    # Not required → average mean
+                    subjects[s] = (0.45, 0.15)
 
             # --- Strength probabilities via SBERT ---
             major_emb = enc.encode(major_text)

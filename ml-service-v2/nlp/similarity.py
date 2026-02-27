@@ -73,14 +73,31 @@ class SimilarityEngine:
         # Compute similarity for each major
         scores = {}
         for major_name, major_info in majors_data.items():
-            description = major_info.get('description', '')
-            keywords = ' '.join(major_info.get('keywords', []))
-            careers = ' '.join(major_info.get('career_paths', []))
-            skills = ' '.join(major_info.get('fundamental_skills', {}).keys())
-            subjects = ' '.join(major_info.get('required_subjects', []))
+            desc = major_info.get('description', '')
+            keywords = major_info.get('keywords', [])
+            careers = major_info.get('career_paths', [])
+            skills_dict = major_info.get('fundamental_skills', {})
+            subjects = major_info.get('required_subjects', [])
             
-            # Combine all signals for a rich AI profile
-            major_text = f"{description} {keywords} {careers} {skills} {subjects}"
+            # Weight skills by importance
+            weighted_skills = []
+            for skill, s_info in skills_dict.items():
+                imp = s_info.get("importance", "medium")
+                if imp == "critical":
+                    weighted_skills.extend([skill] * 3)
+                elif imp == "high":
+                    weighted_skills.extend([skill] * 2)
+                else:
+                    weighted_skills.append(skill)
+            
+            # Repeat subjects and keywords for stronger signal
+            major_text = (
+                f"{desc} "
+                f"{' '.join(keywords)} {' '.join(keywords)} "
+                f"{' '.join(careers)} "
+                f"{' '.join(weighted_skills)} "
+                f"{' '.join(subjects)} {' '.join(subjects)}"
+            )
             
             cache_key = f"major:{major_name}"
             clean_major = clean_text(major_text)

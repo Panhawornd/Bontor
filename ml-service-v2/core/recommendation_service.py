@@ -132,38 +132,179 @@ class RecommendationService:
         ml_predictions = self.predictor.predict(features)
 
         # ========================================
-        # STEP 5: Score Fusion (ML × SBERT × Eligibility)
-        #
-        # No magic numbers. Each signal is a 0-1 factor:
-        # - ml_probability: what the RF model thinks (0-1)
-        # - sbert_factor: how well text matches this major (0-1→boost)
-        # - eligibility: data-driven from required_subjects (0-1)
-        # - semantic_boost: from intent detection (similarity-based)
-        # - exclusion_penalty: from negative detection (similarity-based)
-        #
-        # Final = ml_probability * eligibility * sbert_factor * intent
+        # STEP 5: Academic Signal Locking
         # ========================================
+        # Detect mentions of subjects like "math", "physics", etc.
+        subject_mentions = {s.lower() for s in MAX_SCORES.keys() if s.lower() in raw_text.lower()}
+        
         # Determine if there's a specific intent
         max_boost = max(semantic_boosts.values()) if semantic_boosts else 1.0
         # Very sensitive threshold to catch subject-level interests
         has_specific_intent = has_text_input and max_boost > 1.05
         
+        # --- CONCEPT ANCHOR SYSTEM ---
+        # Explicitly link keywords to majors for "logical" matching
+        CONCEPT_ANCHORS = {
+            # Academic Subjects
+            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
+            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
+            "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
+            "biology": ["Medicine", "Pharmacy", "Dentistry"],
+            "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
+            
+            # Technology Concepts
+            "data": ["Data Science"],
+            "analysis": ["Data Science"],
+            "analytics": ["Data Science"],
+            "machine learning": ["Data Science"],
+            "artificial intelligence": ["Data Science"],
+            "ai": ["Data Science"],
+            "algorithm": ["Data Science", "Software Engineering"],
+            "neural": ["Data Science"],
+            "deep learning": ["Data Science"],
+            "statistics": ["Data Science"],
+            "coding": ["Software Engineering"],
+            "programming": ["Software Engineering"],
+            "code": ["Software Engineering"],
+            "software": ["Software Engineering"],
+            "security": ["Cybersecurity"],
+            "hacking": ["Cybersecurity"],
+            "cyber": ["Cybersecurity"],
+            "network": ["Telecommunication and Networking"],
+            
+            # Medical & Health
+            "doctor": ["Medicine"],
+            "medical": ["Medicine"],
+            "medicine": ["Medicine"],
+            "surgeon": ["Medicine"],
+            "hospital": ["Medicine"],
+            "dentist": ["Dentistry"],
+            "dental": ["Dentistry"],
+            "teeth": ["Dentistry"],
+            "pharmacist": ["Pharmacy"],
+            "pharmacy": ["Pharmacy"],
+            "medication": ["Pharmacy"],
+            "drug": ["Pharmacy"],
+            "patient": ["Medicine", "Dentistry", "Pharmacy"],
+            "treatment": ["Medicine", "Dentistry", "Pharmacy"],
+            "health": ["Medicine", "Dentistry", "Pharmacy"],
+            "diseases": ["Medicine"],
+            "saving lives": ["Medicine"],
+            "help people": ["Medicine", "Psychology", "Education"],
+            
+            # Psychology & Mental Health
+            "psychology": ["Psychology"],
+            "mental": ["Psychology"],
+            "counseling": ["Psychology"],
+            "therapy": ["Psychology"],
+            "behavior": ["Psychology"],
+            
+            # Law & Justice
+            "law": ["Law"],
+            "lawyer": ["Law"],
+            "legal": ["Law"],
+            "justice": ["Law"],
+            "court": ["Law"],
+            "attorney": ["Law"],
+            "judge": ["Law"],
+            
+            # Engineering
+            "bridge": ["Civil Engineering"],
+            "structure": ["Civil Engineering"],
+            "construction": ["Civil Engineering"],
+            "building": ["Civil Engineering", "Architecture"],
+            "robot": ["Mechanical Engineering"],
+            "machine": ["Mechanical Engineering"],
+            "engine": ["Mechanical Engineering"],
+            "circuit": ["Electrical Engineering"],
+            "electrical": ["Electrical Engineering"],
+            "chemical": ["Chemical Engineering"],
+            
+            # Education
+            "teach": ["Education"],
+            "teacher": ["Education"],
+            "school": ["Education"],
+            "education": ["Education"],
+            
+            # International Relations
+            "global": ["International Relations"],
+            "politics": ["International Relations"],
+            "diplomat": ["International Relations"],
+            "international": ["International Relations"],
+            
+            # Business & Finance
+            "business": ["Business Administration", "Business Management"],
+            "entrepreneur": ["Business Administration"],
+            "startup": ["Business Administration"],
+            "money": ["Finance", "Business Administration"],
+            "invest": ["Finance"],
+            "banking": ["Finance"],
+            "financial": ["Finance"],
+            
+            # Design & Creative
+            "design": ["UX/UI Design", "Graphic Design", "Architecture"],
+            "draw": ["Graphic Design", "Architecture"],
+            "art": ["Graphic Design", "Architecture"],
+            "logo": ["Graphic Design"],
+            "branding": ["Graphic Design"],
+            "figma": ["UX/UI Design"],
+            "wireframe": ["UX/UI Design"],
+            
+            # Architecture
+            "architecture": ["Architecture"],
+            "blueprint": ["Architecture"],
+            "floor plan": ["Architecture"],
+        }
+        
+        active_anchors = {m for k, majors in CONCEPT_ANCHORS.items() if k in raw_text.lower() for m in majors}
+        
+        # Remove excluded majors from anchors — negation overrides positive anchoring
+        # e.g. "i don't like math" should NOT anchor to math-related majors
+        if exclusion_penalties:
+            active_anchors -= set(exclusion_penalties.keys())
+        
+        if active_anchors:
+            logger.info(f"CONCEPT ANCHORS ACTIVE: {active_anchors}")
+
         if has_specific_intent:
             logger.info(f"SPECIFIC INTENT: '{interests}' (max_boost={max_boost:.2f})")
+
+        # --- ANCHOR INJECTION ---
+        # The ML model may output 0% for some majors (e.g. SE with low grades).
+        # If the user explicitly stated interest, inject missing anchored majors
+        # with a guaranteed minimum probability so the anchor boost can work.
+        if active_anchors and has_specific_intent:
+            existing_majors = {p["major"] for p in ml_predictions}
+            for anchor_major in active_anchors:
+                if anchor_major not in existing_majors and anchor_major in self.majors_db:
+                    ml_predictions.append({
+                        "major": anchor_major,
+                        "probability": 0.05,  # minimum floor
+                        "source": "anchor-injected",
+                    })
+                    logger.info(f"ANCHOR INJECTED: {anchor_major} (ML model had 0%)")
 
         scored_predictions = []
         for pred in ml_predictions:
             major = pred["major"]
             pred_copy = pred.copy()
+            major_info = self.majors_db.get(major, {})
+            required = [s.lower() for s in major_info.get("required_subjects", [])]
 
             # 1. Eligibility factor
             eligibility = eligibility_flags.get(major, 1.0)
             if eligibility == 0.0 and not has_grades:
                 eligibility = 1.0
+            # If this major is concept-anchored, soften eligibility penalty
+            if major in active_anchors and eligibility < 0.7:
+                eligibility = 0.7  # User's stated interest overrides low grades
 
             # 2. Exclusion penalty
             penalty = exclusion_penalties.get(major, 1.0)
-            if penalty < 0.15:
+            # Don't exclude concept-anchored majors
+            if major in active_anchors:
+                penalty = max(penalty, 0.8)
+            elif penalty < 0.15:
                 continue
 
             # 3. SBERT similarity factor
@@ -171,32 +312,67 @@ class RecommendationService:
             sim_score = major_similarities.get(major, 0.0)
             intent_boost = semantic_boosts.get(major, 1.0)
             
+            # 4. Subject Locking Factor
+            # Distinguish between "Requirements" and "Core Skills"
+            subject_factor = 1.0
+            if subject_mentions:
+                matches = subject_mentions & set(required)
+                if matches:
+                    # Check if any of these subjects are also CORE skills
+                    core_skills = {k.lower() for k in major_info.get("fundamental_skills", {}).keys()}
+                    critical_matches = matches & core_skills
+                    
+                    if critical_matches:
+                        # Massive boost for CORE academic interests (e.g. Math for SE)
+                        subject_factor = 2.0 + (len(critical_matches) * 5.0) # 7.0x boost
+                    else:
+                        # Normal boost for requirement matches (e.g. Math for Pharmacy)
+                        subject_factor = 1.25 + (len(matches) * 0.5)
+                else:
+                    # No match for mentioned subjects
+                    if has_specific_intent:
+                        subject_factor = 0.2 # Stronger penalty for domain mismatch
+
             # --- ULTRA-STRICT FILTERING ---
             # If user has a specific interest, PURGE anything unrelated.
-            # Unrelated = No Semantic Boost AND Low Similarity
             if has_specific_intent:
-                if major not in semantic_boosts and sim_score < 0.2:
-                    logger.debug(f"PURGING UNRELATED: {major} (No boost, sim={sim_score:.2f})")
+                # 1. Purge if NO semantic boost AND NOT a core academic interest
+                has_core_match = bool(subject_mentions & {k.lower() for k in major_info.get("fundamental_skills", {}).keys()})
+                if major not in semantic_boosts and not has_core_match and sim_score < 0.2:
+                    continue
+                # 2. Domain Mismatch Lockdown
+                if subject_mentions and not (subject_mentions & set(required)) and sim_score < 0.3:
                     continue
 
             if not has_text_input:
                 sbert_factor = 1.0
             elif not has_grades:
-                sbert_factor = math.exp(sim_score * 6.0)
+                sbert_factor = math.exp(sim_score * 6.5) # Amplify text signal
             else:
-                # Steepness 5.0 for better separation
-                sbert_factor = math.exp(sim_score * 5.0)
+                sbert_factor = math.exp(sim_score * 6.0) # Amplify text signal
 
-            # 4. Semantic intent boost
-            intent_factor = intent_boost ** 3 if intent_boost > 1.0 else 1.0
+            # 5. Semantic intent boost
+            intent_factor = intent_boost ** 4 if intent_boost > 1.0 else 1.0 # Cube to Quartic
 
-            # 5. Fuse all signals
+            # 6. Concept Anchor boost
+            # When user explicitly states an interest (e.g. "i love law"),
+            # the anchor MUST dominate over ML predictions.
+            anchor_factor = 1.0
+            if active_anchors:
+                if major in active_anchors:
+                    anchor_factor = 50.0  # Massive boost — user intent is king
+                elif has_specific_intent:
+                    anchor_factor = 0.1  # Heavy penalty — suppress unrelated majors
+
+            # 7. Fuse all signals
             final_score = (
                 pred_copy["probability"]
                 * eligibility
                 * penalty
                 * sbert_factor
                 * intent_factor
+                * subject_factor
+                * anchor_factor
             )
 
             pred_copy["probability"] = final_score
@@ -214,14 +390,16 @@ class RecommendationService:
         scored_predictions.sort(key=lambda x: x["probability"], reverse=True)
 
         # --- DYNAMIC CONFIDENCE CUTOFF ---
-        # If #1 is high confidence (> 40%), remove anything that is < 1/3 of its score
-        # and has no semantic relation. This keeps the UX clean.
-        if scored_predictions and scored_predictions[0]["probability"] > 0.4:
+        # If #1 is high confidence (> 40%), remove anything that is < 1/4 of its score
+        # and has no core relation. This keeps the UX clean.
+        # BUT: never remove concept-anchored majors — user explicitly asked for them.
+        if scored_predictions and scored_predictions[0]["probability"] > 0.35:
             top_prob = scored_predictions[0]["probability"]
             refined = [scored_predictions[0]]
             for p in scored_predictions[1:]:
-                # Keep if it has semantic relation OR is at least somewhat close
-                if p["major"] in semantic_boosts or p["probability"] > (top_prob * 0.4):
+                is_anchored = p["major"] in active_anchors
+                has_core_match = subject_mentions & {k.lower() for k in self.majors_db.get(p["major"], {}).get("fundamental_skills", {}).keys()}
+                if is_anchored or p["major"] in semantic_boosts or has_core_match or p["probability"] > (top_prob * 0.25):
                     refined.append(p)
             scored_predictions = refined
 

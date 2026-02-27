@@ -31,10 +31,10 @@ MAJOR_DATABASE = {
         }
     },
     "Electrical Engineering": {
-        "keywords": ["electrical", "electronics", "electronic", "circuit", "power", "signal", "electrical engineering", "electrical engineer", "electrical systems", "electronic systems", "electrical design", "power systems", "electrical technology", "electrical equipment", "electrical installation", "electrical maintenance", "electrical safety", "electrical code", "electrical wiring", "electrical components", "electrical devices", "electrical machines", "electrical motors", "electrical generators", "electrical transformers", "electrical distribution", "electrical transmission", "electrical control", "electrical automation", "electrical instrumentation", "electrical measurement", "electrical testing", "electrical troubleshooting", "electrical repair", "electrical construction", "electrical project", "electrical consulting", "electrical research", "electrical development", "electrical innovation", "electrical technology", "electrical engineering degree", "electrical engineering career", "physics", "math", "mathematics", "electricity"],
+        "keywords": ["physics", "math", "electricity", "electrical", "electronics", "circuit", "power", "signal", "electronics engineer", "electrical systems", "power systems", "automation", "embedded systems", "robotics", "mechatronics"],
         "required_subjects": ["math", "physics"],
         "description": "Design and development of electrical systems, electronics, and power systems",
-        "career_paths": ["Electrical Engineer", "Electronics Engineer", "Power Systems Engineer", "Control Systems Engineer", "Embedded Systems Engineer", "Telecommunications Engineer", "Electrical Designer", "Electrical Project Manager"],
+        "career_paths": ["Electrical Engineer", "Electronics Engineer", "Power Systems Engineer", "Control Systems Engineer", "Embedded Systems Engineer", "Telecommunications Engineer"],
         "fundamental_skills": {
             "Circuit Design": {"importance": "critical", "description": "Designing electrical circuits"},
             "Mathematics": {"importance": "critical", "description": "Calculus and linear algebra"},
@@ -45,7 +45,7 @@ MAJOR_DATABASE = {
         }
     },
     "Mechanical Engineering": {
-        "keywords": ["mechanical", "machines", "robotics", "engine", "automotive", "thermodynamics", "manufacturing", "mechatronics", "physics", "math", "mathematics", "mechanics"],
+        "keywords": ["mechanical", "machines", "robotics", "engine", "automotive", "thermodynamics", "manufacturing", "mechatronics", "physics", "math", "mathematics", "mechanics", "building machines", "fixing stuff", "handy", "mechanical systems"],
         "required_subjects": ["math", "physics"],
         "description": "Design, analysis, and manufacturing of mechanical systems and machines",
         "career_paths": ["Mechanical Engineer", "Design Engineer", "Manufacturing Engineer", "Robotics Engineer", "Automotive Engineer"],
@@ -59,7 +59,7 @@ MAJOR_DATABASE = {
         }
     },
     "Civil Engineering": {
-        "keywords": ["civil", "civil engineering", "civil engineer", "infrastructure", "bridges", "roads", "highways", "transportation", "construction", "structural", "large-scale construction", "public works", "connect communities", "civil construction", "civil infrastructure", "civil projects", "civil design", "civil technology", "civil systems", "civil structures", "civil buildings", "civil bridges", "civil roads", "civil highways", "civil transportation", "civil water", "civil drainage", "civil sewage", "civil environmental", "civil geotechnical", "civil structural", "civil materials", "civil surveying", "civil planning", "civil development", "civil maintenance", "civil repair", "civil renovation", "civil restoration", "civil preservation", "civil safety", "civil codes", "civil regulations", "civil compliance", "civil standards", "civil quality", "civil testing", "civil inspection", "civil supervision", "civil management", "civil consulting", "civil research", "civil innovation", "civil engineering degree", "civil engineering career", "math", "physics", "construction"],
+        "keywords": ["civil", "civil engineering", "infrastructure", "bridges", "roads", "highways", "transportation", "construction", "structural", "public works", "structural analysis", "surveying", "urban planning", "civil project"],
         "required_subjects": ["math", "physics"],
         "description": "Design and construction of infrastructure, buildings, and public works",
         "career_paths": ["Civil Engineer", "Structural Engineer", "Transportation Engineer", "Water Resources Engineer", "Environmental Engineer", "Geotechnical Engineer", "Construction Engineer", "Civil Project Manager"],
@@ -129,7 +129,7 @@ MAJOR_DATABASE = {
         }
     },
     "Education": {
-        "keywords": ["teaching", "education", "teacher", "school", "learning", "students", "classroom", "helping people", "help people", "teach", "mentor", "guide", "educator", "professor", "principal", "curriculum", "educational technology", "special education", "early childhood education", "educational administration", "educational policy", "teacher training", "educational research", "academic", "pedagogy", "instructional design", "educational leadership", "school counselor", "educational consultant", "education degree", "education career", "english", "math"],
+        "keywords": ["teaching", "education", "teacher", "school", "learning", "students", "classroom", "helping people", "help people", "teach", "mentor", "guide", "educator", "professor", "principal", "curriculum", "educational technology", "special education", "early childhood education", "educational administration", "educational policy", "teacher training", "educational research", "academic", "pedagogy", "instructional design", "educational leadership", "school counselor", "educational consultant", "education degree", "education career", "english", "math", "explaining things", "mentoring", "explaining concepts"],
         "required_subjects": ["english", "math"],
         "description": "Preparation for teaching and educational leadership roles",
         "career_paths": ["Teacher", "Principal", "Educational Consultant", "Curriculum Developer", "University Professor", "Special Education Teacher", "Educational Technology Specialist", "School Counselor", "Training and Development Manager"],

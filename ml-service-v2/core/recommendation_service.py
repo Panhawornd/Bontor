@@ -144,18 +144,38 @@ class RecommendationService:
         
         # --- CONCEPT ANCHOR SYSTEM ---
         # Explicitly link keywords to majors for "logical" matching
+        # Covers: subject names, career titles, activities, personality traits, hobbies
         CONCEPT_ANCHORS = {
-            # Academic Subjects
+            # ===== ACADEMIC SUBJECTS =====
             "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
             "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
             "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
             
-            # Technology Concepts
-            "data": ["Data Science"],
-            "analysis": ["Data Science"],
-            "analytics": ["Data Science"],
+            # ===== COMPUTER SCIENCE / IT =====
+            # Core tech
+            "coding": ["Software Engineering"],
+            "programming": ["Software Engineering"],
+            "code": ["Software Engineering"],
+            "software": ["Software Engineering"],
+            "app": ["Software Engineering"],
+            "building apps": ["Software Engineering"],
+            "making games": ["Software Engineering"],
+            "game development": ["Software Engineering"],
+            "game": ["Software Engineering"],
+            "website": ["Software Engineering"],
+            "web development": ["Software Engineering"],
+            "computers": ["Software Engineering", "Data Science"],
+            "computer": ["Software Engineering", "Data Science"],
+            "technology": ["Software Engineering", "Data Science"],
+            "tech": ["Software Engineering", "Data Science"],
+            "digital": ["Software Engineering", "Data Science", "Cybersecurity", "UX/UI Design"],
+            # Logic & problem-solving (IT context)
+            "logical problems": ["Software Engineering", "Data Science"],
+            "puzzles": ["Software Engineering", "Data Science"],
+            "structured thinking": ["Software Engineering", "Data Science"],
+            # AI & Data
             "machine learning": ["Data Science"],
             "artificial intelligence": ["Data Science"],
             "ai": ["Data Science"],
@@ -163,100 +183,200 @@ class RecommendationService:
             "neural": ["Data Science"],
             "deep learning": ["Data Science"],
             "statistics": ["Data Science"],
-            "coding": ["Software Engineering"],
-            "programming": ["Software Engineering"],
-            "code": ["Software Engineering"],
-            "software": ["Software Engineering"],
+            "data": ["Data Science"],
+            "analysis": ["Data Science"],
+            "analytics": ["Data Science"],
+            # Cybersecurity
             "security": ["Cybersecurity"],
             "hacking": ["Cybersecurity"],
+            "hackathon": ["Software Engineering", "Cybersecurity"],
             "cyber": ["Cybersecurity"],
+            "cybersecurity": ["Cybersecurity"],
+            "protecting systems": ["Cybersecurity"],
+            "digital attacks": ["Cybersecurity"],
+            # Networking
             "network": ["Telecommunication and Networking"],
+            # Robotics
+            "robotics": ["Mechanical Engineering", "Electrical Engineering"],
             
-            # Medical & Health
+            # ===== MEDICINE / HEALTH SCIENCES =====
             "doctor": ["Medicine"],
+            "doctors": ["Medicine"],
             "medical": ["Medicine"],
             "medicine": ["Medicine"],
             "surgeon": ["Medicine"],
+            "surgeons": ["Medicine"],
             "hospital": ["Medicine"],
+            "hospitals": ["Medicine"],
+            "human body": ["Medicine"],
+            "saving lives": ["Medicine"],
+            "help people physically": ["Medicine"],
+            "calm under pressure": ["Medicine"],
+            "clinic": ["Medicine"],
+            "clinics": ["Medicine"],
+            "diseases": ["Medicine"],
+            "patient": ["Medicine", "Dentistry", "Pharmacy"],
+            "patients": ["Medicine", "Dentistry", "Pharmacy"],
+            "treatment": ["Medicine", "Dentistry", "Pharmacy"],
+            "treatments": ["Medicine", "Dentistry", "Pharmacy"],
+            "health": ["Medicine", "Dentistry", "Pharmacy"],
+            "help people": ["Medicine", "Psychology", "Education"],
+            # Dentistry
             "dentist": ["Dentistry"],
             "dental": ["Dentistry"],
             "teeth": ["Dentistry"],
+            # Pharmacy
             "pharmacist": ["Pharmacy"],
             "pharmacy": ["Pharmacy"],
             "medication": ["Pharmacy"],
             "drug": ["Pharmacy"],
-            "patient": ["Medicine", "Dentistry", "Pharmacy"],
-            "treatment": ["Medicine", "Dentistry", "Pharmacy"],
-            "health": ["Medicine", "Dentistry", "Pharmacy"],
-            "diseases": ["Medicine"],
-            "saving lives": ["Medicine"],
-            "help people": ["Medicine", "Psychology", "Education"],
             
-            # Psychology & Mental Health
-            "psychology": ["Psychology"],
-            "mental": ["Psychology"],
-            "counseling": ["Psychology"],
-            "therapy": ["Psychology"],
-            "behavior": ["Psychology"],
-            
-            # Law & Justice
-            "law": ["Law"],
-            "lawyer": ["Law"],
-            "legal": ["Law"],
-            "justice": ["Law"],
-            "court": ["Law"],
-            "attorney": ["Law"],
-            "judge": ["Law"],
-            
-            # Engineering
+            # ===== ENGINEERING =====
+            # General engineering
+            "engineering": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering"],
+            "fixing things": ["Mechanical Engineering"],
+            "hands-on": ["Mechanical Engineering", "Civil Engineering"],
+            # Civil
             "bridge": ["Civil Engineering"],
+            "bridges": ["Civil Engineering"],
             "structure": ["Civil Engineering"],
+            "structures": ["Civil Engineering"],
             "construction": ["Civil Engineering"],
-            "building": ["Civil Engineering", "Architecture"],
+            "building": ["Civil Engineering"],
+            "buildings": ["Civil Engineering", "Architecture"],
+            "building things": ["Mechanical Engineering", "Civil Engineering"],
+            "building design": ["Architecture"],
+            "infrastructure": ["Civil Engineering"],
+            # Mechanical
             "robot": ["Mechanical Engineering"],
+            "robots": ["Mechanical Engineering"],
             "machine": ["Mechanical Engineering"],
+            "machines": ["Mechanical Engineering"],
             "engine": ["Mechanical Engineering"],
+            "engines": ["Mechanical Engineering"],
+            "mechanical": ["Mechanical Engineering"],
+            # Electrical
             "circuit": ["Electrical Engineering"],
+            "circuits": ["Electrical Engineering"],
             "electrical": ["Electrical Engineering"],
+            "electronics": ["Electrical Engineering"],
+            "electricity": ["Electrical Engineering"],
+            # Chemical
             "chemical": ["Chemical Engineering"],
+            "chemicals": ["Chemical Engineering"],
             
-            # Education
-            "teach": ["Education"],
-            "teacher": ["Education"],
-            "school": ["Education"],
-            "education": ["Education"],
-            
-            # International Relations
-            "global": ["International Relations"],
-            "politics": ["International Relations"],
-            "diplomat": ["International Relations"],
-            "international": ["International Relations"],
-            
-            # Business & Finance
+            # ===== BUSINESS / MANAGEMENT =====
             "business": ["Business Administration", "Business Management"],
             "entrepreneur": ["Business Administration"],
+            "entrepreneurship": ["Business Administration"],
             "startup": ["Business Administration"],
+            "startups": ["Business Administration"],
+            "company": ["Business Administration", "Business Management"],
+            "companies": ["Business Administration", "Business Management"],
+            "leadership": ["Business Administration", "Business Management"],
+            "selling ideas": ["Business Administration", "Business Management"],
+            "negotiating": ["Business Administration", "Business Management"],
+            "organizing events": ["Business Administration", "Business Management"],
+            "managing money": ["Finance", "Business Administration"],
             "money": ["Finance", "Business Administration"],
             "invest": ["Finance"],
             "banking": ["Finance"],
             "financial": ["Finance"],
+            "finance": ["Finance"],
             
-            # Design & Creative
+            # ===== ART / DESIGN =====
             "design": ["UX/UI Design", "Graphic Design", "Architecture"],
             "draw": ["Graphic Design", "Architecture"],
+            "drawing": ["Graphic Design", "Architecture"],
             "art": ["Graphic Design", "Architecture"],
+            "creative": ["Graphic Design", "UX/UI Design"],
+            "creativity": ["Graphic Design", "UX/UI Design"],
+            "imagination": ["Graphic Design", "UX/UI Design"],
+            "visuals": ["Graphic Design"],
+            "creating visuals": ["Graphic Design"],
+            "aesthetics": ["Graphic Design", "UX/UI Design", "Architecture"],
+            "colors": ["Graphic Design"],
+            "layouts": ["Graphic Design", "UX/UI Design"],
+            "animation": ["Graphic Design"],
+            "fashion": ["Graphic Design"],
+            "interior design": ["Architecture"],
             "logo": ["Graphic Design"],
             "branding": ["Graphic Design"],
             "figma": ["UX/UI Design"],
             "wireframe": ["UX/UI Design"],
             
-            # Architecture
+            # ===== LAW =====
+            "law": ["Law"],
+            "lawyer": ["Law"],
+            "legal": ["Law"],
+            "justice": ["Law"],
+            "fairness": ["Law"],
+            "court": ["Law"],
+            "attorney": ["Law"],
+            "judge": ["Law"],
+            "debating": ["Law"],
+            "debate": ["Law"],
+            "debate club": ["Law"],
+            "arguing": ["Law"],
+            "arguing logically": ["Law"],
+            "model united nations": ["Law", "International Relations"],
+            
+            # ===== EDUCATION =====
+            "teach": ["Education"],
+            "teacher": ["Education"],
+            "teaching": ["Education"],
+            "school": ["Education"],
+            "schools": ["Education"],
+            "education": ["Education"],
+            "explaining": ["Education"],
+            "explaining things": ["Education"],
+            "explaining things to others": ["Education"],
+            "working with children": ["Education"],
+            "students": ["Education"],
+            "student": ["Education"],
+            "make a difference": ["Education"],
+            
+            # ===== PSYCHOLOGY =====
+            "psychology": ["Psychology"],
+            "mental": ["Psychology"],
+            "counseling": ["Psychology"],
+            "therapy": ["Psychology"],
+            "behavior": ["Psychology"],
+            "human behavior": ["Psychology"],
+            "emotions": ["Psychology"],
+            "understanding emotions": ["Psychology"],
+            "empathetic": ["Psychology"],
+            "empathy": ["Psychology"],
+            "listening": ["Psychology"],
+            "listening to people": ["Psychology"],
+            
+            # ===== INTERNATIONAL RELATIONS =====
+            "global": ["International Relations"],
+            "global issues": ["International Relations"],
+            "politics": ["International Relations"],
+            "world politics": ["International Relations"],
+            "diplomat": ["International Relations"],
+            "diplomacy": ["International Relations"],
+            "international": ["International Relations"],
+            "current events": ["International Relations"],
+            "ngo": ["International Relations"],
+            "ngos": ["International Relations"],
+            "history": ["International Relations"],
+            
+            # ===== ARCHITECTURE =====
             "architecture": ["Architecture"],
             "blueprint": ["Architecture"],
             "floor plan": ["Architecture"],
         }
         
-        active_anchors = {m for k, majors in CONCEPT_ANCHORS.items() if k in raw_text.lower() for m in majors}
+        # Use regex for word boundaries to avoid partial matches (e.g. "ai" matching in "explaining")
+        import re
+        active_anchors = set()
+        for k, majors in CONCEPT_ANCHORS.items():
+            pattern = rf"\b{re.escape(k)}\b"
+            if re.search(pattern, raw_text.lower()):
+                for m in majors:
+                    active_anchors.add(m)
         
         # Remove excluded majors from anchors — negation overrides positive anchoring
         # e.g. "i don't like math" should NOT anchor to math-related majors
@@ -271,18 +391,24 @@ class RecommendationService:
 
         # --- ANCHOR INJECTION ---
         # The ML model may output 0% for some majors (e.g. SE with low grades).
-        # If the user explicitly stated interest, inject missing anchored majors
-        # with a guaranteed minimum probability so the anchor boost can work.
-        if active_anchors and has_specific_intent:
-            existing_majors = {p["major"] for p in ml_predictions}
+        # If concept anchors are active (matched keywords in user text),
+        # ensure anchored majors have a minimum probability floor (0.05)
+        # so the anchor boost can work effectively.
+        if active_anchors and has_text_input:
+            existing_map = {p["major"]: p for p in ml_predictions}
             for anchor_major in active_anchors:
-                if anchor_major not in existing_majors and anchor_major in self.majors_db:
-                    ml_predictions.append({
-                        "major": anchor_major,
-                        "probability": 0.05,  # minimum floor
-                        "source": "anchor-injected",
-                    })
-                    logger.info(f"ANCHOR INJECTED: {anchor_major} (ML model had 0%)")
+                if anchor_major in self.majors_db:
+                    if anchor_major not in existing_map:
+                        ml_predictions.append({
+                            "major": anchor_major,
+                            "probability": 0.05,
+                            "source": "anchor-injected",
+                        })
+                        logger.info(f"ANCHOR INJECTED: {anchor_major} (was missing)")
+                    elif existing_map[anchor_major]["probability"] < 0.05:
+                        existing_map[anchor_major]["probability"] = 0.05
+                        existing_map[anchor_major]["source"] = "anchor-floor-boost"
+                        logger.info(f"ANCHOR FLOOR APPLIED: {anchor_major} (was {existing_map[anchor_major]['probability']})")
 
         scored_predictions = []
         for pred in ml_predictions:
@@ -335,7 +461,8 @@ class RecommendationService:
 
             # --- ULTRA-STRICT FILTERING ---
             # If user has a specific interest, PURGE anything unrelated.
-            if has_specific_intent:
+            # BUT: never purge concept-anchored majors — user explicitly matched them.
+            if has_specific_intent and major not in active_anchors:
                 # 1. Purge if NO semantic boost AND NOT a core academic interest
                 has_core_match = bool(subject_mentions & {k.lower() for k in major_info.get("fundamental_skills", {}).keys()})
                 if major not in semantic_boosts and not has_core_match and sim_score < 0.2:
@@ -355,14 +482,18 @@ class RecommendationService:
             intent_factor = intent_boost ** 4 if intent_boost > 1.0 else 1.0 # Cube to Quartic
 
             # 6. Concept Anchor boost
-            # When user explicitly states an interest (e.g. "i love law"),
+            # When concept anchors match (keywords in user text),
             # the anchor MUST dominate over ML predictions.
             anchor_factor = 1.0
             if active_anchors:
                 if major in active_anchors:
                     anchor_factor = 50.0  # Massive boost — user intent is king
-                elif has_specific_intent:
-                    anchor_factor = 0.1  # Heavy penalty — suppress unrelated majors
+                else:
+                    # Penalize non-anchored majors whenever anchors are active
+                    if has_specific_intent:
+                        anchor_factor = 0.1  # Heavy penalty for strong intent
+                    else:
+                        anchor_factor = 0.3  # Moderate penalty for keyword-matched anchors
 
             # 7. Fuse all signals
             final_score = (

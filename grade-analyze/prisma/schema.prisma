@@ -48,10 +48,18 @@ model Grade {
 }
 
 model University {
-  id              Int      @id @default(autoincrement())
-  name            String
-  country         String
-  majorsAvailable String[] @map("majors_available")
+  id                   Int      @id @default(autoincrement())
+  name                 String
+  country              String
+  city                 String?
+  availablePrograms    String[] @map("available_programs")
+  minGrade             Float?   @map("min_grade")
+  entranceExam         Boolean? @map("entrance_exam")
+  scholarshipAvailable Boolean? @map("scholarship_available")
+  scholarshipDetail    String?  @map("scholarship_detail") @db.Text
+  locationMaps         String?  @map("location_maps") @db.Text
+  tuitionFee           String?  @map("tuition_fee")
+  imageUrl             String?  @map("image_url")
 
   @@map("universities")
 }

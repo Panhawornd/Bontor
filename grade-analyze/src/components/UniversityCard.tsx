@@ -14,53 +14,18 @@ import {
 import UniversityDetailModal from "./UniversityDetailModal";
 
 export interface University {
+  id: number;
   name: string;
   country: string;
-  location: string;
-  programs: string[];
-  imageUrl?: string;
-  requirements: {
-    min_grade: number;
-    preferred_subjects: string[];
-    entrance_exam?: {
-      required: boolean;
-      description?: string;
-      subjects?: string[];
-      schedule?: string;
-      fee?: string;
-    };
-    english_proficiency?: {
-      toefl?: {
-        required: boolean;
-        min_score?: number;
-      };
-      ielts?: {
-        required: boolean;
-        min_score?: number;
-      };
-    };
-  };
-  scholarships?: {
-    available: boolean;
-    description?: string;
-    types?: string[];
-    coverage?: string[];
-    application_deadline?: string;
-    how_to_apply?: string;
-  };
-  additional_info?: {
-    website?: string;
-    email?: string;
-    phone?: string;
-    application_deadline?: string;
-    tuition_fee?: string;
-    duration?: string;
-    accreditation?: string[];
-    facilities?: string[];
-    student_life?: string;
-    international_program?: boolean;
-    google_maps_link?: string;
-  };
+  city: string | null;
+  availablePrograms: string[];
+  minGrade: number | null;
+  entranceExam: boolean | null;
+  scholarshipAvailable: boolean | null;
+  scholarshipDetail: string | null;
+  locationMaps: string | null;
+  tuitionFee: string | null;
+  imageUrl?: string | null;
 }
 
 interface UniversityCardProps {
@@ -77,8 +42,8 @@ export default function UniversityCard({ university }: UniversityCardProps) {
       : "/image/Bontor-logo.png";
 
   const displayedPrograms = showAllPrograms
-    ? university.programs
-    : university.programs.slice(0, 5);
+    ? university.availablePrograms
+    : university.availablePrograms.slice(0, 5);
 
   return (
     <div
@@ -99,9 +64,9 @@ export default function UniversityCard({ university }: UniversityCardProps) {
       <div className="p-6 flex flex-col flex-grow">
       <div className="mb-4">
         <h3 className="text-xl font-bold text-white mb-2">{university.name}</h3>
-        <div className="flex items-center gap-2 text-gray-400 mb-2 text-sm overflow-hidden">
+        <div className="pt-2 flex items-center gap-2 text-gray-400 mb-2 text-sm overflow-hidden">
           <MapPin className="w-4 h-4 flex-shrink-0" />
-          <span className="truncate flex-shrink">{university.location}</span>
+          <span className="truncate flex-shrink">{university.city || "Unknown City"}</span>
           <span className="text-gray-600 flex-shrink-0">•</span>
           <span className="truncate flex-shrink">{university.country}</span>
           <span className="text-gray-600 flex-shrink-0">•</span>
@@ -113,9 +78,9 @@ export default function UniversityCard({ university }: UniversityCardProps) {
         <h4 className="text-sm font-semibold text-gray-300 mb-3">
           Available Programs
         </h4>
-        <div className="text-sm text-gray-400">
-          {university.programs.slice(0, 2).join(", ")}
-          {university.programs.length > 2 && "..."}
+        <div className="pt-2 text-sm text-gray-400">
+          {university.availablePrograms.slice(0, 2).join(", ")}
+          {university.availablePrograms.length > 2 && "..."}
         </div>
       </div>
 

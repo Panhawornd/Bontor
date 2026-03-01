@@ -105,10 +105,10 @@ export default function UniversityPage() {
   const filteredUniversities = universities.filter((uni) => {
     const matchesSearch =
       uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      uni.programs.some((p) =>
+      (uni.availablePrograms || []).some((p: string) =>
         p.toLowerCase().includes(searchQuery.toLowerCase())
       ) ||
-      uni.location.toLowerCase().includes(searchQuery.toLowerCase());
+      (uni.city || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesSearch;
   });

@@ -55,7 +55,7 @@ export default function UniversityDetailModal({
       }
       
       // Fallback: use university name as search query
-      const query = encodeURIComponent(university.name);
+      const query = encodeURIComponent(university.name + " " + (university.city || ""));
       return `https://maps.google.com/maps?q=${query}&hl=en&z=16&output=embed`;
     } catch {
       return "";
@@ -90,7 +90,7 @@ export default function UniversityDetailModal({
         <div className="flex items-center gap-6 text-gray-300 pt-2">
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-blue-500" />
-            <span className="text-lg">{university.location}</span>
+            <span className="text-lg">{university.city || "Unknown City"}</span>
           </div>
           <span className="text-gray-600">•</span>
           <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export default function UniversityDetailModal({
               <span className="text-xs text-gray-400">Programs</span>
             </div>
             <p className="text-2xl font-bold text-white">
-              {university.programs.length}
+              {university.availablePrograms?.length || 0}
             </p>
           </div>
 
@@ -121,8 +121,8 @@ export default function UniversityDetailModal({
               <TrendingUp className="w-5 h-5 text-green-500" />
               <span className="text-xs text-gray-400">Min Grade</span>
             </div>
-            <p className="text-lg font-bold text-white">
-              {university.requirements.min_grade}%
+            <p className="text-xl font-bold text-white">
+              {university.minGrade ? `${university.minGrade}%` : "N/A"}
             </p>
           </div>
 
@@ -131,8 +131,8 @@ export default function UniversityDetailModal({
               <FileText className="w-5 h-5 text-green-500" />
               <span className="text-xs text-gray-400">Entrance Exam</span>
             </div>
-            <p className="text-lg font-bold text-white">
-              {university.requirements.entrance_exam?.required ? "Required" : "No"}
+            <p className="text-xl font-bold text-white">
+              {university.entranceExam ? "Required" : "No"}
             </p>
           </div>
 
@@ -141,8 +141,8 @@ export default function UniversityDetailModal({
               <Award className="w-5 h-5 text-yellow-500" />
               <span className="text-xs text-gray-400">Scholarships</span>
             </div>
-            <p className="text-lg font-bold text-white">
-              {university.scholarships?.available ? "Available" : "N/A"}
+            <p className="text-xl font-bold text-white">
+              {university.scholarshipAvailable ? "Available" : "N/A"}
             </p>
           </div>
         </div>
@@ -151,10 +151,10 @@ export default function UniversityDetailModal({
         <div className="bg-[#111111] border border-[#1f1f1f] rounded-lg p-6 mt-2">
           <h3 className="text-xl font-bold text-white pb-6 flex items-center gap-3">
             <BookOpen className="w-6 h-6 text-blue-500" />
-            Available Programs ({university.programs.length})
+            Available Programs ({university.availablePrograms?.length || 0})
           </h3>
           <div className="space-y-3 pt-2">
-            {university.programs.map((program, idx) => (
+            {university.availablePrograms?.map((program, idx) => (
               <div
                 key={idx}
                 className="flex items-center gap-3 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg p-4"
@@ -167,43 +167,19 @@ export default function UniversityDetailModal({
         </div>
 
         {/* Additional Information Section */}
-        {university.additional_info && (
+        {(university.locationMaps || university.tuitionFee || university.scholarshipDetail) && (
           <div className="bg-[#111111] border border-[#1f1f1f] rounded-lg p-6 pt-4 mt-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* International Program */}
-              {university.additional_info.international_program !==
-                undefined && (
-                <div className="md:col-span-2">
-                  <div className="flex items-center gap-3 bg-blue-500/10 rounded-lg p-4 border border-blue-500/30">
-                    <Globe className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm font-semibold text-white">
-                        International Program:{" "}
-                        {university.additional_info.international_program
-                          ? "Available"
-                          : "Not Available"}
-                      </p>
-                      {university.additional_info.international_program && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          Offers programs taught in English for international
-                          students
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Google Maps Location */}
-              {university.additional_info.google_maps_link && (
+              {university.locationMaps && (
                 <div className="md:col-span-2">
                   <h4 className="text-sm font-semibold text-white pb-4 ">
                     Campus Location
                   </h4>
-                  {/* Embedded Google Map */}
                   <div className="w-full h-64 bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg overflow-hidden mb-3">
                     <iframe
-                      src={getEmbedUrl(university.additional_info.google_maps_link)}
+                      src={getEmbedUrl(university.locationMaps)}
                       width="100%"
                       height="100%"
                       style={{ border: 0 }}
@@ -214,7 +190,7 @@ export default function UniversityDetailModal({
                     />
                   </div>
                   <a
-                    href={university.additional_info.google_maps_link}
+                    href={university.locationMaps}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 bg-gray-700/50 hover:bg-gray-700 rounded-lg p-4 transition-colors group"
@@ -228,82 +204,8 @@ export default function UniversityDetailModal({
                 </div>
               )}
 
-              {/* Contact Information */}
-              {(university.additional_info.website ||
-                university.additional_info.email ||
-                university.additional_info.phone) && (
-                <div className="md:col-span-2">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-4">
-                    Contact Information
-                  </h4>
-                  <div className="space-y-3">
-                    {university.additional_info.website && (
-                      <a
-                        href={university.additional_info.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
-                      >
-                        <Globe className="w-4 h-4" />
-                        <span className="text-sm">
-                          {university.additional_info.website}
-                        </span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                    {university.additional_info.email && (
-                      <a
-                        href={`mailto:${university.additional_info.email}`}
-                        className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-                      >
-                        <Mail className="w-4 h-4 text-blue-400" />
-                        <span className="text-sm">
-                          {university.additional_info.email}
-                        </span>
-                      </a>
-                    )}
-                    {university.additional_info.phone && (
-                      <div className="flex items-center gap-2 text-gray-300">
-                        <Phone className="w-4 h-4 text-blue-400" />
-                        <span className="text-sm">
-                          {university.additional_info.phone}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Academic Information */}
-              {university.additional_info.application_deadline && (
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-400 mb-3">
-                    Application Deadline
-                  </h4>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Calendar className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm">
-                      {university.additional_info.application_deadline}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {university.additional_info.duration && (
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-400 mb-3">
-                    Program Duration
-                  </h4>
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Clock className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm">
-                      {university.additional_info.duration}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {university.additional_info.tuition_fee && (
+              {/* Tuition Fee */}
+              {university.tuitionFee && (
                 <div>
                   <h4 className="text-sm font-semibold text-gray-400 mb-3">
                     Tuition Fee
@@ -311,69 +213,24 @@ export default function UniversityDetailModal({
                   <div className="flex items-center gap-2 text-gray-300">
                     <DollarSign className="w-4 h-4 text-blue-400" />
                     <span className="text-sm">
-                      {university.additional_info.tuition_fee}
+                      {university.tuitionFee}
                     </span>
                   </div>
                 </div>
               )}
 
-              {/* Accreditation */}
-              {university.additional_info.accreditation &&
-                university.additional_info.accreditation.length > 0 && (
-                  <div className="md:col-span-2">
-                    <h4 className="text-sm font-semibold text-gray-400 mb-3">
-                      Accreditation
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {university.additional_info.accreditation.map(
-                        (acc, idx) => (
-                          <span
-                            key={idx}
-                            className="flex items-center gap-1 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/30"
-                          >
-                            <BadgeCheck className="w-3 h-3" />
-                            {acc}
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-
-              {/* Facilities */}
-              {university.additional_info.facilities &&
-                university.additional_info.facilities.length > 0 && (
-                  <div className="md:col-span-2">
-                    <h4 className="text-sm font-semibold text-gray-400 mb-3">
-                      Campus Facilities
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {university.additional_info.facilities.map(
-                        (facility, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 text-gray-300 text-sm"
-                          >
-                            <Lightbulb className="w-3 h-3 text-blue-400" />
-                            <span>{facility}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-
-              {/* Student Life */}
-              {university.additional_info.student_life && (
+              {/* Scholarship Detail */}
+              {university.scholarshipDetail && (
                 <div className="md:col-span-2">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-3">
-                    Student Life
+                  <h4 className="text-sm font-semibold text-white mb-3">
+                    Scholarship Details
                   </h4>
-                  <p className="text-gray-300 text-sm">
-                    {university.additional_info.student_life}
+                  <p className="py-2 text-gray-300 text-sm">
+                    {university.scholarshipDetail}
                   </p>
                 </div>
               )}
+
             </div>
           </div>
         )}

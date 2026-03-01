@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:baboo123@localhost:5433/grade_analyzer"
+  url = env("DATABASE_URL")
 }
 
 model User {

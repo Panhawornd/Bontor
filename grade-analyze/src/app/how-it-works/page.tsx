@@ -69,8 +69,6 @@ function HowItWorksContent() {
     
     if (justLoggedIn) {
       setHasToken(true);
-      setAuthLoading(false);
-      return;
     }
 
     // Check if user is authenticated via API

@@ -23,8 +23,14 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    precision_score,
+    recall_score,
+)
 from sklearn.preprocessing import StandardScaler
 
 logging.basicConfig(level=logging.INFO)
@@ -301,7 +307,7 @@ class ModelTrainer:
 
         return np.array(X, dtype=np.float32), np.array(y)
 
-    def train(self, n_samples: int = 50000):
+    def train(self, n_samples: int = 50000, tune_hyperparams: bool = True):
         logger.info("Starting training…")
         X, y = self.generate_smart_data(n_samples)
 
@@ -313,10 +319,55 @@ class ModelTrainer:
             X_scaled, y, test_size=0.2, random_state=42, stratify=y
         )
 
-        self.model.fit(X_train, y_train)
+        best_params = {
+            "n_estimators": self.model.n_estimators,
+            "max_depth": self.model.max_depth,
+            "min_samples_leaf": self.model.min_samples_leaf,
+            "max_features": self.model.max_features,
+        }
+        tuning_cv_accuracy = None
+
+        if tune_hyperparams:
+            logger.info("Running lightweight hyperparameter tuning (GridSearchCV)…")
+            param_grid = {
+                "n_estimators": [600, 1000],
+                "max_depth": [20, 30],
+                "min_samples_leaf": [2, 3],
+                "max_features": ["sqrt", "log2"],
+            }
+            tuner = GridSearchCV(
+                estimator=RandomForestClassifier(
+                    class_weight="balanced",
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+                param_grid=param_grid,
+                cv=3,
+                scoring="accuracy",
+                n_jobs=-1,
+                refit=True,
+                verbose=0,
+            )
+            tuner.fit(X_train, y_train)
+            self.model = tuner.best_estimator_
+            best_params = tuner.best_params_
+            tuning_cv_accuracy = float(tuner.best_score_)
+            logger.info(
+                f"Best tuning CV Accuracy: {tuning_cv_accuracy:.4f} | Params: {best_params}"
+            )
+        else:
+            self.model.fit(X_train, y_train)
 
         y_pred = self.model.predict(X_test)
         acc = accuracy_score(y_test, y_pred)
+        precision_weighted = precision_score(y_test, y_pred, average="weighted", zero_division=0)
+        recall_weighted = recall_score(y_test, y_pred, average="weighted", zero_division=0)
+        precision_macro = precision_score(y_test, y_pred, average="macro", zero_division=0)
+        recall_macro = recall_score(y_test, y_pred, average="macro", zero_division=0)
+        cm = confusion_matrix(y_test, y_pred, labels=self.majors_list)
+        class_support = {
+            major: int(np.sum(y_test == major)) for major in self.majors_list
+        }
 
         logger.info("Running 5-fold cross-validation…")
         cv_scores = cross_val_score(
@@ -327,6 +378,19 @@ class ModelTrainer:
         report_dict = classification_report(y_test, y_pred, output_dict=True)
         logger.info(f"Classification Report:\n{classification_report(y_test, y_pred)}")
         logger.info(f"Test Accuracy: {acc:.4f}")
+        logger.info(
+            "Weighted Precision: %.4f | Weighted Recall: %.4f",
+            precision_weighted,
+            recall_weighted,
+        )
+        logger.info(
+            "Macro Precision: %.4f | Macro Recall: %.4f",
+            precision_macro,
+            recall_macro,
+        )
+        logger.info("Confusion Matrix (rows=true, cols=pred):\n%s", np.array2string(cm))
+        logger.info("Per-class test sample counts: %s", class_support)
+        logger.info("Total test samples: %d", len(y_test))
 
         # Save
         if not MODEL_DIR.exists():
@@ -353,8 +417,18 @@ class ModelTrainer:
             "n_classes": len(self.majors_list),
             "classes": self.majors_list,
             "test_accuracy": acc,
+            "test_precision_weighted": float(precision_weighted),
+            "test_recall_weighted": float(recall_weighted),
+            "test_precision_macro": float(precision_macro),
+            "test_recall_macro": float(recall_macro),
+            "confusion_matrix": cm.tolist(),
+            "test_samples_per_class": class_support,
+            "test_total_samples": int(len(y_test)),
             "cv_accuracy_mean": float(cv_scores.mean()),
             "cv_accuracy_std": float(cv_scores.std()),
+            "tuning_enabled": bool(tune_hyperparams),
+            "tuning_best_params": best_params,
+            "tuning_best_cv_accuracy": tuning_cv_accuracy,
             "feature_names": feature_names,
         }
         joblib.dump(training_meta, TRAINING_META_PATH)
@@ -365,8 +439,18 @@ class ModelTrainer:
 
         return self.model, {
             "test_accuracy": acc,
+            "test_precision_weighted": float(precision_weighted),
+            "test_recall_weighted": float(recall_weighted),
+            "test_precision_macro": float(precision_macro),
+            "test_recall_macro": float(recall_macro),
+            "confusion_matrix": cm.tolist(),
+            "test_samples_per_class": class_support,
+            "test_total_samples": int(len(y_test)),
             "cv_accuracy_mean": float(cv_scores.mean()),
             "cv_accuracy_std": float(cv_scores.std()),
+            "tuning_enabled": bool(tune_hyperparams),
+            "tuning_best_params": best_params,
+            "tuning_best_cv_accuracy": tuning_cv_accuracy,
             "n_features": X.shape[1],
             "n_classes": len(self.majors_list),
             "per_class_metrics": {
@@ -379,10 +463,11 @@ def train_random_forest(majors_database: Dict, **kwargs) -> Tuple:
     n_estimators = kwargs.get("n_estimators", 1000)
     max_depth = kwargs.get("max_depth", 30)
     n_samples = kwargs.get("n_samples", 50000)
+    tune_hyperparams = kwargs.get("tune_hyperparams", True)
 
     trainer = ModelTrainer(
         majors_database,
         n_estimators=n_estimators,
         max_depth=max_depth,
     )
-    return trainer.train(n_samples=n_samples)
+    return trainer.train(n_samples=n_samples, tune_hyperparams=tune_hyperparams)

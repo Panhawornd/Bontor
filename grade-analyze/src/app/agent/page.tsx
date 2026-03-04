@@ -19,6 +19,7 @@ export default function AgentPage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ name: string; email?: string } | null>(
     null
   );
@@ -94,6 +95,8 @@ export default function AgentPage() {
       } catch (error) {
         console.error("Auth check error:", error);
         setHasToken(false);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -298,16 +301,69 @@ Fundamental skills to prepare before enrolling:
     window.location.href = "/landing";
   };
 
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        padding: '40px 20px',
+        position: 'relative'
+      }}>
+        {/* Ultravib image background */}
+        <div
+          style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: "url(/image/Ultravib.png)",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
+            filter: 'brightness(0.9)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '24px'
+          }}>
+            <svg className="logo-spin" width="80" height="80" viewBox="-30 -30 201 233" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+              <g>
+                <path d="M110.464 0C127.032 0.000247877 140.464 13.4316 140.464 30V31.4922H92.9033V58.2891H49.9043V86.3154H0V30C0 13.4315 13.4315 1.61637e-06 30 0H110.464Z" fill="white"/>
+              </g>
+              <g>
+                <path d="M30.5372 172.649C13.9687 172.67 0.453776 159.257 0.350835 142.689L0.341564 141.196L47.9011 141.134L47.7346 114.338L90.7336 114.282L90.5595 86.2549L140.464 86.1897L140.814 142.505C140.917 159.073 127.569 172.522 111 172.544L30.5372 172.649Z" fill="#3B82F6"/>
+              </g>
+            </svg>
+            <img 
+              src="/image/Bontor-logo.png" 
+              alt="Bontor" 
+              style={{ 
+                height: '30px',
+                width: 'auto',
+                display: 'block'
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen overflow-hidden text-white relative">
+    <div className="flex flex-col h-screen overflow-hidden text-white relative bg-black">
       {/* Ultravib image background with dark overlay */}
       <div
-        className="fixed inset-x-0"
+        className="fixed inset-0"
         style={{
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           backgroundImage: "url(/image/Ultravib.png)",
           backgroundSize: "cover",
           backgroundPosition: "center center",
@@ -320,17 +376,14 @@ Fundamental skills to prepare before enrolling:
 
       {/* Header */}
       <header
-        className="bg-white/2 backdrop-blur-md"
+        className="bg-white/2 backdrop-blur-md flex-shrink-0 relative z-50"
         style={{
           padding: "16px 0",
           minHeight: "4rem",
-          position: "sticky",
-          top: 0,
-          zIndex: 100,
         }}
       >
         <div
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: '100%' }}
+          className="max-w-[1200px] 2xl:max-w-none mx-auto px-6 2xl:px-24 h-full"
         >
           <div
             style={{
@@ -599,10 +652,10 @@ Fundamental skills to prepare before enrolling:
         </div>
       )}
 
-      {/* Main content area - ready for chatbot implementation */}
-      <div className="relative z-10 flex" style={{ height: 'calc(100vh - 4rem)' }}>
-        {/* Sidebar for chat history - background only */}
-        <aside className="hidden md:block fixed left-0 top-18 w-64 bg-[#111111] border-r border-[#1f1f1f] h-[calc(100vh-4.5rem)] overflow-auto z-20">
+      {/* Main content area */}
+      <div className="relative z-10 flex flex-1 overflow-hidden">
+        {/* Sidebar for chat history */}
+        <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-[#111111] border-r border-[#1f1f1f] overflow-y-auto z-20">
           <div className="p-4">
             <button
               type="button"
@@ -661,19 +714,18 @@ Fundamental skills to prepare before enrolling:
           </div>
         </aside>
         {/* Main Content */}
-        <div className="flex-1 flex flex-col relative overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div 
             ref={chatAreaRef} 
-            className={`flex-1 ml-4 mr-4 md:ml-75 md:mr-8 p-4 flex flex-col ${messages.length > 0 ? 'overflow-auto scrollbar-hide' : ''}`}
-            style={{ paddingBottom: `${inputHeight}px` }}
+            className={`flex-1 p-4 px-6 flex flex-col overflow-y-auto scrollbar-hide`}
           >
             {messages.length === 0 ? (
-              <div className="fixed top-1/2 left-4 right-4 md:left-80 md:right-8 transform -translate-y-1/2 flex flex-col items-center justify-center text-gray-200 z-50">
+              <div className="flex-1 flex flex-col items-center justify-center text-gray-200">
                 <Bot className="w-16 h-16 text-blue-500 mb-6" />
                 <p className="text-center text-lg">Ask me about major and skills that you want to prepare for the major</p>
               </div>
             ) : (
-              <div className="flex-1 space-y-4">
+              <div className="max-w-[900px] mx-auto w-full space-y-4 pb-4">
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg break-words whitespace-pre-wrap ${
@@ -686,36 +738,35 @@ Fundamental skills to prepare before enrolling:
               </div>
             )}
           </div>
-        </div>
-        {/* Floating chat input (centered) */}
-        <div 
-          ref={inputContainerRef}
-          className="fixed left-0 right-0 bottom-0 md:left-64 md:right-0 z-40 p-4 pb-8 bg-gradient-to-t from-black via-black/80 to-transparent"
-        >
-          <div className="mx-auto max-w-full md:max-w-[900px] px-4 md:px-0">
-            <div className="w-full bg-[#111111]/90 backdrop-blur-md rounded-2xl p-3 py-[2px] shadow-lg border border-[#1f1f1f] focus-within:ring-1 focus-within:ring-blue-500 transition-all duration-200">
-              <textarea
-                ref={textareaRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                placeholder="Ask agent a question..."
-                className="w-full bg-[#111111] placeholder-gray-500 text-gray-200 px-4 py-3 rounded-lg focus:outline-none text-sm min-h-[60px] max-h-[200px] resize-none overflow-y-auto custom-scrollbar"
-              />
 
-              <div className="mt-3 flex items-center justify-between">
-                <button className="p-2 text-gray-300 hover:text-white">
-                  <Paperclip className="w-5 h-5" />
-                </button>
-
-                <button onClick={handleSend} className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md">
-                  <ArrowUp className="w-5 h-5 text-white" />
-                </button>
+          {/* Chat input - anchored to bottom */}
+          <div 
+            ref={inputContainerRef}
+            className="flex-shrink-0 p-4 pb-6 bg-gradient-to-t from-black via-black/80 to-transparent"
+          >
+            <div className="mx-auto max-w-full md:max-w-[900px]">
+              <div className="w-full bg-[#111111]/90 backdrop-blur-md rounded-2xl p-3 py-[2px] shadow-lg border border-[#1f1f1f] focus-within:ring-1 focus-within:ring-blue-500 transition-all duration-200">
+                <textarea
+                  ref={textareaRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder="Ask agent a question..."
+                  className="w-full bg-[#111111] placeholder-gray-500 text-gray-200 px-4 py-3 rounded-lg focus:outline-none text-sm min-h-[60px] max-h-[200px] resize-none overflow-y-auto custom-scrollbar"
+                />
+                <div className="mt-3 flex items-center justify-between">
+                  <button className="p-2 text-gray-300 hover:text-white">
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+                  <button onClick={handleSend} className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md">
+                    <ArrowUp className="w-5 h-5 text-white" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -724,4 +775,3 @@ Fundamental skills to prepare before enrolling:
     </div>
   );
 }
-

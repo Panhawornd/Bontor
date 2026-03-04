@@ -228,7 +228,7 @@ export default function InputPage() {
         zIndex: 100
        }}>  
         
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+        <div className="max-w-[1200px] 2xl:max-w-none mx-auto px-6 2xl:px-24">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
             {/* Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateToken } from "@/lib/auth"
-import { PrismaClient } from "@prisma/client"
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 // Helper: redirect to login with an error, always clearing the oauth_state cookie
 function errorRedirect(url: URL, errorCode: string): NextResponse {

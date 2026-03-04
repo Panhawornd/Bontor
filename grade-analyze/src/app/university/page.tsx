@@ -218,7 +218,7 @@ export default function UniversityPage() {
         }}
       >
         <div
-          style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px", height: '100%' }}
+          className="max-w-[1200px] 2xl:max-w-none mx-auto px-6 2xl:px-24 h-full"
         >
           <div
             style={{

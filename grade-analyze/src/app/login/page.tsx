@@ -106,7 +106,7 @@ function LoginContent() {
       />
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent backdrop-blur-md min-h-[4rem]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl 2xl:max-w-none mx-auto px-4 sm:px-6 lg:px-8 2xl:px-24">
           <div className="flex items-center justify-between h-16 relative">
             {/* Logo */}
             <div className="absolute left-3 md:left-0 flex items-center gap-3">

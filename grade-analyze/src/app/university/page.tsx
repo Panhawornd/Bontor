@@ -35,6 +35,7 @@ export default function UniversityPage() {
   );
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if user is authenticated via cookie
@@ -500,6 +501,7 @@ export default function UniversityPage() {
                 className="absolute left-4 top-1/2 transform -translate-y-1/2"
               />
               <input
+                ref={searchInputRef}
                 type="text"
                 placeholder="Search universities..."
                 value={searchQuery}
@@ -517,11 +519,11 @@ export default function UniversityPage() {
               />
               <button
                 onClick={() => {
-                  // Trigger search or filter action
+                  searchInputRef.current?.focus();
                 }}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-gray-700 rounded-full transition-colors"
               >
-                <Search className="w-5 h-5 text-gray-400 hover:text-white" />
+                <Search className="w-5 h-5 text-gray-400 hover:text-white" />   
               </button>
             </div>
 
@@ -595,12 +597,9 @@ export default function UniversityPage() {
             </div>
           ) : filteredUniversities.length === 0 ? (
             <div className="text-center py-20">
-              <GraduationCap className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-xl text-gray-400 mb-2">
-                No universities found
-              </p>
-              <p className="text-gray-500">
-                Try adjusting your search criteria
+              <GraduationCap className="w-16 h-16 text-blue-500 mx-auto mb-6" />
+              <p className="text-lg text-gray-200 mb-6 max-w-2xl mx-auto">
+                No universities found. Try adjusting your search criteria.
               </p>
             </div>
           ) : (

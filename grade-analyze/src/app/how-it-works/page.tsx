@@ -42,15 +42,7 @@ function HowItWorksContent() {
   const searchParams = useSearchParams();
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasToken, setHasToken] = useState(() => {
-    // Initialize based on localStorage flags immediately (client-side only)
-    if (typeof window !== 'undefined') {
-      const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
-      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
-      return justLoggedIn && !justLoggedOut;
-    }
-    return false; // Default for server-side rendering
-  });
+  const [hasToken, setHasToken] = useState(false); // Always false on SSR to avoid hydration mismatch
   const [authLoading, setAuthLoading] = useState(false);
   const [metrics, setMetrics] = useState<number[]>([]);
   const [progressPct, setProgressPct] = useState<number>(0);
@@ -669,7 +661,7 @@ function HowItWorksContent() {
               </div>
               <div className="pt-4 border-t border-white/10 footer-copyright">
             <p className="text-gray-300 text-sm">
-              © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
+              © {new Date().getFullYear()} Bontor Smart BacII Grade & Career Analyzer. All rights reserved.
             </p>
               </div>
             </div>

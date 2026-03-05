@@ -14,8 +14,7 @@ import {
   Pencil,
   Check,
   X,
-  BarChart2,
-  MessageCircle,
+  TrendingUp,
   Send,
 } from 'lucide-react';
 import PerformanceChart from '@/components/charts/PerformanceChart';
@@ -49,6 +48,7 @@ export default function DashboardPage() {
   const [analysisCount, setAnalysisCount] = useState(0);
   const [chatCount, setChatCount] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [recentAnalysis, setRecentAnalysis] = useState<AnalysisResult | null>(null);
   const [chatHistory, setChatHistory] = useState<{ title: string }[]>([]);
 
@@ -83,6 +83,8 @@ export default function DashboardPage() {
         }
       } catch {
         // silently fail
+      } finally {
+        setStatsLoading(false);
       }
     };
     fetchStats();
@@ -171,7 +173,7 @@ export default function DashboardPage() {
   // Build chart data from recentAnalysis
   const hasAnalysisData = recentAnalysis?.subject_analysis && Object.keys(recentAnalysis.subject_analysis).length > 0;
 
-  if (loading) {
+  if (loading || statsLoading) {
     return (
       <div style={{
         display: 'flex', justifyContent: 'center', alignItems: 'center',
@@ -412,7 +414,7 @@ export default function DashboardPage() {
 
             {/* Dashboard label */}
             <div className="flex items-center justify-center mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1f1f1f] border border-[#2a2a2a]">
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 <span className="text-sm text-gray-400">Dashboard</span>
               </div>
@@ -424,36 +426,36 @@ export default function DashboardPage() {
                 {/* Stats cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8 px-2 lg:px-20">
                   {/* Analysis */}
-                  <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
+                  <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
                     <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5 rounded-lg bg-blue-600/10">
-                        <BarChart2 size={14} className="text-blue-400" />
+                      <div className="p-1 lg:p-1.5">
+                        <TrendingUp size={18} className="text-green-400"/>
                       </div>
                       <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Analysis <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
                     </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white">{analysisCount}</p>
+                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">{analysisCount}</p>
                   </div>
 
                   {/* Chats */}
-                  <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
+                  <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
                     <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5 rounded-lg bg-blue-600/10">
-                        <MessageCircle size={14} className="text-blue-400" />
+                      <div className="p-1 lg:p-1.5">
+                        <MessageSquare size={18} className="text-blue-400" />
                       </div>
                       <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Chats <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
                     </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white">{chatCount}</p>
+                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">{chatCount}</p>
                   </div>
 
                   {/* Requests */}
-                  <div className="col-span-2 lg:col-span-1 bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
+                  <div className="col-span-2 lg:col-span-1 bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
                     <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5 rounded-lg bg-blue-600/10">
-                        <Send size={14} className="text-blue-400" />
+                      <div className="p-1 lg:p-1.5">
+                        <Send size={18} className="text-blue-400" />
                       </div>
                       <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Requests <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
                     </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white">0</p>
+                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">0</p>
                   </div>
                 </div>
 

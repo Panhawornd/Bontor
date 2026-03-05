@@ -87,20 +87,21 @@ export default function UniversityDetailModal({
         </div>
 
         {/* Location & Country */}
-        <div className="flex items-center gap-6 text-gray-300 pt-2">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-blue-500" />
-            <span className="text-lg">{university.city || "Unknown City"}</span>
+        <div className="flex items-center gap-6 max-[430px]:gap-3 text-gray-300 pt-2">
+          <div className="flex items-center gap-2 max-[430px]:gap-1.5">
+            <MapPin className="w-5 h-5 max-[430px]:w-4 max-[430px]:h-4 text-blue-500" />
+            <span className="text-lg max-[430px]:text-sm">{university.city || "Unknown City"}</span>
           </div>
-          <span className="text-gray-600">•</span>
-          <div className="flex items-center gap-2">
+          <span className="text-gray-600 max-[430px]:text-sm">•</span>
+          <div className="flex items-center gap-2 max-[430px]:gap-1.5">
             <Image 
               src="/image/kh-flag.jpg" 
               alt="Cambodia Flag" 
               width={20} 
               height={20} 
+              className="max-[430px]:w-4 max-[430px]:h-4"
             />
-            <span className="text-lg">{university.country}</span>
+            <span className="text-lg max-[430px]:text-sm">{university.country}</span>
           </div>
         </div>
 
@@ -111,7 +112,7 @@ export default function UniversityDetailModal({
               <BookOpen className="w-5 h-5 text-blue-500" />
               <span className="text-xs text-gray-400">Programs</span>
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-xl font-bold text-white">
               {university.availablePrograms?.length || 0}
             </p>
           </div>
@@ -131,7 +132,7 @@ export default function UniversityDetailModal({
               <FileText className="w-5 h-5 text-green-500" />
               <span className="text-xs text-gray-400">Entrance Exam</span>
             </div>
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl max-[430px]:text-base font-bold text-white">
               {university.entranceExam ? "Required" : "No"}
             </p>
           </div>
@@ -141,7 +142,7 @@ export default function UniversityDetailModal({
               <Award className="w-5 h-5 text-yellow-500" />
               <span className="text-xs text-gray-400">Scholarships</span>
             </div>
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl max-[430px]:text-base font-bold text-white">
               {university.scholarshipAvailable ? "Available" : "N/A"}
             </p>
           </div>

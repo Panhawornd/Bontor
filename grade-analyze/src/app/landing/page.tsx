@@ -32,15 +32,7 @@ import InfiniteScroll from "@/components/InfiniteScroll";
 function LandingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [hasToken, setHasToken] = useState(() => {
-    // Initialize based on localStorage flags immediately (client-side only)
-    if (typeof window !== 'undefined') {
-      const justLoggedOut = localStorage.getItem('just_logged_out') === 'true';
-      const justLoggedIn = localStorage.getItem('just_logged_in') === 'true';
-      return justLoggedIn && !justLoggedOut;
-    }
-    return false; // Default for server-side rendering
-  });
+  const [hasToken, setHasToken] = useState(false); // Always false on SSR to avoid hydration mismatch
   const [authLoading, setAuthLoading] = useState(false);
   const [grades, setGrades] = useState<Record<string, string>>({});
   const [interestText, setInterestText] = useState("");
@@ -1226,9 +1218,10 @@ function LandingPageContent() {
                     <Image
                       src={`/image/${step.image}`}
                       alt={step.title}
-                      width={400}
-                      height={320}
-                      className="object-contain rounded-lg"
+                      width={800}
+                      height={640}
+                      quality={100}
+                      className="w-full h-auto object-contain rounded-lg"
                     />
                   </div>
                 </div>
@@ -1751,7 +1744,7 @@ function LandingPageContent() {
               </div>
               <div className="pt-4 border-t border-white/10 footer-copyright">
                 <p className="text-gray-300 text-sm">
-                  © 2025 Bontor Smart BacII Grade & Career Analyzer. All rights
+                  © {new Date().getFullYear()} Bontor Smart BacII Grade & Career Analyzer. All rights
                   reserved.
                 </p>
               </div>

@@ -10,7 +10,10 @@ export async function POST(req: Request) {
         // Get user from JWT token
         let user = null
         try {
-          const token = req.headers.get('cookie')?.split('auth-token=')[1]?.split(';')[0]
+          const rawCookie = req.headers.get('cookie')
+            ?.split(';')
+            .find(c => c.trim().startsWith('auth-token='))
+          const token = rawCookie?.split('=').slice(1).join('=')
           if (token) {
             const decoded = verifyToken(token)
             if (decoded && typeof decoded === 'object' && 'userId' in decoded) {
@@ -52,24 +55,34 @@ export async function POST(req: Request) {
     // Save to database only if user is authenticated
     if (user) {
       try {
+        // Validate grades before saving
+        const grades = Array.isArray(body.grades) ? body.grades.slice(0, 20) : []
 
         // Save grades
-        for (const grade of body.grades) {
-          await prisma.grade.create({
-            data: {
-              userId: user.id,
-              subject: grade.subject,
-              score: grade.score,
-            }
-          })
+        for (const grade of grades) {
+          if (
+            grade &&
+            typeof grade.subject === 'string' && grade.subject.length <= 100 &&
+            typeof grade.score === 'number' && isFinite(grade.score) && grade.score >= 0 && grade.score <= 200
+          ) {
+            await prisma.grade.create({
+              data: {
+                userId: user.id,
+                subject: grade.subject,
+                score: grade.score,
+              }
+            })
+          }
         }
 
         // Save input
+        const interestText = typeof body.interest_text === 'string' ? body.interest_text.slice(0, 2000) : ''
+        const careerGoals = typeof body.career_goals === 'string' ? body.career_goals.slice(0, 2000) : ''
         await prisma.input.create({
           data: {
             userId: user.id,
-            interestText: body.interest_text,
-            careerGoals: body.career_goals,
+            interestText,
+            careerGoals,
           }
         })
 

@@ -32,9 +32,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password must be less than 128 characters' }, { status: 400 })
     }
 
+    const normalizedEmail = email.trim().toLowerCase()
+    const trimmedName = name.trim()
+
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.trim().toLowerCase() }
+      where: { email: normalizedEmail }
     })
 
     if (existingUser) {
@@ -44,11 +47,11 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await hashPassword(password)
 
-    // Create user
+    // Create user with normalized values
     const user = await prisma.user.create({
       data: {
-        name,
-        email,
+        name: trimmedName,
+        email: normalizedEmail,
         password: hashedPassword
       }
     })
@@ -70,7 +73,8 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 // 24 hours
+      maxAge: 24 * 60 * 60, // 24 hours
+      path: '/'
     })
 
     return response

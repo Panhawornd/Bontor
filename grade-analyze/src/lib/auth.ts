@@ -18,20 +18,22 @@ export interface User {
 export interface JWTPayload {
   userId: number
   email: string
+  name: string
 }
 
 export function generateToken(user: User): string {
   const payload: JWTPayload = {
     userId: user.id,
-    email: user.email
+    email: user.email,
+    name: user.name
   }
   return jwt.sign(payload, JWT_SECRET!, { expiresIn: '24h' })
 }
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET!) as JWTPayload
-  } catch (error) {
+    return jwt.verify(token, JWT_SECRET!, { algorithms: ['HS256'] }) as JWTPayload
+  } catch {
     return null
   }
 }

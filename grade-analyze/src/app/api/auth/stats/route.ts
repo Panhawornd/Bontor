@@ -4,10 +4,10 @@ import { verifyToken } from '@/lib/auth'
 
 export async function GET(req: Request) {
   try {
-    const token = req.headers.get('cookie')
+    const rawCookie = req.headers.get('cookie')
       ?.split(';')
       .find(c => c.trim().startsWith('auth-token='))
-      ?.split('=')[1]
+    const token = rawCookie?.split('=').slice(1).join('=')
 
     if (!token) {
       return NextResponse.json({ analysisCount: 0, requestCount: 0 })

@@ -4,10 +4,11 @@ import { verifyToken } from '@/lib/auth'
 
 export async function GET(req: Request) {
   try {
-    const token = req.headers.get('cookie')
+    const rawCookie = req.headers.get('cookie')
       ?.split(';')
       .find(c => c.trim().startsWith('auth-token='))
-      ?.split('=')[1]
+    // Use slice(1).join('=') to handle base64 '=' padding in JWT
+    const token = rawCookie?.split('=').slice(1).join('=')
 
     if (!token) {
       return NextResponse.json({ user: null })
@@ -18,12 +19,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ user: null })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { id: true, name: true, email: true }
-    })
+    // Return user from JWT payload — no DB roundtrip needed
+    const user = { id: payload.userId, email: payload.email, name: payload.name }
 
-    return NextResponse.json({ user })
+    return NextResponse.json(
+      { user },
+      { headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' } }
+    )
   } catch (error) {
     console.error('Auth check error:', error)
     return NextResponse.json({ user: null })
@@ -32,10 +34,10 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const token = req.headers.get('cookie')
+    const rawCookiePatch = req.headers.get('cookie')
       ?.split(';')
       .find(c => c.trim().startsWith('auth-token='))
-      ?.split('=')[1]
+    const token = rawCookiePatch?.split('=').slice(1).join('=')
 
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -57,7 +59,21 @@ export async function PATCH(req: Request) {
       select: { id: true, name: true, email: true }
     })
 
-    return NextResponse.json({ user: updated })
+    // Re-issue JWT with updated name so future /api/auth/me calls reflect the change
+    const newToken = (await import('@/lib/auth')).generateToken({
+      id: updated.id,
+      name: updated.name!,
+      email: updated.email!
+    })
+    const patchResponse = NextResponse.json({ user: updated })
+    patchResponse.cookies.set('auth-token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60,
+      path: '/'
+    })
+    return patchResponse
   } catch (error) {
     console.error('Update name error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

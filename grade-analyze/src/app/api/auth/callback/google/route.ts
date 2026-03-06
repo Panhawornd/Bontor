@@ -72,17 +72,23 @@ export async function GET(request: NextRequest) {
       return errorRedirect(new URL(request.url), 'user_info_failed')
     }
 
+    // Validate Google user data
+    if (!googleUser.email || typeof googleUser.email !== 'string') {
+      return errorRedirect(new URL(request.url), 'invalid_google_user')
+    }
+    const normalizedGoogleEmail = googleUser.email.trim().toLowerCase()
+
     // Check if user exists in our database
     let user = await prisma.user.findUnique({
-      where: { email: googleUser.email }
+      where: { email: normalizedGoogleEmail }
     })
 
     if (!user) {
       // Create new user
       user = await prisma.user.create({
         data: {
-          name: googleUser.name,
-          email: googleUser.email,
+          name: (googleUser.name as string | null)?.trim() || normalizedGoogleEmail.split('@')[0],
+          email: normalizedGoogleEmail,
           emailVerified: new Date(),
           image: googleUser.picture,
           provider: "google",
@@ -92,7 +98,7 @@ export async function GET(request: NextRequest) {
     } else if (!user.provider || user.provider === "credentials") {
       // Update existing user with OAuth info
       user = await prisma.user.update({
-        where: { email: googleUser.email },
+        where: { email: normalizedGoogleEmail },
         data: {
           provider: "google",
           providerId: googleUser.id,
@@ -117,7 +123,8 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 // 24 hours
+      maxAge: 24 * 60 * 60, // 24 hours
+      path: '/'
     })
 
     // Set localStorage flag for instant UI updates

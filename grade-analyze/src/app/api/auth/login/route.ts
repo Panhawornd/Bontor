@@ -4,11 +4,22 @@ import { comparePassword, generateToken } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json()
+    const body = await req.json()
+    const { email, password } = body
+
+    // Input validation
+    if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+    if (password.length > 128) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    const normalizedEmail = email.trim().toLowerCase()
 
     // Find user
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email: normalizedEmail }
     })
 
     if (!user || !user.password) {
@@ -38,7 +49,8 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 // 24 hours
+      maxAge: 24 * 60 * 60, // 24 hours
+      path: '/'
     })
 
     return response

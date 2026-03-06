@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 interface JWTPayload {
   userId: number
   email: string
+  name: string
   exp?: number
 }
 

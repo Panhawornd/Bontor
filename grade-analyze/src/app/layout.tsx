@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: "Bontor - AI-Powered Major and Career Guidance for Cambodian BacII Students",
   description: "AI-powered Major, University, and Career Recommendations System for Cambodian BacII Students",
   icons: {

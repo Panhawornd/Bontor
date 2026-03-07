@@ -18,6 +18,7 @@ import {
   Send,
 } from 'lucide-react';
 import PerformanceChart from '@/components/charts/PerformanceChart';
+import ContactPage from './contact/ContactPage';
 
 type ActiveSection = 'overview' | 'contact' | 'history' | 'chat-history';
 
@@ -416,7 +417,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                <span className="text-sm text-gray-400">Dashboard</span>
+                <span className="text-sm text-gray-400">{activeSection === 'contact' ? 'Contact Us' : 'Dashboard'}</span>
               </div>
             </div>
 
@@ -465,15 +466,7 @@ export default function DashboardPage() {
             )}
 
             {/* Contact Us section */}
-            {activeSection === 'contact' && (
-              <div className="max-w-lg">
-                
-                <div className="bg-[#111111]/80 backdrop-blur-sm border border-[#2a2a2a] rounded-xl p-6">
-                  <p className="text-gray-400 text-sm mb-4">Have questions or feedback? Reach out to us.</p>
-                  <a href="mailto:support@bontor.app" className="text-blue-400 hover:text-blue-300 text-sm">support@bontor.app</a>
-                </div>
-              </div>
-            )}
+            {activeSection === 'contact' && <ContactPage />}
 
           </div>
         </main>

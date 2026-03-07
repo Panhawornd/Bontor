@@ -104,16 +104,29 @@ export default function GradeInputForm({ onSubmit, loading, initialData, onFormC
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Validate and normalize inputs: convert numeric strings to numbers
-    const normalizedGrades = Object.entries(grades).map(([subject, score]) => {
-      const subjDef = SUBJECTS.find(s => s.id === subject)
-      const maxScore = subjDef?.maxScore ?? 100
-      const s = (score || '').trim()
-      const asNumber = parseFloat(s)
+    const nextErrors: Record<string, string> = {}
+    const normalizedGrades = SUBJECTS.map((subject) => {
+      const raw = (grades[subject.id] || '').trim()
+      if (!raw) {
+        nextErrors[subject.id] = `Required (0-${subject.maxScore})`
+        return { subject: subject.id, score: 0 }
+      }
+
+      const asNumber = parseFloat(raw)
+      if (isNaN(asNumber) || asNumber < 0 || asNumber > subject.maxScore) {
+        nextErrors[subject.id] = `Must be between 0 and ${subject.maxScore}`
+      }
+
       const value = isNaN(asNumber) ? 0 : asNumber
-      const clamped = Math.min(Math.max(value, 0), maxScore)
-      return { subject, score: clamped }
+      const clamped = Math.min(Math.max(value, 0), subject.maxScore)
+      return { subject: subject.id, score: clamped }
     })
+
+    setErrors(nextErrors)
+
+    if (Object.keys(nextErrors).length > 0 || interestText.trim().length === 0) {
+      return
+    }
 
     const formData = {
       grades: normalizedGrades,
@@ -124,13 +137,11 @@ export default function GradeInputForm({ onSubmit, loading, initialData, onFormC
     onSubmit(formData)
   }
 
-  const isFormValid = Object.entries(grades).every(([id, val]) => {
-    const subj = SUBJECTS.find(s => s.id === id)
-    if (!subj) return false
-    const s = (val || '').trim()
+  const isFormValid = SUBJECTS.every((subject) => {
+    const s = (grades[subject.id] || '').trim()
     const asNumber = parseFloat(s)
-    if (isNaN(asNumber)) return false
-    return asNumber >= 0 && asNumber <= subj.maxScore
+    if (!s || isNaN(asNumber)) return false
+    return asNumber >= 0 && asNumber <= subject.maxScore
   }) && interestText.trim().length > 0
 
   return (

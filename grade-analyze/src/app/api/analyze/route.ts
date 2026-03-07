@@ -2,9 +2,114 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
 
+const SCIENCE_GRADE_LIMITS: Record<string, number> = {
+  math: 125,
+  physics: 75,
+  chemistry: 75,
+  biology: 75,
+  khmer: 75,
+  english: 50,
+  history: 50,
+}
+
+const SOCIAL_SCIENCE_GRADE_LIMITS: Record<string, number> = {
+  khmer: 125,
+  math: 75,
+  geography: 75,
+  history: 75,
+  moral: 75,
+  earth: 50,
+  english: 50,
+}
+
+type AnalyzeGrade = { subject: string; score: number }
+
+function sameSubjects(required: string[], incoming: string[]) {
+  return required.length === incoming.length && required.every((s) => incoming.includes(s))
+}
+
+function validateAnalyzePayload(body: unknown):
+  | { ok: true; payload: { grades: AnalyzeGrade[]; interest_text: string; career_goals: string } }
+  | { ok: false; error: string } {
+  if (!body || typeof body !== 'object') {
+    return { ok: false, error: 'Invalid request body' }
+  }
+
+  const obj = body as Record<string, unknown>
+  const interestText = typeof obj.interest_text === 'string' ? obj.interest_text.trim() : ''
+  const careerGoals = typeof obj.career_goals === 'string' ? obj.career_goals.trim() : ''
+
+  if (!interestText) {
+    return { ok: false, error: 'interest_text is required' }
+  }
+
+  const rawGrades = Array.isArray(obj.grades) ? obj.grades : null
+  if (!rawGrades || rawGrades.length !== 7) {
+    return { ok: false, error: 'All 7 subject grades are required' }
+  }
+
+  const parsedGrades: AnalyzeGrade[] = []
+  const seen = new Set<string>()
+  for (const g of rawGrades) {
+    if (!g || typeof g !== 'object') {
+      return { ok: false, error: 'Invalid grade format' }
+    }
+
+    const grade = g as Record<string, unknown>
+    const subject = typeof grade.subject === 'string' ? grade.subject.trim() : ''
+    const score = grade.score
+    if (!subject || typeof score !== 'number' || !isFinite(score)) {
+      return { ok: false, error: 'Each grade must include valid subject and numeric score' }
+    }
+
+    if (seen.has(subject)) {
+      return { ok: false, error: `Duplicate subject: ${subject}` }
+    }
+    seen.add(subject)
+    parsedGrades.push({ subject, score })
+  }
+
+  const incomingSubjects = parsedGrades.map((g) => g.subject)
+  const scienceSubjects = Object.keys(SCIENCE_GRADE_LIMITS)
+  const socialSubjects = Object.keys(SOCIAL_SCIENCE_GRADE_LIMITS)
+
+  let limits: Record<string, number> | null = null
+  if (sameSubjects(scienceSubjects, incomingSubjects)) {
+    limits = SCIENCE_GRADE_LIMITS
+  } else if (sameSubjects(socialSubjects, incomingSubjects)) {
+    limits = SOCIAL_SCIENCE_GRADE_LIMITS
+  } else {
+    return { ok: false, error: 'Grades must match exactly one valid exam type subject set' }
+  }
+
+  for (const g of parsedGrades) {
+    const max = limits[g.subject]
+    if (typeof max !== 'number') {
+      return { ok: false, error: `Unknown subject: ${g.subject}` }
+    }
+    if (g.score < 0 || g.score > max) {
+      return { ok: false, error: `Score for ${g.subject} must be between 0 and ${max}` }
+    }
+  }
+
+  return {
+    ok: true,
+    payload: {
+      grades: parsedGrades,
+      interest_text: interestText.slice(0, 2000),
+      career_goals: careerGoals.slice(0, 2000),
+    },
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
+    const validation = validateAnalyzePayload(body)
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+    const payload = validation.payload
     const fastapiUrl = process.env.FASTAPI_URL || 'http://localhost:8000'
 
         // Get user from JWT token
@@ -39,7 +144,7 @@ export async function POST(req: Request) {
         'Content-Type': 'application/json',
         'X-API-Key': mlApiKey,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     })
     
@@ -55,34 +160,23 @@ export async function POST(req: Request) {
     // Save to database only if user is authenticated
     if (user) {
       try {
-        // Validate grades before saving
-        const grades = Array.isArray(body.grades) ? body.grades.slice(0, 20) : []
-
         // Save grades
-        for (const grade of grades) {
-          if (
-            grade &&
-            typeof grade.subject === 'string' && grade.subject.length <= 100 &&
-            typeof grade.score === 'number' && isFinite(grade.score) && grade.score >= 0 && grade.score <= 200
-          ) {
-            await prisma.grade.create({
-              data: {
-                userId: user.id,
-                subject: grade.subject,
-                score: grade.score,
-              }
-            })
-          }
+        for (const grade of payload.grades) {
+          await prisma.grade.create({
+            data: {
+              userId: user.id,
+              subject: grade.subject,
+              score: grade.score,
+            }
+          })
         }
 
         // Save input
-        const interestText = typeof body.interest_text === 'string' ? body.interest_text.slice(0, 2000) : ''
-        const careerGoals = typeof body.career_goals === 'string' ? body.career_goals.slice(0, 2000) : ''
         await prisma.input.create({
           data: {
             userId: user.id,
-            interestText,
-            careerGoals,
+            interestText: payload.interest_text,
+            careerGoals: payload.career_goals,
           }
         })
 

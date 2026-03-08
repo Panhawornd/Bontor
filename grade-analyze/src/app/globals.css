@@ -6,6 +6,13 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 /* Clean Black Theme */
@@ -367,6 +374,8 @@ h4 {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
   }
 
+  
+
   /* Chart card headers */
   .rec-chart-card h3 {
     font-size: 18px !important;
@@ -445,6 +454,41 @@ h4 {
   .rec-dashboard-container .rec-source-badge {
     font-size: 9px !important;
     padding: 2px 6px !important;
+  }
+
+  .rec-dashboard-container .rec-legend-label {
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+  }
+
+  .rec-dashboard-container .rec-level-badge {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+    line-height: 1.4 !important;
+    font-weight: 500 !important;
+  }
+
+  /* Section cards padding on mobile */
+  .rec-section-card {
+    padding: 12px !important;
+  }
+
+  /* Section titles on mobile */
+  .rec-section-title {
+    font-size: 14px !important;
+    margin-bottom: 14px !important;
+  }
+
+  /* Section card titles: add horizontal margin to match chart card underline width */
+  .rec-section-card .rec-section-title {
+    margin-left: 15px !important;
+    margin-right: 15px !important;
+  }
+
+  /* Skill gap - keep badges inline with skill name */
+  .rec-skill-card > div:first-child {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
   }
 }
 

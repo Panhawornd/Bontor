@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react'
 import { Line } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -19,6 +20,14 @@ interface SkillRadarChartProps {
 }
 
 export default function SkillRadarChart({ skillGaps }: SkillRadarChartProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const data = {
     labels: skillGaps.map(gap => gap.skill),
     datasets: [
@@ -66,23 +75,25 @@ export default function SkillRadarChart({ skillGaps }: SkillRadarChartProps) {
           display: false
         },
         ticks: {
-          maxRotation: 0,
-          minRotation: 0,
+          maxRotation: isMobile ? 45 : 0,
+          minRotation: isMobile ? 45 : 0,
           padding: 5,
+          font: { size: isMobile ? 9 : 12 },
           callback: function(value: string | number, index: number): string {
             const labels = skillGaps.map(gap => gap.skill);
             const label: string = labels[index] || '';
             
-            // Calculate dynamic character limit based on number of skills
             const totalSkills = skillGaps.length;
             let maxLength: number;
             
-            if (totalSkills <= 3) {
-              maxLength = 15; // More space for fewer skills
+            if (isMobile) {
+              maxLength = totalSkills <= 3 ? 10 : totalSkills <= 5 ? 7 : 5;
+            } else if (totalSkills <= 3) {
+              maxLength = 15;
             } else if (totalSkills <= 5) {
-              maxLength = 12; // Medium space
+              maxLength = 12;
             } else {
-              maxLength = 8; // Less space for many skills
+              maxLength = 8;
             }
             
             return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
@@ -116,7 +127,7 @@ export default function SkillRadarChart({ skillGaps }: SkillRadarChartProps) {
     <div style={{
       width: '100%',
       height: '100%',
-      minHeight: '200px'
+      minHeight: '250px'
     }}>
       <Line data={data} options={options} />
     </div>

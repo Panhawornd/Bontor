@@ -16,16 +16,16 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
     <div className="rec-dashboard-container" style={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '40px',
+      gap: '24px',
       maxWidth: '1400px',
       margin: '0 auto',
-      padding: '0 20px'
+      padding: '0'
     }}>
       {/* Charts Section */}
       <div className="rec-charts-grid" style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', 
-        gap: '40px',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 500px), 1fr))', 
+        gap: '20px',
         alignItems: 'start'
       }}>
         <div className="rec-chart-card" style={{
@@ -38,14 +38,14 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <h3 style={{ 
+          <h3 className="rec-section-title" style={{ 
             fontSize: '22px', 
             fontWeight: '700', 
-            marginBottom: '24px',
+            marginBottom: '20px',
             color: 'var(--text-primary)',
             textAlign: 'center',
             borderBottom: '2px solid var(--accent-primary)',
-            paddingBottom: '12px'
+            paddingBottom: '10px'
           }}>
             Subject Performance
           </h3>
@@ -54,7 +54,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
           </div>
         </div>
         
-        <div className="rec-chart-card" style={{
+        <div className="rec-chart-card rec-skill-chart" style={{
           background: 'var(--bg-secondary)',
           border: '1px solid var(--border-primary)',
           borderRadius: '12px',
@@ -64,14 +64,14 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <h3 style={{ 
+          <h3 className="rec-section-title" style={{ 
             fontSize: '22px', 
             fontWeight: '700', 
-            marginBottom: '10px',
+            marginBottom: '8px',
             color: 'var(--text-primary)',
             textAlign: 'center',
             borderBottom: '2px solid var(--accent-primary)',
-            paddingBottom: '12px'
+            paddingBottom: '10px'
           }}>
             Skills Analysis
           </h3>
@@ -81,7 +81,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
             display: 'flex',
             justifyContent: 'center',
             gap: '30px',
-            marginTop: '4px',
+            marginTop: '10px',
             marginBottom: '0px',
             
           }}>
@@ -96,7 +96,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                 backgroundColor: 'rgba(59, 130, 246, 0.8)',
                 borderRadius: '2px'
               }}></div>
-              <span style={{
+              <span className="rec-legend-label" style={{
                 fontSize: '12px',
                 color: 'var(--text-primary)',
                 fontWeight: '500'
@@ -114,7 +114,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                 backgroundColor: 'rgba(34, 197, 94, 0.8)',
                 borderRadius: '2px'
               }}></div>
-              <span style={{
+              <span className="rec-legend-label" style={{
                 fontSize: '12px',
                 color: 'var(--text-primary)',
                 fontWeight: '500'
@@ -122,21 +122,21 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
             </div>
           </div>
           
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, paddingTop: '12px' }}>
             <SkillRadarChart skillGaps={data.skill_gaps} />
           </div>
         </div>
       </div>
 
       {/* Majors Section */}
-      <div style={{
+      <div className="rec-section-card" style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-primary)',
         borderRadius: '12px',
         padding: '32px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
-        <h3 style={{ 
+        <h3 className="rec-section-title" style={{ 
           fontSize: '22px', 
           fontWeight: '700', 
           marginBottom: '28px',
@@ -211,14 +211,14 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
       </div>
 
       {/* Careers Section */}
-      <div style={{
+      <div className="rec-section-card" style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-primary)',
         borderRadius: '12px',
         padding: '32px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
-        <h3 style={{ 
+        <h3 className="rec-section-title" style={{ 
           fontSize: '22px', 
           fontWeight: '700', 
           marginBottom: '28px',
@@ -232,8 +232,8 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
         
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-          gap: '20px' 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', 
+          gap: '16px' 
         }}>
           {data.careers.map((career, index) => (
             <div 
@@ -291,14 +291,14 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
       </div>
 
       {/* Universities Section */}
-      <div style={{
+      <div className="rec-section-card" style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-primary)',
         borderRadius: '12px',
         padding: '32px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
       }}>
-        <h3 style={{ 
+        <h3 className="rec-section-title" style={{ 
           fontSize: '22px', 
           fontWeight: '700', 
           marginBottom: '28px',
@@ -312,8 +312,8 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
         
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: '20px' 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', 
+          gap: '16px' 
         }}>
           {data.universities.map((uni, index) => (
             <div 
@@ -393,7 +393,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
       </div>
 
       {/* Skills Section */}
-      <div className="card" style={{
+      <div className="card rec-section-card" style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-primary)',
         borderRadius: '16px',
@@ -411,7 +411,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
           background: 'var(--gradient-primary)'
         }} />
         
-        <h2 style={{ 
+        <h2 className="rec-section-title" style={{ 
           fontSize: '22px', 
           fontWeight: '600', 
           marginBottom: '24px',
@@ -453,7 +453,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                   {gap.skill}
                 </h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <span style={{
+                  <span className="rec-level-badge" style={{
                     fontSize: '12px',
                     background: 'rgba(59, 130, 246, 0.1)',
                     color: '#ffffff',
@@ -464,7 +464,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                   }}>
                     Current: {gap.current_level}/10
                   </span>
-                  <span style={{
+                  <span className="rec-level-badge" style={{
                     fontSize: '12px',
                     background: 'rgba(40, 167, 69, 0.1)',
                     color: 'var(--accent-success)',
@@ -510,7 +510,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                 </p>
                 <div style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', 
                   gap: '8px' 
                 }}>
                   {gap.suggestions.map((suggestion, sIndex) => (
@@ -519,12 +519,12 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                       alignItems: 'flex-start', 
                       gap: '8px',
                       fontSize: '14px',
-                      color: 'var(--text-secondary)'
+                      color: 'var(--text-secondary)',
                     }}>
                         <span style={{ 
                           color: 'rgba(59, 130, 246, 1)', 
-                          marginTop: '2px',
-                          fontWeight: 'bold'
+                          marginTop: '-1px',
+                          fontWeight: 'bold',
                         }}>
                           •
                         </span>

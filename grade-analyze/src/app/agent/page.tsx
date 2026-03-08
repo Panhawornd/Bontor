@@ -12,12 +12,15 @@ import {
   Paperclip,
   ArrowUp,
   Bot,
+  BotMessageSquare,
   Trash2,
+  X,
 } from "lucide-react";
 
 export default function AgentPage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ name: string; email?: string } | null>(
@@ -652,7 +655,43 @@ Fundamental skills to prepare before enrolling:
         </div>
       )}
 
-      {/* Main content area */}
+      {/* Mobile Chat Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-[180]">
+          <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-label="Close sidebar" onClick={() => setIsSidebarOpen(false)} />
+          <aside className="absolute top-0 left-0 h-full w-72 max-w-[85%] bg-[#111111] border-r border-[#1f1f1f] overflow-y-auto shadow-2xl">
+            <div className="p-4">
+              <button type="button" onClick={() => { handleNewChat(); setIsSidebarOpen(false); }} className="w-full flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 transition-colors text-gray-100">
+                <Edit className="w-4 h-4" /><span className="text-sm text-white">New chat</span>
+              </button>
+              <button type="button" className="w-full flex items-center gap-3 px-2 py-2 mt-2 rounded-md hover:bg-white/5 transition-colors text-gray-100">
+                <Search className="w-4 h-4" /><span className="text-sm text-white">Search chats</span>
+              </button>
+              <div className="mt-4 border-t border-gray-700 pt-3 px-2">
+                <p className="text-xs text-gray-400 uppercase tracking-wide">Chat history</p>
+                {chatHistory.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 px-2 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+                    <p className="text-sm text-gray-200 font-semibold">No chats yet</p>
+                    <p className="text-xs text-gray-400 mt-2">Start a new chat to see it here.</p>
+                  </div>
+                ) : (
+                  <div>
+                    {chatHistory.map((c, idx) => (
+                      <div key={idx} className="group relative mt-2 px-3 py-2 text-sm text-gray-100 hover:bg-gray-800 rounded-md transition-colors">
+                        <button onClick={() => { handleLoadChat(idx); setIsSidebarOpen(false); }} className="w-full text-left truncate pr-8">{c.title || `Chat ${idx + 1}`}</button>
+                        <button onClick={(e) => handleDeleteChat(idx, e)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-700 rounded transition-all duration-200" title="Delete chat">
+                          <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
       <div className="relative z-10 flex flex-1 overflow-hidden">
         {/* Sidebar for chat history */}
         <aside className="hidden md:flex flex-col w-64 flex-shrink-0 bg-[#111111] border-r border-[#1f1f1f] overflow-y-auto z-20">
@@ -744,7 +783,15 @@ Fundamental skills to prepare before enrolling:
             ref={inputContainerRef}
             className="flex-shrink-0 p-4 pb-6 bg-gradient-to-t from-black via-black/80 to-transparent"
           >
-            <div className="mx-auto max-w-full md:max-w-[900px]">
+            <div className="mx-auto max-w-full md:max-w-[900px] relative">
+              {/* Mobile sidebar toggle - overlaid top-right of input, hidden on desktop */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="md:hidden absolute -top-14 right-0 z-[150] flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 border border-gray-600 text-white shadow-lg hover:bg-gray-700 transition-colors"
+                aria-label="Open chat history"
+              >
+                <BotMessageSquare size={20} />
+              </button>
               <div className="w-full bg-[#111111]/90 backdrop-blur-md rounded-2xl p-3 py-[2px] shadow-lg border border-[#1f1f1f] focus-within:ring-1 focus-within:ring-blue-500 transition-all duration-200">
                 <textarea
                   ref={textareaRef}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useState, useEffect, useLayoutEffect, useRef, Suspense } from 'react';
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/Reveal";
@@ -148,39 +149,21 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
           <div className="flex items-center justify-center h-16 relative">
             {/* Logo */}
             <div className="absolute left-3 md:left-0 flex items-center">
-              <button
-                onClick={() => router.push('/landing')}
-                className="hover:opacity-80 transition-opacity"
-              >
-                <img 
-                  src="/image/Bontor-logo.png" 
-                  alt="Bontor" 
+              <Link href="/landing" className="hover:opacity-80 transition-opacity">
+                <img
+                  src="/image/Bontor-logo.png"
+                  alt="Bontor"
                   className="h-5 md:h-[23px] w-auto"
                 />
-              </button>
+              </Link>
             </div>
 
             {/* Desktop Navigation - Centered */}
             <div className="hidden md:block">
               <div className="flex items-baseline space-x-8">
-                <button
-                  onClick={() => router.push('/landing')}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  Home
-                </button>
-                <button
-                  onClick={() => router.push('/how-it-works')}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  How it Works
-                </button>
-                <button
-                  onClick={() => router.push('/about')}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  About
-                </button>
+                <Link href="/landing" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">Home</Link>
+                <Link href="/how-it-works" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">How it Works</Link>
+                <Link href="/about" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">About</Link>
               </div>
             </div>
 
@@ -269,24 +252,9 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
               </button>
             </div>
             <div className="flex flex-col gap-6 px-5 py-6 text-sm">
-              <button
-                onClick={() => { router.push('/landing'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => { router.push('/how-it-works'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                How it Works
-              </button>
-              <button
-                onClick={() => { router.push('/about'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                About
-              </button>
+              <Link href="/landing" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">Home</Link>
+              <Link href="/how-it-works" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">How it Works</Link>
+              <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">About</Link>
             </div>
             <div className="mt-5 px-5 pb-8">
               <Button
@@ -651,51 +619,16 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
                 <div className="flex flex-col">
                   <h3 className="text-white font-semibold mb-3">Quick Links</h3>
                   <ul className="space-y-2 mt-2">
-                    <li>
-                      <button
-                        onClick={() => router.push('/landing')}
-                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
-                      >
-                        Home
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => router.push('/how-it-works')}
-                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
-                      >
-                        How it Works
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => router.push('/about')}
-                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
-                      >
-                        About
-                      </button>
-                    </li>
+                  <li><Link href="/landing" className="text-gray-300 hover:text-blue-500 transition-colors text-sm">Home</Link></li>
+                    <li><Link href="/how-it-works" className="text-gray-300 hover:text-blue-500 transition-colors text-sm">How it Works</Link></li>
+                    <li><Link href="/about" className="text-gray-300 hover:text-blue-500 transition-colors text-sm">About</Link></li>
                   </ul>
                 </div>
                 <div className="flex flex-col">
                   <h3 className="text-white font-semibold mb-3">Account</h3>
                   <ul className="space-y-2 mt-2">
-                    <li>
-                      <button
-                        onClick={() => router.push('/login')}
-                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
-                      >
-                        Login
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => router.push('/signup')}
-                        className="text-gray-300 hover:text-blue-500 transition-colors text-sm"
-                      >
-                        Register
-                      </button>
-                    </li>
+                  <li><Link href="/login" className="text-gray-300 hover:text-blue-500 transition-colors text-sm">Login</Link></li>
+                    <li><Link href="/signup" className="text-gray-300 hover:text-blue-500 transition-colors text-sm">Register</Link></li>
                   </ul>
                 </div>
               </div>

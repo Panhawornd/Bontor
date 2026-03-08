@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Button from "@/components/ui/Button";
 import UniversityCard, { University } from "@/components/UniversityCard";
 import {
@@ -254,21 +255,17 @@ export default function UniversityPage() {
                   <path d="M21 19H7" />
                 </svg>
               </button>
-              <button
-                onClick={() => router.push("/landing")}
+              <Link
+                href="/landing"
                 className="hover:opacity-80 transition-opacity"
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  padding: 0,
-                }}
+                style={{ padding: 0 }}
               >
                 <img
                   src="/image/Bontor-logo.png"
                   alt="Bontor"
                   className="h-5 md:h-[23px] w-auto"
                 />
-              </button>
+              </Link>
             </div>
 
             {/* Navigation Links - Centered - Hidden on mobile */}
@@ -276,30 +273,30 @@ export default function UniversityPage() {
               className="hidden lg:flex items-center space-x-8"
               style={{ position: "absolute", left: "50%", transform: "translateX(-50%)" }}
             >
-              <button
-                onClick={() => router.push("/Input")}
+              <Link
+                href="/Input"
                 className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
               >
                 Analyze
-              </button>
-              <button
-                onClick={() => router.push("/dashboard")}
+              </Link>
+              <Link
+                href="/dashboard"
                 className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
               >
                 Dashboard
-              </button>
-              <button
-                onClick={() => router.push("/university")}
+              </Link>
+              <Link
+                href="/university"
                 className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
               >
                 University
-              </button>
-              <button
-                onClick={() => router.push("/agent")}
+              </Link>
+              <Link
+                href="/agent"
                 className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
               >
                 Agent
-              </button>
+              </Link>
             </div>
 
             {/* Profile Menu */}
@@ -445,30 +442,18 @@ export default function UniversityPage() {
               </button>
             </div>
             <div className="flex flex-col gap-6 px-5 py-6 text-sm">
-              <button
-                onClick={() => { router.push('/Input'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
+              <Link href="/Input" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">
                 Analyze
-              </button>
-              <button
-                onClick={() => { router.push('/dashboard'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
+              </Link>
+              <Link href="/dashboard" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">
                 Dashboard
-              </button>
-              <button
-                onClick={() => { router.push('/university'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
+              </Link>
+              <Link href="/university" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">
                 University
-              </button>
-              <button
-                onClick={() => { router.push('/agent'); setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
+              </Link>
+              <Link href="/agent" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">
                 Agent
-              </button>
+              </Link>
             </div>
             <div className="mt-5 px-5 pb-8">
               <div className="mb-3">
@@ -582,13 +567,13 @@ export default function UniversityPage() {
               <p className="text-lg text-gray-200 mb-6 max-w-2xl mx-auto">
                 Complete your academic analysis on the Analyze page to receive university recommendations.
               </p>
-              <button
-                onClick={() => router.push('/Input')}
+              <Link
+                href="/Input"
                 className="group inline-flex items-center gap-3 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-md transition-colors border border-gray-600"
               >
                 Go to Analyze
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
             </div>
           ) : loading ? (
             <div className="text-center py-20">

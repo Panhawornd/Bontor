@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   User,
   LogOut,
@@ -42,6 +43,7 @@ export default function DashboardPage() {
   const [editNameValue, setEditNameValue] = useState('');
   const [savingName, setSavingName] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
+  const editInputRefMobile = useRef<HTMLInputElement>(null);
 
   // Stats from localStorage/sessionStorage
   const [analysisCount, setAnalysisCount] = useState(0);
@@ -130,10 +132,10 @@ export default function DashboardPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showProfileMenu]);
 
-  // Focus edit input when editing
+  // Focus edit input when editing (mobile or desktop)
   useEffect(() => {
-    if (isEditingName && editInputRef.current) {
-      editInputRef.current.focus();
+    if (isEditingName) {
+      (editInputRefMobile.current ?? editInputRef.current)?.focus();
     }
   }, [isEditingName]);
 
@@ -231,22 +233,19 @@ export default function DashboardPage() {
                   <path d="M21 5H3" /><path d="M21 12H9" /><path d="M21 19H7" />
                 </svg>
               </button>
-              <button onClick={() => router.push('/landing')} className="hover:opacity-80 transition-opacity" style={{ background: 'transparent', border: 'none', padding: 0 }}>
+              <Link href="/landing" className="hover:opacity-80 transition-opacity">
                 <img src="/image/Bontor-logo.png" alt="Bontor" className="h-5 md:h-[23px] w-auto" />
-              </button>
+              </Link>
             </div>
 
             {/* Desktop Nav - Centered */}
             <div className="hidden lg:flex items-center space-x-8" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-              {['Analyze', 'Dashboard', 'University', 'Agent'].map((label) => {
-                const paths: Record<string, string> = { Analyze: '/Input', Dashboard: '/dashboard', University: '/university', Agent: '/agent' };
-                return (
-                  <button key={label} onClick={() => router.push(paths[label])}
-                    className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-gray-800 transition-colors">
-                    {label}
-                  </button>
-                );
-              })}
+              {[['Analyze', '/Input'], ['Dashboard', '/dashboard'], ['University', '/university'], ['Agent', '/agent']].map(([label, path]) => (
+                <Link key={label} href={path}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+                  {label}
+                </Link>
+              ))}
             </div>
 
             {/* Profile Menu */}
@@ -296,7 +295,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex flex-col gap-6 px-5 py-6 text-sm">
               {[['Analyze', '/Input'], ['Dashboard', '/dashboard'], ['University', '/university'], ['Agent', '/agent']].map(([label, path]) => (
-                <button key={label} onClick={() => { router.push(path); setIsMenuOpen(false); }} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">{label}</button>
+                <Link key={label} href={path} onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">{label}</Link>
               ))}
             </div>
             <div className="mt-5 px-5 pb-8">
@@ -330,7 +329,7 @@ export default function DashboardPage() {
                   {isEditingName ? (
                     <div className="flex items-center gap-1">
                       <input
-                        ref={editInputRef}
+                        ref={editInputRefMobile}
                         value={editNameValue}
                         onChange={(e) => setEditNameValue(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') handleCancelEditName(); }}
@@ -372,7 +371,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
                     ) : (
                       chatHistory.map((c, i) => (
-                        <button key={i} onClick={() => { router.push('/agent'); setIsSidebarOpen(false); }} className="text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate">{c.title || `Chat ${i + 1}`}</button>
+                        <Link key={i} href="/agent" onClick={() => setIsSidebarOpen(false)} className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate">{c.title || `Chat ${i + 1}`}</Link>
                       ))
                     )}
                   </div>
@@ -469,13 +468,13 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
                   ) : (
                     chatHistory.map((c, i) => (
-                      <button
+                      <Link
                         key={i}
-                        onClick={() => router.push('/agent')}
-                        className="text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate"
+                        href="/agent"
+                        className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate"
                       >
                         {c.title || `Chat ${i + 1}`}
-                      </button>
+                      </Link>
                     ))
                   )}
                 </div>

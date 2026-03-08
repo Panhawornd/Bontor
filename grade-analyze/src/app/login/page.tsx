@@ -110,46 +110,20 @@ function LoginContent() {
           <div className="flex items-center justify-between h-16 relative">
             {/* Logo */}
             <div className="absolute left-3 md:left-0 flex items-center gap-3">
-              <button
-                onClick={() => {
-                  window.location.href = '/landing'
-                }}
-                className="hover:opacity-80 transition-opacity"
-              >
+              <Link href="/landing" className="hover:opacity-80 transition-opacity">
                 <img 
                   src="/image/Bontor-logo.png" 
                   alt="Bontor" 
                   className="h-5 md:h-[23px] w-auto"
                 />
-              </button>
+              </Link>
             </div>
 
             {/* Navigation Links - align with logo and stay at right (hidden on mobile) */}
             <div className="hidden md:flex items-center space-x-8 absolute right-[-10px]">
-                <button
-                  onClick={() => {
-                    window.location.href = '/landing'
-                  }}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  Home
-                </button>
-                <button
-                  onClick={() => {
-                    window.location.href = '/how-it-works'
-                  }}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  How it Works
-                </button>
-                <button
-                  onClick={() => {
-                    window.location.href = '/about'
-                  }}
-                  className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors"
-                >
-                  About
-                </button>
+                <Link href="/landing" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">Home</Link>
+                <Link href="/how-it-works" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">How it Works</Link>
+                <Link href="/about" className="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-white hover:bg-gray-800 transition-colors">About</Link>
             </div>
 
             {/* Mobile Menu Trigger - right */}
@@ -223,24 +197,9 @@ function LoginContent() {
               </button>
             </div>
             <div className="flex flex-col gap-6 px-5 py-6 text-sm">
-              <button
-                onClick={() => { window.location.href = '/landing'; setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => { window.location.href = '/how-it-works'; setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                How it Works
-              </button>
-              <button
-                onClick={() => { window.location.href = '/about'; setIsMenuOpen(false); }}
-                className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors"
-              >
-                About
-              </button>
+              <Link href="/landing" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">Home</Link>
+              <Link href="/how-it-works" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">How it Works</Link>
+              <Link href="/about" onClick={() => setIsMenuOpen(false)} className="text-left uppercase tracking-wide text-white/90 hover:text-white transition-colors">About</Link>
             </div>
           </aside>
         </div>

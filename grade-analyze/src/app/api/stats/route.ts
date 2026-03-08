@@ -10,17 +10,22 @@ export async function GET(req: Request) {
     const token = rawCookie?.split('=').slice(1).join('=')
 
     if (!token) {
-      return NextResponse.json({ analysisCount: 0, requestCount: 0 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const payload = verifyToken(token)
     if (!payload) {
-      return NextResponse.json({ analysisCount: 0, requestCount: 0 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    if (typeof payload.userId !== 'number') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = payload.userId
     const [analysisCount, requestCount] = await Promise.all([
-      prisma.input.count({ where: { userId: payload.userId } }),
-      prisma.recommendation.count({ where: { userId: payload.userId } }),
+      prisma.input.count({ where: { userId } }),
+      prisma.recommendation.count({ where: { userId } }),
     ])
 
     return NextResponse.json({ analysisCount, requestCount })

@@ -147,15 +147,35 @@ class SemanticIntentDetector:
         ]
         has_negation = any(neg in lower_text for neg in NEGATION_PATTERNS)
         
-        # If text has negation, extract the "positive part" for correct SBERT matching
-        # e.g. "i don't like math" -> negative intent about math
-        # e.g. "i love coding but hate math" -> mixed: positive coding, negative math
+        # Detect mixed intent: text has negation but ALSO positive parts
+        # e.g. "I hate coding BUT I love designing interfaces"
+        MIXED_CONNECTORS = ["but", "however", "instead", "prefer", "rather", "love", "enjoy", "like"]
+        has_mixed_intent = has_negation and any(conn in lower_text for conn in MIXED_CONNECTORS)
+        
+        # For mixed intent, identify which majors are being NEGATED (keyword-based)
+        negated_majors = set()
+        if has_mixed_intent:
+            NEGATED_KEYWORD_MAP = {
+                "coding": ["Software Engineering"],
+                "programming": ["Software Engineering"],
+                "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering"],
+                "biology": ["Medicine", "Pharmacy", "Dentistry"],
+                "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy"],
+                "doctor": ["Medicine"], "medicine": ["Medicine"],
+                "law": ["Law"], "lawyer": ["Law"],
+                "business": ["Business Administration", "Business Management"],
+                "teaching": ["Education"], "psychology": ["Psychology"],
+                "hacking": ["Cybersecurity"], "security": ["Cybersecurity"],
+            }
+            for keyword, majors in NEGATED_KEYWORD_MAP.items():
+                if keyword in lower_text:
+                    negated_majors.update(majors)
         
         user_emb = enc.encode(clean_text(text))
 
         # Check negative sentiment — require BOTH pattern match AND semantic signal
         neg_sim = self._cosine(user_emb, SemanticIntentDetector._negative_embedding)
-        is_negative = has_negation and neg_sim > 0.25  # Must have negation words + semantic confirmation
+        is_negative = has_negation and neg_sim > 0.25 and not has_mixed_intent
 
         boosts: Dict[str, float] = {}
         for major_name, major_emb in SemanticIntentDetector._major_embeddings.items():
@@ -164,8 +184,15 @@ class SemanticIntentDetector:
             if sim < threshold:
                 continue
 
-            if is_negative or has_negation:
-                # If purely negative text, penalise matching majors
+            if has_mixed_intent:
+                # Mixed intent: penalize negated majors, boost everything else normally
+                if major_name in negated_majors:
+                    boosts[major_name] = max(0.1, 1.0 - sim)
+                else:
+                    boost = 1.0 + (sim - threshold) / (1.0 - threshold) * 5.0
+                    boosts[major_name] = boost
+            elif is_negative or has_negation:
+                # Purely negative text, penalise matching majors
                 boosts[major_name] = max(0.1, 1.0 - sim)
             else:
                 # Scale similarity (0.12-1.0) → boost (1.0-6.0)
@@ -212,6 +239,8 @@ class SemanticIntentDetector:
         
         if has_negation:
             # Check which majors are being negated using keywords
+            # Use word-boundary matching, NOT substring matching
+            import re
             KEYWORD_TO_MAJORS = {
                 "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
                 "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
@@ -234,8 +263,26 @@ class SemanticIntentDetector:
                 "security": ["Cybersecurity"],
             }
             
+            # Check proximity: keyword must be within 5 words of a negation
+            words = lower_text.split()
+            neg_positions = []
+            for i, w in enumerate(words):
+                for neg in NEGATION_PATTERNS:
+                    neg_words = neg.split()
+                    if i + len(neg_words) <= len(words):
+                        if words[i:i+len(neg_words)] == neg_words:
+                            neg_positions.extend(range(i, i + len(neg_words)))
+            
             for keyword, majors in KEYWORD_TO_MAJORS.items():
-                if keyword in lower_text:
+                # Use word boundary regex to avoid "designing" matching "design"
+                pattern = rf"\b{re.escape(keyword)}\b"
+                match = re.search(pattern, lower_text)
+                if not match:
+                    continue
+                # Check if the keyword is near a negation (within 5 words)
+                kw_start = len(lower_text[:match.start()].split())
+                near_negation = any(abs(kw_start - np) <= 5 for np in neg_positions)
+                if near_negation:
                     for major in majors:
                         penalties[major] = min(penalties.get(major, 1.0), 0.05)  # Very strong penalty
             

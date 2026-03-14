@@ -147,8 +147,8 @@ class RecommendationService:
         # Covers: subject names, career titles, activities, personality traits, hobbies
         CONCEPT_ANCHORS = {
             # ===== ACADEMIC SUBJECTS =====
-            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
-            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
+            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance"],
+            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance"],
             "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
@@ -304,6 +304,21 @@ class RecommendationService:
             "branding": ["Graphic Design"],
             "figma": ["UX/UI Design"],
             "wireframe": ["UX/UI Design"],
+            # UX/UI specific
+            "ux": ["UX/UI Design"],
+            "ui": ["UX/UI Design"],
+            "ux designer": ["UX/UI Design"],
+            "ui designer": ["UX/UI Design"],
+            "ux design": ["UX/UI Design"],
+            "ui design": ["UX/UI Design"],
+            "user interface": ["UX/UI Design"],
+            "user experience": ["UX/UI Design"],
+            "interface": ["UX/UI Design"],
+            "interfaces": ["UX/UI Design"],
+            "designing interfaces": ["UX/UI Design"],
+            "prototype": ["UX/UI Design"],
+            "usability": ["UX/UI Design"],
+            "designing": ["UX/UI Design", "Graphic Design"],
             
             # ===== LAW =====
             "law": ["Law"],

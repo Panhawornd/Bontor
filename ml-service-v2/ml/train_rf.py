@@ -105,6 +105,18 @@ class ProfileGenerator:
             self._sbert = SBERTEncoder()
         return self._sbert
 
+    def _load_real_distributions(self) -> dict:
+        """Load real grade distributions from CSV data for calibration."""
+        try:
+            from data.grade_loader import get_real_grade_distributions
+            dist = get_real_grade_distributions()
+            if dist:
+                logger.info("Real grade data found — calibrating profiles")
+            return dist
+        except Exception as e:
+            logger.warning(f"Could not load real grade data: {e}")
+            return {}
+
     def generate_profiles(self) -> Dict[str, Dict]:
         """Generate a profile for every major from the database."""
         if self._profiles:
@@ -113,6 +125,9 @@ class ProfileGenerator:
         logger.info("Auto-generating training profiles from database…")
         enc = self._get_sbert()
 
+        # Load real grade distributions for calibration
+        real_dist = self._load_real_distributions()
+
         for major_name, info in self.majors_db.items():
             required = [s.lower() for s in info.get("required_subjects", [])]
             desc = info.get("description", "")
@@ -120,7 +135,7 @@ class ProfileGenerator:
             skills_text = " ".join(info.get("fundamental_skills", {}).keys())
             major_text = f"{desc} {keywords} {skills_text}"
 
-            # --- Subject distributions ---
+            # --- Subject distributions (calibrated with real data) ---
             subjects = {}
             # Define primary subjects for specific fields to guide the ML model
             primary_map = {
@@ -137,15 +152,26 @@ class ProfileGenerator:
             major_primaries = primary_map.get(major_name, required)
 
             for s in SUBJECTS:
-                if s in major_primaries:
-                    # Primary required → very high mean
-                    subjects[s] = (0.82, 0.07)
-                elif s in required:
-                    # Required but not primary → high mean
-                    subjects[s] = (0.65, 0.10)
+                if real_dist:
+                    # Calibrate with real student data
+                    real_mean, real_std = real_dist.get(s, (0.50, 0.15))
+                    if s in major_primaries:
+                        # Primary: students choosing this major score above average
+                        subjects[s] = (min(0.95, real_mean + 0.20), max(0.05, real_std * 0.7))
+                    elif s in required:
+                        # Required but not primary: slight upward shift
+                        subjects[s] = (min(0.90, real_mean + 0.10), max(0.05, real_std * 0.85))
+                    else:
+                        # Not required: use actual real distribution
+                        subjects[s] = (real_mean, max(0.05, real_std))
                 else:
-                    # Not required → average mean
-                    subjects[s] = (0.45, 0.15)
+                    # Fallback: hardcoded distributions (no CSV data)
+                    if s in major_primaries:
+                        subjects[s] = (0.82, 0.07)
+                    elif s in required:
+                        subjects[s] = (0.65, 0.10)
+                    else:
+                        subjects[s] = (0.45, 0.15)
 
             # --- Strength probabilities via SBERT ---
             major_emb = enc.encode(major_text)
@@ -305,7 +331,124 @@ class ModelTrainer:
                 X.append(features)
                 y.append(major_name)
 
+        # === REAL DATA AUGMENTATION ===
+        real_data = self._generate_real_augmented_data(profiles)
+        if real_data:
+            real_X, real_y = real_data
+            X.extend(real_X)
+            y.extend(real_y)
+            logger.info(
+                f"Mixed training data: {len(X) - len(real_X)} synthetic + "
+                f"{len(real_X)} real-augmented = {len(X)} total"
+            )
+
         return np.array(X, dtype=np.float32), np.array(y)
+
+    def _generate_real_augmented_data(
+        self, profiles: Dict
+    ) -> Tuple[List[np.ndarray], List[str]]:
+        """
+        Generate training samples from real student CSV data.
+
+        For each real student:
+        1. Convert letter grades → numeric scores (randomised within range)
+        2. Compute eligibility for every major
+        3. Probabilistically assign a target major (weighted by eligibility)
+        4. Build full feature vector using real grades + target major profile
+        """
+        try:
+            from data.grade_loader import get_real_students_augmented
+            augmented = get_real_students_augmented(n_copies=20)
+        except Exception as e:
+            logger.warning(f"Could not load real student data: {e}")
+            return None
+
+        if not augmented:
+            return None
+
+        X: List[np.ndarray] = []
+        y: List[str] = []
+
+        for grades in augmented:
+            # 1. Compute eligibility for each major
+            eligibilities: Dict[str, float] = {}
+            for m in self.majors_list:
+                m_info = self.majors_db.get(m, {})
+                m_req = [r.lower() for r in m_info.get("required_subjects", [])]
+                if not m_req:
+                    eligibilities[m] = 0.5
+                    continue
+                req_scores = [grades.get(r, 0) / MAX_SCORES.get(r, 100) for r in m_req]
+                avg_req = np.mean(req_scores)
+                elig = float(1.0 / (1.0 + np.exp(-8 * (avg_req - 0.5))))
+                eligibilities[m] = elig
+
+            # 2. Probabilistically select target major (weighted by eligibility)
+            eligible = [(m, e) for m, e in eligibilities.items() if e > 0.3]
+            if not eligible:
+                eligible = sorted(eligibilities.items(), key=lambda x: x[1], reverse=True)[:3]
+            total_e = sum(e for _, e in eligible)
+            probs = [e / total_e for _, e in eligible]
+            chosen_idx = np.random.choice(len(eligible), p=probs)
+            target_major = eligible[chosen_idx][0]
+            target_profile = profiles.get(target_major, {})
+
+            # 3. Build feature vector (same layout as synthetic data)
+            grade_features = [grades.get(s, 0) / MAX_SCORES[s] for s in SUBJECTS]
+
+            non_zero = [g for g in grade_features if g > 0]
+            grade_stats = (
+                [float(np.mean(non_zero)), float(np.std(non_zero)), float(max(non_zero))]
+                if non_zero else [0.0, 0.0, 0.0]
+            )
+
+            stem_avg = float(np.mean([grade_features[SUBJECTS.index(s)] for s in STEM_SUBJECTS]))
+            lang_avg = float(np.mean([grade_features[SUBJECTS.index(s)] for s in LANG_SUBJECTS]))
+            stem_lang_ratio = stem_avg / (lang_avg + 1e-6)
+            math_phys = grade_features[0] * grade_features[1]
+            chem_bio = grade_features[2] * grade_features[3]
+            interaction_features = [stem_avg, lang_avg, stem_lang_ratio, math_phys, chem_bio]
+
+            # Strengths & preferences from target major profile
+            strength_vec = np.zeros(len(STRENGTH_CONCEPTS))
+            for i, (sname, _) in enumerate(STRENGTH_CONCEPTS.items()):
+                prob = target_profile.get("strengths", {}).get(sname, 0.35)
+                prob = np.clip(prob + np.random.uniform(-0.10, 0.10), 0.0, 1.0)
+                strength_vec[i] = float(np.random.random() < prob) * np.random.uniform(0.4, 1.0)
+
+            pref_vec = np.zeros(len(PREFERENCE_CONCEPTS))
+            for i, (pname, _) in enumerate(PREFERENCE_CONCEPTS.items()):
+                prob = target_profile.get("preferences", {}).get(pname, 0.35)
+                prob = np.clip(prob + np.random.uniform(-0.10, 0.10), 0.0, 1.0)
+                pref_vec[i] = float(np.random.random() < prob) * np.random.uniform(0.4, 1.0)
+
+            # SBERT similarity (overlapping Gaussians)
+            sim_scores = []
+            for m in self.majors_list:
+                if m == target_major:
+                    sim_scores.append(np.clip(np.random.normal(0.62, 0.12), 0.0, 1.0))
+                else:
+                    sim_scores.append(np.clip(np.random.normal(0.32, 0.12), 0.0, 1.0))
+
+            # Eligibility flags (from actual computed eligibility)
+            elig_flags = [
+                np.clip(eligibilities.get(m, 0.5) + np.random.normal(0, 0.03), 0.0, 1.0)
+                for m in self.majors_list
+            ]
+
+            features = np.concatenate([
+                grade_features, grade_stats, interaction_features,
+                strength_vec, pref_vec,
+                np.array(sim_scores), elig_flags,
+            ])
+            X.append(features)
+            y.append(target_major)
+
+        logger.info(
+            f"Real data augmentation: {len(X)} samples across "
+            f"{len(set(y))} majors"
+        )
+        return X, y
 
     def train(self, n_samples: int = 50000, tune_hyperparams: bool = True):
         logger.info("Starting training…")

@@ -14,6 +14,7 @@ No if/elif chains, no magic numbers, no keyword dictionaries.
 """
 import logging
 import re
+import math
 import numpy as np
 from typing import Dict, List, Optional
 
@@ -147,8 +148,8 @@ class RecommendationService:
         # Covers: subject names, career titles, activities, personality traits, hobbies
         CONCEPT_ANCHORS = {
             # ===== ACADEMIC SUBJECTS =====
-            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance"],
-            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance"],
+            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture"],
+            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture"],
             "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
@@ -196,6 +197,14 @@ class RecommendationService:
             "digital attacks": ["Cybersecurity"],
             # Networking
             "network": ["Telecommunication and Networking"],
+            "networking": ["Telecommunication and Networking"],
+            "telecommunication": ["Telecommunication and Networking"],
+            "telecom": ["Telecommunication and Networking"],
+            "cisco": ["Telecommunication and Networking"],
+            "routing": ["Telecommunication and Networking"],
+            "wireless": ["Telecommunication and Networking"],
+            "5g": ["Telecommunication and Networking"],
+            "it infrastructure": ["Telecommunication and Networking"],
             # Robotics
             "robotics": ["Mechanical Engineering", "Electrical Engineering"],
             
@@ -247,6 +256,14 @@ class RecommendationService:
             "building things": ["Mechanical Engineering", "Civil Engineering"],
             "building design": ["Architecture"],
             "infrastructure": ["Civil Engineering"],
+            "architecture": ["Architecture"],
+            "architect": ["Architecture"],
+            "floor plans": ["Architecture"],
+            "blueprint": ["Architecture"],
+            "blueprints": ["Architecture"],
+            "urban structures": ["Architecture"],
+            "modern structures": ["Architecture"],
+            "exterior design": ["Architecture"],
             # Mechanical
             "robot": ["Mechanical Engineering"],
             "robots": ["Mechanical Engineering"],
@@ -384,8 +401,6 @@ class RecommendationService:
             "floor plan": ["Architecture"],
         }
         
-        # Use regex for word boundaries to avoid partial matches (e.g. "ai" matching in "explaining")
-        import re
         active_anchors = set()
         for k, majors in CONCEPT_ANCHORS.items():
             pattern = rf"\b{re.escape(k)}\b"
@@ -448,8 +463,6 @@ class RecommendationService:
             elif penalty < 0.15:
                 continue
 
-            # 3. SBERT similarity factor
-            import math
             sim_score = major_similarities.get(major, 0.0)
             intent_boost = semantic_boosts.get(major, 1.0)
             
@@ -494,7 +507,7 @@ class RecommendationService:
                 sbert_factor = math.exp(sim_score * 6.0) # Amplify text signal
 
             # 5. Semantic intent boost
-            intent_factor = intent_boost ** 4 if intent_boost > 1.0 else 1.0 # Cube to Quartic
+            intent_factor = intent_boost ** 2 if intent_boost > 1.0 else 1.0 # Reduced from **4 to prevent wiping out other valid anchors
 
             # 6. Concept Anchor boost
             # When concept anchors match (keywords in user text),
@@ -520,10 +533,10 @@ class RecommendationService:
                 * subject_factor
                 * anchor_factor
             )
-
             pred_copy["probability"] = final_score
             pred_copy["similarity_score"] = sim_score
             pred_copy["rule_penalty"] = eligibility < 0.9
+            pred_copy["eligibility"] = eligibility
 
             if final_score > 0:
                 scored_predictions.append(pred_copy)
@@ -593,10 +606,14 @@ class RecommendationService:
                 continue
             major_name = pred["major"]
             info = self.majors_db.get(major_name, {})
+            # Factor in absolute eligibility so normalised confidence drops for terrible grades
+            final_conf = pred["probability"] * pred.get("eligibility", 1.0)
+            
             recs.append({
                 "major": major_name,
-                "confidence": round(pred["probability"], 4),
+                "confidence": round(final_conf, 4),
                 "similarity_score": round(pred.get("similarity_score", 0), 3),
+                "eligibility": round(pred.get("eligibility", 1.0), 3),
                 "description": info.get("description", ""),
                 "required_subjects": info.get("required_subjects", []),
                 "career_paths": info.get("career_paths", []),
@@ -616,12 +633,17 @@ class RecommendationService:
         top = major_recs[0]
         confidence = top.get("confidence", 0)
         similarity = top.get("similarity_score", 0)
+        eligibility = top.get("eligibility", 1.0)
 
         if has_text:
             # Blend confidence and semantic match
             base = confidence * 0.6 + similarity * 0.4
         else:
             base = confidence
+            
+        # Hard grade cap: if grades are severely low, match % should reflect the struggle
+        # This prevents 1.0 GPA from giving 95% match
+        base *= eligibility
 
         return min(99.0, round(base * 100, 1))
 
@@ -886,9 +908,7 @@ class RecommendationService:
         # 2. SBERT-based estimation from strengths text
         if strengths_emb is not None:
             skill_emb = self.sbert.encode(skill_name.lower())
-            sim = float(np.dot(strengths_emb, skill_emb) / (
-                np.linalg.norm(strengths_emb) * np.linalg.norm(skill_emb) + 1e-8
-            ))
+            sim = self.similarity.compute_similarity(strengths_emb, skill_emb)
             # High similarity to strengths → higher current level
             if sim > 0.3:
                 sbert_level = sim * 10  # 0.5 similarity → 5.0 level

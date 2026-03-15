@@ -16,11 +16,9 @@ continuous similarity scores instead of binary keyword matching.
 understands the semantic relationship.
 """
 import logging
-import re
 import numpy as np
 from typing import Dict, List, Optional
 
-from nlp.preprocess import clean_text
 from nlp.sbert import SBERTEncoder
 from nlp.similarity import SimilarityEngine
 from rules.eligibility import apply_eligibility_rules

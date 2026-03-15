@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { verifyToken } from '@/lib/auth'
+import { redis } from '@/lib/redis'
+import crypto from 'crypto'
 
 const SCIENCE_GRADE_LIMITS: Record<string, number> = {
   math: 125,
@@ -131,31 +133,72 @@ export async function POST(req: Request) {
           console.error('Auth error:', authError)
         }
 
-    // ML service API key for secure service-to-service communication
-    const mlApiKey = process.env.ML_API_KEY || 'capstone-ml-secret-key-2026'
+    // -------------------------------------------------------------------------
+    // REDIS CACHING BLOCK
+    // Generate a unique key based on the hashed payload
+    // -------------------------------------------------------------------------
+    const payloadHash = crypto
+      .createHash('md5')
+      .update(JSON.stringify(payload))
+      .digest('hex')
+    const cacheKey = `analyze:cache:${payloadHash}`
 
-    // Call ML service with timeout
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
-    
-    const res = await fetch(`${fastapiUrl}/api/analyze`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': mlApiKey,
-      },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    })
-    
-    clearTimeout(timeoutId)
+    let data = null
 
-    if (!res.ok) {
-      const text = await res.text()
-      return NextResponse.json({ error: 'ML service error', details: text }, { status: 502 })
+    try {
+      if (redis.isOpen) {
+        const cached = await redis.get(cacheKey)
+        if (cached) {
+          console.log(`[Redis] Cache hit for ${cacheKey}`)
+          data = JSON.parse(cached)
+        }
+      }
+    } catch (cacheError) {
+      console.error('[Redis] Error reading from cache:', cacheError)
     }
 
-    const data = await res.json()
+    // If not in cache, call the ML service
+    if (!data) {
+      console.log(`[ML Service] Cache miss. Calling ML service at ${fastapiUrl}`)
+      // ML service API key for secure service-to-service communication
+      const mlApiKey = process.env.ML_API_KEY
+      if (!mlApiKey) {
+        console.warn('ML_API_KEY is not defined in environment variables')
+      }
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000)
+
+      const res = await fetch(`${fastapiUrl}/api/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': mlApiKey || '',
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!res.ok) {
+        const text = await res.text()
+        return NextResponse.json({ error: 'ML service error', details: text }, { status: 502 })
+      }
+
+      data = await res.json()
+
+      // Store in Redis for 24 hours
+      try {
+        if (redis.isOpen && data) {
+          await redis.set(cacheKey, JSON.stringify(data), {
+            EX: 86400, // 24 hours in seconds
+          })
+          console.log(`[Redis] Cached new result for ${cacheKey}`)
+        }
+      } catch (cacheStoreError) {
+        console.error('[Redis] Error saving to cache:', cacheStoreError)
+      }
+    }
 
     // Save to database only if user is authenticated
     if (user) {

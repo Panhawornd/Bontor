@@ -126,7 +126,6 @@ This file is like the **main entrance** of a restaurant. It sets up the restaura
 
 This acts as our waiter. It provides two endpoints:
 
-- **`POST /api/recommend`**: Returns the raw recommendation data (internal format).
 - **`POST /api/analyze`**: Packages the data into a consumer-friendly format suitable for the React/Next.js frontend. It transforms normalized grades into readable bands like "Excellent" or "Needs Improvement" and restructures JSON keys nicely.
 
 ### 📄 File: `app/schemas/models.py`
@@ -234,14 +233,14 @@ When training finishes, it saves **FOUR** files to the `ml/models/` directory:
 4. **`training_meta.pkl`**: Metadata about the training run. It holds the model's accuracy, cross-validation scores, and the classes (majors) it was trained on. `predict.py` reads this to ensure it understands what the output probabilities map to.
 
 random_forest_major.pkl: This is the actual Machine Learning model. It contains the trained "Decision Trees" that take the 71 numbers we give it and output probability percentages for all 20+ majors.
-feature_scaler.pkl: Machine learning models prefer data to be "scaled" (e.g. distributed perfectly between 0.0 and 1.0) so large numbers like Max Grade = 125 don't overwhelm small NLP scores of 0.82. When the model trained, it scaled all the synthetic student data. This file saves exactly how it scaled the training data, so we can apply the exact same mathematical scale to live students' data in 
+feature_scaler.pkl: Machine learning models prefer data to be "scaled" (e.g. distributed perfectly between 0.0 and 1.0) so large numbers like Max Grade = 125 don't overwhelm small NLP scores of 0.82. When the model trained, it scaled all the synthetic student data. This file saves exactly how it scaled the training data, so we can apply the exact same mathematical scale to live students' data in
 
 predict.py
- before making a prediction.
-feature_names.pkl: This saves the exact list of the 71 feature names (e.g. ['grade_math', 'grade_physics', ..., 'sbert_sim_Software Engineering']). This file is extremely useful for debugging. If a user's data produces 70 numbers instead of 71, 
+before making a prediction.
+feature_names.pkl: This saves the exact list of the 71 feature names (e.g. ['grade_math', 'grade_physics', ..., 'sbert_sim_Software Engineering']). This file is extremely useful for debugging. If a user's data produces 70 numbers instead of 71,
 
 predict.py
- can load this file to figure out exactly which feature is missing by comparing the names!
+can load this file to figure out exactly which feature is missing by comparing the names!
 training_meta.pkl: This saves metadata about the training run, such as the total rows used, the cross-validation accuracy, and crucially, the output classes (the alphabetical list of all the Majors the model was trained to predict). It ensures the live API knows exactly what accuracy the currently loaded model achieved during testing.
 
 ### 📄 File: `ml/predict.py`

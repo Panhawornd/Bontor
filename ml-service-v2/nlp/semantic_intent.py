@@ -138,14 +138,17 @@ class SemanticIntentDetector:
         lower_text = text.lower()
         
         # Detect negative patterns in the text
+        import re
+        # Detect negative patterns in the text
         NEGATION_PATTERNS = [
-            "don't like", "dont like", "don't want", "dont want",
-            "not interested", "not like", "hate", "dislike",
-            "don't enjoy", "dont enjoy", "never want", "avoid",
-            "anything but", "anything except", "not for me",
-            "bad at", "terrible at", "boring",
+            r"don't like", r"dont like", r"don't want", r"dont want",
+            r"not interested", r"not like", r"\bhate\b", r"\bdislike\b",
+            r"don't enjoy", r"dont enjoy", r"never want", r"\bavoid\b",
+            r"anything but", r"anything except", r"not for me",
+            r"bad at", r"terrible at", r"\bboring\b",
+            r"\bnot\b", r"\bno\b", r"\bnever\b", r"\bcannot\b", r"\bcant\b", r"can't\b"
         ]
-        has_negation = any(neg in lower_text for neg in NEGATION_PATTERNS)
+        has_negation = any(re.search(neg, lower_text) for neg in NEGATION_PATTERNS)
         
         # Detect mixed intent: text has negation but ALSO positive parts
         # e.g. "I hate coding BUT I love designing interfaces"
@@ -161,16 +164,26 @@ class SemanticIntentDetector:
                 "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering"],
                 "biology": ["Medicine", "Pharmacy", "Dentistry"],
                 "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy"],
+                "electrical": ["Electrical Engineering"],
+                "electronics": ["Electrical Engineering"],
+                "mechanical": ["Mechanical Engineering"],
                 "doctor": ["Medicine"], "medicine": ["Medicine"],
                 "law": ["Law"], "lawyer": ["Law"],
                 "business": ["Business Administration", "Business Management"],
                 "teaching": ["Education"], "psychology": ["Psychology"],
                 "hacking": ["Cybersecurity"], "security": ["Cybersecurity"],
             }
-            for keyword, majors in NEGATED_KEYWORD_MAP.items():
-                if keyword in lower_text:
-                    negated_majors.update(majors)
-        
+            
+            # Split into clauses by contrasting conjunctions to isolate negated keywords
+            clauses = re.split(r'\b(?:but|however|instead|except|although|while)\b', lower_text)
+            for clause in clauses:
+                # Check if this specific clause has a negation
+                if any(re.search(neg, clause) for neg in NEGATION_PATTERNS):
+                    for keyword, majors in NEGATED_KEYWORD_MAP.items():
+                        # Use word boundary to avoid partial matches
+                        if re.search(rf"\b{re.escape(keyword)}\b", clause):
+                            negated_majors.update(majors)
+
         user_emb = enc.encode(clean_text(text))
 
         # Check negative sentiment — require BOTH pattern match AND semantic signal
@@ -228,14 +241,16 @@ class SemanticIntentDetector:
         penalties: Dict[str, float] = {}
         
         # --- METHOD 1: Keyword-based negation detection ---
+        import re
         NEGATION_PATTERNS = [
-            "don't like", "dont like", "don't want", "dont want",
-            "not interested", "not like", "hate", "dislike",
-            "don't enjoy", "dont enjoy", "never want", "avoid",
-            "anything but", "anything except",
+            r"don't like", r"dont like", r"don't want", r"dont want",
+            r"not interested", r"not like", r"\bhate\b", r"\bdislike\b",
+            r"don't enjoy", r"dont enjoy", r"never want", r"\bavoid\b",
+            r"anything but", r"anything except", r"\bnot\b", r"\bno\b",
+            r"\bnever\b", r"\bcannot\b", r"\bcant\b", r"can't\b"
         ]
         
-        has_negation = any(neg in lower_text for neg in NEGATION_PATTERNS)
+        has_negation = any(re.search(neg, lower_text) for neg in NEGATION_PATTERNS)
         
         if has_negation:
             # Check which majors are being negated using keywords
@@ -248,6 +263,9 @@ class SemanticIntentDetector:
                 "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
                 "coding": ["Software Engineering"],
                 "programming": ["Software Engineering"],
+                "electrical": ["Electrical Engineering"],
+                "electronics": ["Electrical Engineering"],
+                "mechanical": ["Mechanical Engineering"],
                 "doctor": ["Medicine"],
                 "medicine": ["Medicine"],
                 "medical": ["Medicine"],
@@ -263,29 +281,16 @@ class SemanticIntentDetector:
                 "security": ["Cybersecurity"],
             }
             
-            # Check proximity: keyword must be within 5 words of a negation
-            words = lower_text.split()
-            neg_positions = []
-            for i, w in enumerate(words):
-                for neg in NEGATION_PATTERNS:
-                    neg_words = neg.split()
-                    if i + len(neg_words) <= len(words):
-                        if words[i:i+len(neg_words)] == neg_words:
-                            neg_positions.extend(range(i, i + len(neg_words)))
-            
-            for keyword, majors in KEYWORD_TO_MAJORS.items():
-                # Use word boundary regex to avoid "designing" matching "design"
-                pattern = rf"\b{re.escape(keyword)}\b"
-                match = re.search(pattern, lower_text)
-                if not match:
-                    continue
-                # Check if the keyword is near a negation (within 5 words)
-                kw_start = len(lower_text[:match.start()].split())
-                near_negation = any(abs(kw_start - np) <= 5 for np in neg_positions)
-                if near_negation:
-                    for major in majors:
-                        penalties[major] = min(penalties.get(major, 1.0), 0.05)  # Very strong penalty
-            
+            # Split into clauses by contrasting conjunctions to isolate negated keywords
+            clauses = re.split(r'\b(?:but|however|instead|except|although|while)\b', lower_text)
+            for clause in clauses:
+                if any(re.search(neg, clause) for neg in NEGATION_PATTERNS):
+                    for keyword, majors in KEYWORD_TO_MAJORS.items():
+                        # Use word boundary to avoid "designing" matching "design"
+                        if re.search(rf"\b{re.escape(keyword)}\b", clause):
+                            for major in majors:
+                                penalties[major] = min(penalties.get(major, 1.0), 0.05)  # Very strong penalty
+
         # --- METHOD 2: SBERT-based negative detection (fallback) ---
         # Only run if there's actual negation language OR very high negative similarity
         neg_sim = self._cosine(user_emb, SemanticIntentDetector._negative_embedding)
@@ -310,16 +315,6 @@ class SemanticIntentDetector:
 
         return penalties
 
-    def extract_keywords(self, text: str) -> List[str]:
-        """Minimal keyword extraction (kept for compatibility)"""
-        if not text:
-            return []
-        words = set(text.lower().split())
-        # Return any words that appear in major keywords (from database)
-        all_keywords = set()
-        for info in MAJOR_DATABASE.values():
-            all_keywords.update(k.lower() for k in info.get("keywords", []))
-        return [w for w in words if w in all_keywords]
 
 
 # Singleton

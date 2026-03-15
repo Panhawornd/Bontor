@@ -227,9 +227,9 @@ MAJOR_DATABASE = {
         }
     },
     "Finance": {
-        "keywords": ["finance", "financial", "investment", "banking", "financial analysis", "financial planning", "financial management", "financial services", "financial markets", "financial instruments", "financial modeling", "financial reporting", "financial accounting", "financial risk", "financial strategy", "financial consulting", "financial advisor", "financial analyst", "financial manager", "financial controller", "financial director", "financial executive", "financial degree", "financial career", "financial profession", "corporate finance", "personal finance", "public finance", "international finance", "quantitative finance", "financial engineering", "math", "mathematics", "english"],
+        "keywords": ["finance", "financial", "investment", "banking", "financial analysis", "financial planning", "financial management", "financial services", "financial markets", "financial instruments", "financial modeling", "financial reporting", "financial accounting", "financial risk", "financial strategy", "financial consulting", "financial advisor", "financial analyst", "financial manager", "financial controller", "financial director", "financial executive", "financial degree", "financial career", "financial profession", "corporate finance", "personal finance", "public finance", "international finance", "quantitative finance", "financial engineering", "math", "mathematics", "numbers", "statistics", "calculating", "equations", "analytics", "quantitative", "numerical analysis", "data analysis", "english"],
         "required_subjects": ["math", "english"],
-        "description": "Study of financial systems, investment, and financial management",
+        "description": "Study of financial systems, investment, quantitative analysis, numeric modeling, and math-driven financial management",
         "career_paths": ["Financial Analyst", "Investment Banker", "Financial Advisor", "Financial Manager", "Financial Controller", "Investment Manager", "Risk Manager", "Financial Consultant", "Corporate Finance Manager", "Portfolio Manager"],
         "fundamental_skills": {
             "Financial Analysis": {"importance": "critical", "description": "Analyzing financial data"},

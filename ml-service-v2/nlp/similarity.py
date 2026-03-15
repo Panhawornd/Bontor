@@ -23,7 +23,6 @@ class SimilarityEngine:
     
     def __init__(self):
         self.encoder = SBERTEncoder()
-        self.preprocessor_ready = False
     
     def compute_similarity(self, embedding1: np.ndarray, embedding2: np.ndarray) -> float:
         """

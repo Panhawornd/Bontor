@@ -148,8 +148,8 @@ class RecommendationService:
         # Covers: subject names, career titles, activities, personality traits, hobbies
         CONCEPT_ANCHORS = {
             # ===== ACADEMIC SUBJECTS =====
-            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture"],
-            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture"],
+            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture", "Logistic"],
+            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture", "Logistic"],
             "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
@@ -281,6 +281,18 @@ class RecommendationService:
             # Chemical
             "chemical": ["Chemical Engineering"],
             "chemicals": ["Chemical Engineering"],
+            
+            # ===== LOGISTICS =====
+            "logistic": ["Logistic"],
+            "logistics": ["Logistic"],
+            "supply chain": ["Logistic"],
+            "delivery": ["Logistic"],
+            "deliveries": ["Logistic"],
+            "route optimization": ["Logistic"],
+            "transportation": ["Logistic"],
+            "warehouse": ["Logistic"],
+            "operations": ["Logistic", "Business Management"],
+            
             
             # ===== BUSINESS / MANAGEMENT =====
             "business": ["Business Administration", "Business Management"],

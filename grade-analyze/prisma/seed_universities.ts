@@ -17,7 +17,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 75,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Merit-based and need-based scholarships available (Merit Scholarship, Need-Based, Technology Excellence)",
+    scholarshipDetail: "none",
     locationMaps: "https://www.google.com/maps/place/Cambodia+Academy+of+Digital+Technology+(CADT)/@11.6530599,104.9068235,17z/data=!3m1!4b1!4m6!3m5!1s0x3109516bdea989b3:0x372d2c5e0e14b706!8m2!3d11.6530599!4d104.9116944!16s%2Fg%2F11byygmxw3?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
     tuitionFee: null
   },
@@ -44,7 +44,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 70,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Government scholarships and merit-based awards",
+    scholarshipDetail: "none",
     locationMaps: "https://www.google.com/maps/place/Royal+University+of+Phnom+Penh/@11.568676,104.8881668,17z/data=!3m1!4b1!4m6!3m5!1s0x3109519fe4077d69:0x20138e822e434660!8m2!3d11.568676!4d104.8907417!16s%2Fm%2F0278m39?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
     tuitionFee: null
   },
@@ -65,7 +65,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 75,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Engineering excellence scholarships available",
+    scholarshipDetail: "none",
     locationMaps: "https://www.google.com/maps/place/Institute+of+Technology+of+Cambodia/@11.5703975,104.8955108,17z/data=!3m1!4b1!4m6!3m5!1s0x3109517388680e15:0x63057e6682968f5!8m2!3d11.5703975!4d104.8980857!16zL20vMDZ5dmhz?entry=ttu&g_ep=EgoyMDI1MTEzMC4wIKXMDSoASAFQAw%3D%3D",
     tuitionFee: null
   },
@@ -84,7 +84,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 65,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "Merit-based scholarships available",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -103,7 +103,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 60,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "Various scholarship opportunities (Merit-Based, Need-Based)",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -123,7 +123,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 65,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Law and economics excellence scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -143,7 +143,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 60,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "Scholarships for outstanding students",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -165,7 +165,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 65,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "Academic excellence and need-based scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -188,7 +188,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 75,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Comprehensive scholarship program including full and partial awards",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -204,12 +204,13 @@ const UNIVERSITY_DATABASE = {
       "Management",
       "Tourism & Hospitality",
       "Economics",
+      "Logistic",
     ],
     imageUrl: "https://numer.digital/public/faculties/MainSlide/num_front.jpg",
     minGrade: 65,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Business excellence and management scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -234,7 +235,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 60,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Arts excellence and cultural heritage scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -255,7 +256,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 80,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Medical scholarships and government health sector funding",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -276,7 +277,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 70,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "Academic excellence scholarships available",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -294,12 +295,13 @@ const UNIVERSITY_DATABASE = {
       "Information Technology",
       "UX/UI Design",
       "Digital Design",
+      "Logistic",
     ],
     imageUrl: "https://academics-bucket-sj19asxm-prod.s3.ap-southeast-1.amazonaws.com/47268da4-7c59-4aa1-9d5d-1f94a31756af/feature-image.jpg",
     minGrade: 70,
     entranceExam: false,
     scholarshipAvailable: true,
-    scholarshipDetail: "International programs with scholarship opportunities",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -320,7 +322,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 80,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Health sciences scholarships and financial aid programs",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -342,7 +344,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 70,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Technical excellence and polytechnic scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   },
@@ -362,7 +364,7 @@ const UNIVERSITY_DATABASE = {
     minGrade: 70,
     entranceExam: true,
     scholarshipAvailable: true,
-    scholarshipDetail: "Technology and design focused scholarships",
+    scholarshipDetail: "none",
     locationMaps: null,
     tuitionFee: null
   }

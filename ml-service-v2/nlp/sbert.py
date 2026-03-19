@@ -303,6 +303,10 @@ def _get_education_domain_pairs() -> List[Tuple[str, str]]:
         # Graphic Design
         ("creating logos and posters", "graphic design visual communication branding"),
         ("visual art and digital design", "graphic design illustration typography layout"),
+
+        # Logistic
+        ("planning trips and organizing deliveries", "logistic supply chain route optimization transportation warehouse"),
+        ("managing delivery tracking and distribution", "logistics operations transportation supply chain management"),
     ]
 
 

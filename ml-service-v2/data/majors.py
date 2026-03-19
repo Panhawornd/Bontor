@@ -295,5 +295,17 @@ MAJOR_DATABASE = {
             "Hardware": {"importance": "medium", "description": "Network equipment"},
             "Wireless Tech": {"importance": "medium", "description": "5G and wireless systems"}
         }
+    },
+    "Logistic": {
+        "keywords": ["logistic", "logistics", "supply chain", "plans trips", "organizes deliveries", "route optimization", "enjoys organizing tasks", "delivery tracking", "transportation", "warehouse", "operations"],
+        "required_subjects": ["math", "english"],
+        "description": "Study of the complex operations involved in the flow of goods, services, and information, including route optimization and delivery organization",
+        "career_paths": ["Logistics Manager", "Supply Chain Analyst", "Transportation Manager", "Operations Manager"],
+        "fundamental_skills": {
+            "Route Optimization": {"importance": "critical", "description": "Planning efficient delivery routes"},
+            "Organization": {"importance": "critical", "description": "Managing complex task schedules"},
+            "Data Analysis": {"importance": "high", "description": "Tracking and improving delivery metrics"},
+            "Communication": {"importance": "high", "description": "Coordinating with teams and clients"}
+        }
     }
 }

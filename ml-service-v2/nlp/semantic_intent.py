@@ -173,6 +173,9 @@ class SemanticIntentDetector:
                 "business": ["Business Administration", "Business Management"],
                 "teaching": ["Education"], "psychology": ["Psychology"],
                 "hacking": ["Cybersecurity"], "security": ["Cybersecurity"],
+                "logistic": ["Logistic"], "logistics": ["Logistic"],
+                "supply chain": ["Logistic"], "delivery": ["Logistic"],
+                "transportation": ["Logistic"],
             }
             
             # Split into clauses by contrasting conjunctions to isolate negated keywords
@@ -287,6 +290,11 @@ class SemanticIntentDetector:
                 "finance": ["Finance"],
                 "hacking": ["Cybersecurity"],
                 "security": ["Cybersecurity"],
+                "logistic": ["Logistic"],
+                "logistics": ["Logistic"],
+                "supply chain": ["Logistic"],
+                "delivery": ["Logistic"],
+                "transportation": ["Logistic"],
             }
             
             # Split into clauses by contrasting conjunctions to isolate negated keywords

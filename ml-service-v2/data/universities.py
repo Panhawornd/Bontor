@@ -58,7 +58,7 @@ UNIVERSITY_DATABASE = {
     "National University of Management (NUM)": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Business Administration", "Accounting", "Finance", "Marketing", "Business Management", "Tourism & Hospitality", "Economics", "International Business"],
+        "programs": ["Business Administration", "Accounting", "Finance", "Marketing", "Business Management", "Tourism & Hospitality", "Economics", "International Business", "Logistic"],
         "requirements": {"min_grade": 65, "preferred_subjects": ["math", "english"]}
     },
     "Royal University of Fine Arts (RUFA)": {
@@ -82,7 +82,7 @@ UNIVERSITY_DATABASE = {
     "Paragon International University": {
         "country": "Cambodia",
         "location": "Phnom Penh",
-        "programs": ["Business Administration", "International Relations", "Data Science", "Computer Science", "Software Engineering", "Civil Engineering", "Architecture", "Information Technology", "UX/UI Design", "Cybersecurity"],
+        "programs": ["Business Administration", "International Relations", "Data Science", "Computer Science", "Software Engineering", "Civil Engineering", "Architecture", "Information Technology", "UX/UI Design", "Cybersecurity", "Logistic"],
         "requirements": {"min_grade": 70, "preferred_subjects": ["math", "english"]}
     },
     "University of Puthisastra (UP)": {

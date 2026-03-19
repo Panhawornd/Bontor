@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { AnalysisResult } from '../../types';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   User,
@@ -15,26 +16,121 @@ import {
   Pencil,
   Check,
   X,
-  TrendingUp,
-  Send,
+  Trash2,
 } from 'lucide-react';
-import RecommendationDashboard from '@/components/RecommendationDashboard';
-import ContactPage from './contact/ContactPage';
-import { AnalysisResult } from '@/types';
 
-type ActiveSection = 'overview' | 'contact' | 'history' | 'chat-history';
+// Analysis history item shape from the API
+interface AnalysisHistoryItem {
+  id: number;
+  interestText: string;
+  majors: unknown;
+  careers: unknown;
+  universities: unknown;
+  skill_gaps: unknown;
+  subject_analysis: unknown;
+  createdAt: string;
+}
 
-export default function DashboardPage() {
+// Define a context for sharing dashboard stats
+interface DashboardContextType {
+  analysisCount: number;
+  chatCount: number;
+  requestCount: number;
+  recentAnalysis: AnalysisResult | null;
+  statsLoading: boolean;
+  analysisHistory: AnalysisHistoryItem[];
+  selectedHistoryId: number | null;
+  setSelectedHistoryId: (id: number | null) => void;
+}
+
+const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
+
+export function useDashboard() {
+  const context = useContext(DashboardContext);
+  if (context === undefined) {
+    throw new Error('useDashboard must be used within a DashboardProvider');
+  }
+  return context;
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [analysisCount, setAnalysisCount] = useState(0);
+  const [requestCount, setRequestCount] = useState(0);
+  const [recentAnalysis, setRecentAnalysis] = useState<AnalysisResult | null>(null);
   const [user, setUser] = useState<{ name: string; email?: string } | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
+  const activeSection = pathname === '/contact' ? 'contact' : pathname === '/history' ? 'history' : 'overview';
+
+  // Analysis history from DB
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisHistoryItem[]>([]);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<number | null>(null);
+  const [historyVisibleCount, setHistoryVisibleCount] = useState(5);
+
+  const handleSelectHistory = (id: number) => {
+    setSelectedHistoryId(id);
+    setIsSidebarOpen(false);
+    router.push('/history');
+  };
+
+  const handleDeleteHistory = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!confirm('Are you sure you want to delete this analysis?')) return;
+
+    try {
+      console.log(`[Client] Deleting history item: ${id}`);
+      const res = await fetch(`/api/analysis-history/${id}?t=${Date.now()}`, { 
+        method: 'DELETE',
+        cache: 'no-store'
+      });
+      
+      if (res.ok) {
+        console.log(`[Client] Delete successful for ${id}. Refreshing history...`);
+        // Fetch latest history to ensure UI is in sync with database
+        const historyRes = await fetch(`/api/analysis-history?t=${Date.now()}`, { 
+          cache: 'no-store' 
+        });
+        
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          setAnalysisHistory(historyData.history || []);
+          console.log(`[Client] History refreshed. Current count: ${historyData.history?.length}`);
+        }
+        
+        // If the deleted item was selected, deselect it
+        if (selectedHistoryId === id) {
+          setSelectedHistoryId(null);
+        }
+
+        // Re-fetch stats without cache
+        const statsRes = await fetch(`/api/stats?t=${Date.now()}`, { 
+          cache: 'no-store' 
+        });
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setAnalysisCount(statsData.analysisCount ?? 0);
+          setRequestCount(statsData.requestCount ?? 0);
+        }
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(`Failed to delete history: ${errData.error || res.statusText || res.status}`);
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Error deleting history. Check console for details.');
+    }
+  };
+  
   // Sidebar state
-  const [activeSection, setActiveSection] = useState<ActiveSection>('overview');
   const [historyOpen, setHistoryOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(true);
 
@@ -45,12 +141,7 @@ export default function DashboardPage() {
   const editInputRef = useRef<HTMLInputElement>(null);
   const editInputRefMobile = useRef<HTMLInputElement>(null);
 
-  // Stats from localStorage/sessionStorage
-  const [analysisCount, setAnalysisCount] = useState(0);
-  const [chatCount, setChatCount] = useState(0);
-  const [requestCount, setRequestCount] = useState(0);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [recentAnalysis, setRecentAnalysis] = useState<AnalysisResult | null>(null);
+  // Chat History
   const [chatHistory, setChatHistory] = useState<{ title: string }[]>([]);
 
   useEffect(() => {
@@ -72,15 +163,46 @@ export default function DashboardPage() {
     checkAuth();
   }, [router]);
 
-  // Load stats from localStorage/sessionStorage
+  // Fetch stats, recent analysis, and history at layout level for consistency
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const res = await fetch('/api/stats');
-        if (res.ok) {
-          const data = await res.json();
+        const [statsRes, recentRes, historyRes] = await Promise.all([
+          fetch('/api/stats'),
+          fetch('/api/recent-analysis'),
+          fetch('/api/analysis-history')
+        ]);
+
+        if (statsRes.ok) {
+          const data = await statsRes.json();
           setAnalysisCount(data.analysisCount ?? 0);
           setRequestCount(data.requestCount ?? 0);
+        }
+
+        if (recentRes.ok) {
+          const data = await recentRes.json();
+          if (data.analysis) {
+            setRecentAnalysis(data.analysis);
+          }
+        }
+
+        if (historyRes.ok) {
+          const data = await historyRes.json();
+          if (Array.isArray(data.history)) {
+            setAnalysisHistory(data.history);
+          }
+        }
+
+        // Also load chat history from localStorage
+        try {
+          const storedChats = localStorage.getItem('chatHistory');
+          if (storedChats) {
+            const parsed = JSON.parse(storedChats);
+            const validChats = parsed.filter((c: { messages?: unknown[] }) => c.messages && (c.messages as unknown[]).length > 0);
+            setChatHistory(validChats);
+          }
+        } catch {
+          // silently fail
         }
       } catch {
         // silently fail
@@ -88,36 +210,9 @@ export default function DashboardPage() {
         setStatsLoading(false);
       }
     };
-    fetchStats();
-
-    const fetchRecentAnalyses = async () => {
-      try {
-        const res = await fetch('/api/recent-analysis');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.analysis) {
-            setRecentAnalysis(data.analysis);
-          }
-        }
-      } catch {
-        // silently fail
-      }
-    };
-    fetchRecentAnalyses();
-
-    try {
-      // Chat history from localStorage
-      const storedChats = localStorage.getItem('chatHistory');
-      if (storedChats) {
-        const parsed = JSON.parse(storedChats);
-        const validChats = parsed.filter((c: { messages?: unknown[] }) => c.messages && (c.messages as unknown[]).length > 0);
-        setChatHistory(validChats);
-        setChatCount(validChats.length);
-      }
-    } catch {
-      // silently fail
-    }
+    fetchDashboardData();
   }, []);
+
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -350,17 +445,176 @@ export default function DashboardPage() {
                 </div>
               </div>
               <nav className="flex flex-col gap-1">
-                <button onClick={() => { setActiveSection('overview'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'overview' ? 'bg-gray-800' : ''}`}>
+                <Link href="/dashboard" onClick={() => setIsSidebarOpen(false)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'overview' ? 'bg-gray-800' : ''}`}>
                   <LayoutDashboard size={16} className="flex-shrink-0" /><span>Overview</span>
-                </button>
-                <button onClick={() => { setActiveSection('contact'); setIsSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'contact' ? 'bg-gray-800' : ''}`}>
+                </Link>
+                <Link href="/contact" onClick={() => setIsSidebarOpen(false)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'contact' ? 'bg-gray-800' : ''}`}>
                   <Mail size={16} className="flex-shrink-0" /><span>Contact Us</span>
-                </button>
+                </Link>
                 <button onClick={() => setHistoryOpen(!historyOpen)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-100 hover:bg-gray-800 transition-colors text-left">
                   <Clock size={16} className="flex-shrink-0" /><span className="flex-1">History</span>
                   <ChevronRight size={14} className={`flex-shrink-0 transition-transform ${historyOpen ? 'rotate-90' : ''}`} />
                 </button>
-                {historyOpen && <div className="ml-7"><p className="text-xs text-gray-500 px-3 py-1">No history yet</p></div>}
+                {historyOpen && (
+                  <div className="ml-7 flex flex-col gap-0.5">
+                    {analysisHistory.length === 0 ? (
+                      <p className="text-xs text-gray-500 px-3 py-1">No history yet</p>
+                    ) : (
+                      <>
+                        {analysisHistory.slice(0, historyVisibleCount).map((item) => (
+                          <div key={item.id} className="relative group/item">
+                            <button
+                              onClick={() => handleSelectHistory(item.id)}
+                              className={`block w-full text-left px-3 py-2 rounded transition-colors ${selectedHistoryId === item.id && pathname === '/history' ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
+                            >
+                              <p className={`text-xs font-medium truncate pr-6 ${selectedHistoryId === item.id && pathname === '/history' ? 'text-gray-100' : 'text-gray-100'}`}>
+                                {item.interestText}
+                              </p>
+                              <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                                {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteHistory(e, item.id)}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                              title="Delete history"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2 mt-1">
+                          {analysisHistory.length > historyVisibleCount && (
+                            <button onClick={() => setHistoryVisibleCount(prev => prev + 5)} className="text-xs text-blue-400 hover:text-blue-300 px-3 py-1 transition-colors text-left flex-shrink-0">
+                              View {Math.min(5, analysisHistory.length - historyVisibleCount)} more
+                            </button>
+                          )}
+                          {historyVisibleCount > 5 && (
+                            <button onClick={() => setHistoryVisibleCount(5)} className="text-xs text-gray-500 hover:text-gray-400 px-3 py-1 transition-colors text-left flex-shrink-0">
+                              Show less
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+                <button onClick={() => setChatHistoryOpen(!chatHistoryOpen)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-100 hover:bg-gray-800 transition-colors text-left">
+                  <MessageSquare size={16} className="flex-shrink-0" /><span className="flex-1">Chat History</span>
+                  <ChevronRight size={14} className={`flex-shrink-0 transition-transform ${chatHistoryOpen ? 'rotate-90' : ''}`} />
+                </button>
+                {chatHistoryOpen && (
+                  <div className="ml-7 flex flex-col gap-0.5">
+                    {chatHistory.length === 0 ? (
+                      <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
+                    ) : (
+                      chatHistory.map((c, i) => (
+                        <Link key={i} href="/agent" onClick={() => setIsSidebarOpen(false)} className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate">{c.title || `Chat ${i + 1}`}</Link>
+                      ))
+                    )}
+                  </div>
+                )}
+              </nav>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Mobile FAB - bottom left, hidden on desktop */}
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="md:hidden fixed bottom-6 left-6 z-[150] flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 border border-gray-600 text-white shadow-lg hover:bg-gray-700 transition-colors"
+        aria-label="Open sidebar"
+      >
+        <LayoutDashboard size={20} />
+      </button>
+
+      {/* Mobile Dashboard Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-[180]">
+          <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-label="Close sidebar" onClick={() => setIsSidebarOpen(false)} />
+          <aside className="absolute top-0 left-0 h-full w-72 max-w-[85%] bg-[#111111] border-r border-[#1f1f1f] overflow-y-auto shadow-2xl">
+            <div className="p-7">
+              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-700">
+                <div className="min-w-0 flex-1">
+                  {isEditingName ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        ref={editInputRefMobile}
+                        value={editNameValue}
+                        onChange={(e) => setEditNameValue(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') handleCancelEditName(); }}
+                        className="bg-[#1f1f1f] text-white text-sm font-semibold rounded px-2 py-0.5 border border-blue-500 focus:outline-none w-full"
+                        maxLength={100}
+                        disabled={savingName}
+                      />
+                      <button onClick={handleSaveName} disabled={savingName} className="text-green-400 hover:text-green-500 flex-shrink-0 p-0.5"><Check size={14} /></button>
+                      <button onClick={handleCancelEditName} disabled={savingName} className="text-red-400 hover:text-red-500 flex-shrink-0 p-0.5"><X size={14} /></button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{user?.name}</p>
+                      <button onClick={handleStartEditName} className="text-gray-400 hover:text-white flex-shrink-0 p-0.5 rounded hover:bg-white/5 transition-colors"><Pencil size={12} /></button>
+                    </div>
+                  )}
+                  {user?.email && <p className="text-gray-400 text-xs mt-0.5 truncate">{user.email}</p>}
+                </div>
+              </div>
+              <nav className="flex flex-col gap-1">
+                <Link href="/dashboard" onClick={() => setIsSidebarOpen(false)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'overview' ? 'bg-gray-800' : ''}`}>
+                  <LayoutDashboard size={16} className="flex-shrink-0" /><span>Overview</span>
+                </Link>
+                <Link href="/contact" onClick={() => setIsSidebarOpen(false)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'contact' ? 'bg-gray-800' : ''}`}>
+                  <Mail size={16} className="flex-shrink-0" /><span>Contact Us</span>
+                </Link>
+                <button onClick={() => setHistoryOpen(!historyOpen)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-100 hover:bg-gray-800 transition-colors text-left">
+                  <Clock size={16} className="flex-shrink-0" /><span className="flex-1">History</span>
+                  <ChevronRight size={14} className={`flex-shrink-0 transition-transform ${historyOpen ? 'rotate-90' : ''}`} />
+                </button>
+                {historyOpen && (
+                  <div className="ml-7 flex flex-col gap-0.5">
+                    {analysisHistory.length === 0 ? (
+                      <p className="text-xs text-gray-500 px-3 py-1">No history yet</p>
+                    ) : (
+                      <>
+                        {analysisHistory.slice(0, historyVisibleCount).map((item) => (
+                          <div key={item.id} className="relative group/item">
+                            <button
+                              onClick={() => handleSelectHistory(item.id)}
+                              className={`block w-full text-left px-3 py-2 rounded transition-colors ${selectedHistoryId === item.id && pathname === '/history' ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
+                            >
+                              <p className={`text-xs font-medium truncate pr-6 ${selectedHistoryId === item.id && pathname === '/history' ? 'text-blue-400' : 'text-gray-100'}`}>
+                                {item.interestText}
+                              </p>
+                              <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                                {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </p>
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteHistory(e, item.id)}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                              title="Delete history"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2 mt-1">
+                          {analysisHistory.length > historyVisibleCount && (
+                            <button onClick={() => setHistoryVisibleCount(prev => prev + 5)} className="text-xs text-blue-400 hover:text-blue-300 px-3 py-1 transition-colors text-left flex-shrink-0">
+                              View {Math.min(5, analysisHistory.length - historyVisibleCount)} more
+                            </button>
+                          )}
+                          {historyVisibleCount > 5 && (
+                            <button onClick={() => setHistoryVisibleCount(5)} className="text-xs text-gray-500 hover:text-gray-400 px-3 py-1 transition-colors text-left flex-shrink-0">
+                              Show less
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
                 <button onClick={() => setChatHistoryOpen(!chatHistoryOpen)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm text-gray-100 hover:bg-gray-800 transition-colors text-left">
                   <MessageSquare size={16} className="flex-shrink-0" /><span className="flex-1">Chat History</span>
                   <ChevronRight size={14} className={`flex-shrink-0 transition-transform ${chatHistoryOpen ? 'rotate-90' : ''}`} />
@@ -421,22 +675,22 @@ export default function DashboardPage() {
             {/* Nav items */}
             <nav className="flex flex-col gap-1">
               {/* Overview */}
-              <button
-                onClick={() => setActiveSection('overview')}
+              <Link
+                href="/dashboard"
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'overview' ? 'bg-gray-800' : ''}`}
               >
                 <LayoutDashboard size={16} className="flex-shrink-0" />
                 <span>Overview</span>
-              </button>
+              </Link>
 
               {/* Contact Us */}
-              <button
-                onClick={() => setActiveSection('contact')}
+              <Link
+                href="/contact"
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors text-left text-gray-100 hover:bg-gray-800 ${activeSection === 'contact' ? 'bg-gray-800' : ''}`}
               >
                 <Mail size={16} className="flex-shrink-0" />
                 <span>Contact Us</span>
-              </button>
+              </Link>
 
               {/* History (expandable) */}
               <button
@@ -449,7 +703,46 @@ export default function DashboardPage() {
               </button>
               {historyOpen && (
                 <div className="ml-7 flex flex-col gap-0.5">
-                  <p className="text-xs text-gray-500 px-3 py-1">No history yet</p>
+                  {analysisHistory.length === 0 ? (
+                    <p className="text-xs text-gray-500 px-3 py-1">No history yet</p>
+                  ) : (
+                    <>
+                      {analysisHistory.slice(0, historyVisibleCount).map((item) => (
+                        <div key={item.id} className="relative group/item">
+                          <button
+                            onClick={() => handleSelectHistory(item.id)}
+                            className={`block w-full text-left px-3 py-2 rounded transition-colors ${selectedHistoryId === item.id && pathname === '/history' ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
+                          >
+                            <p className="text-xs font-medium truncate pr-6 text-gray-100">
+                              {item.interestText}
+                            </p>
+                            <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                              {new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </p>
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteHistory(e, item.id)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-red-400 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            title="Delete history"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-2 mt-1">
+                        {analysisHistory.length > historyVisibleCount && (
+                          <button onClick={() => setHistoryVisibleCount(prev => prev + 5)} className="text-xs text-blue-400 hover:text-blue-300 px-3 py-1 transition-colors text-left flex-shrink-0">
+                            View {Math.min(5, analysisHistory.length - historyVisibleCount)} more
+                          </button>
+                        )}
+                        {historyVisibleCount > 5 && (
+                          <button onClick={() => setHistoryVisibleCount(5)} className="text-xs text-gray-500 hover:text-gray-400 px-3 py-1 transition-colors text-left flex-shrink-0">
+                            Show less
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -491,72 +784,23 @@ export default function DashboardPage() {
             <div className="flex items-center justify-center mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                <span className="text-sm text-gray-400">{activeSection === 'contact' ? 'Contact Us' : 'Dashboard'}</span>
+                <span className="text-sm text-gray-400">{activeSection === 'contact' ? 'Contact Us' : activeSection === 'history' ? 'Analysis History' : 'Dashboard'}</span>
               </div>
             </div>
 
-            {/* Overview section */}
-            {activeSection === 'overview' && (
-              <div>
-                {/* Stats cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8 px-2 lg:px-20">
-                  {/* Analysis */}
-                  <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
-                    <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5">
-                        <TrendingUp size={18} className="text-green-400"/>
-                      </div>
-                      <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Analysis <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
-                    </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">{analysisCount}</p>
-                  </div>
-
-                  {/* Chats */}
-                  <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
-                    <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5">
-                        <MessageSquare size={18} className="text-blue-400" />
-                      </div>
-                      <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Chats <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
-                    </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">{chatCount}</p>
-                  </div>
-
-                  {/* Requests */}
-                  <div className="col-span-2 lg:col-span-1 bg-[#111111] border border-[#2a2a2a] rounded-xl p-3 lg:p-5">
-                    <div className="flex items-center gap-1.5 lg:gap-2 mb-2 lg:mb-3">
-                      <div className="p-1 lg:p-1.5">
-                        <Send size={18} className="text-blue-400" />
-                      </div>
-                      <p className="text-xs lg:text-lg text-white tracking-wide leading-tight">Requests <span className="text-xs lg:text-sm text-gray-400">(Total)</span></p>
-                    </div>
-                    <p className="text-xl lg:text-3xl font-bold text-white ml-1">0</p>
-                  </div>
-                </div>
-
-                {/* Recent Analysis */}
-                <div className="px-2 lg:px-20 mt-4">
-                  <div className="flex items-center justify-center mb-1 sm:mb-3 md:mb-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-[#1a1a1a] border border-[#2a2a2a]">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      <span className="text-sm text-gray-400">Recent Analysis</span>
-                    </div>
-                  </div>
-                  {recentAnalysis ? (
-                    <div className="rec-dashboard-responsive">
-                      <RecommendationDashboard data={recentAnalysis} />
-                    </div>
-                  ) : (
-                    <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-6 text-center">
-                      <p className="text-gray-400 text-sm">No analysis yet. Go to the Analyze page to get started.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Contact Us section */}
-            {activeSection === 'contact' && <ContactPage />}
+            {/* Render Child Content Here with Context Provider */}
+            <DashboardContext.Provider value={{
+              analysisCount,
+              chatCount: chatHistory.length,
+              requestCount,
+              recentAnalysis,
+              statsLoading,
+              analysisHistory,
+              selectedHistoryId,
+              setSelectedHistoryId
+            }}>
+              {children}
+            </DashboardContext.Provider>
 
           </div>
         </main>
@@ -564,5 +808,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-

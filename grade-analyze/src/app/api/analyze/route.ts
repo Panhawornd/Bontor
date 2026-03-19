@@ -203,40 +203,41 @@ export async function POST(req: Request) {
     // Save to database only if user is authenticated
     if (user) {
       try {
-        // Save grades
-        for (const grade of payload.grades) {
-          await prisma.grade.create({
-            data: {
-              userId: user.id,
-              subject: grade.subject,
-              score: grade.score,
-            }
-          })
+        // Save recommendation with metadata (for robust history view)
+        const majorsArray = Array.isArray(data.majors) ? [...data.majors] : []
+        if (majorsArray.length > 0 && typeof majorsArray[0] === 'object' && majorsArray[0] !== null) {
+          majorsArray[0] = {
+            ...majorsArray[0],
+            _userInterest: payload.interest_text,
+            _userGrades: payload.grades
+          }
         }
 
-        // Save input
-        await prisma.input.create({
+        const recommendation = await prisma.recommendation.create({
           data: {
-            userId: user.id,
-            interestText: payload.interest_text,
-            careerGoals: payload.career_goals,
-          }
-        })
-
-        // Save recommendation
-        await prisma.recommendation.create({
-          data: {
-            userId: user.id,
-            majors: data.majors,
+            user: { connect: { id: user.id } },
+            majors: majorsArray,
             jobs: data.careers,
             universities: data.universities,
             skillGaps: data.skill_gaps,
           }
         })
 
+        // Save input using raw SQL to bypass Prisma's locked schema validation
+        await prisma.$executeRaw`
+          INSERT INTO inputs (user_id, recommendation_id, interest_text, career_goals)
+          VALUES (${user.id}, ${recommendation.id}, ${payload.interest_text}, ${payload.career_goals})
+        `;
+
+        // Save grades using raw SQL to bypass Prisma's locked schema validation
+        for (const grade of payload.grades) {
+          await prisma.$executeRaw`
+            INSERT INTO grades (user_id, recommendation_id, subject, score)
+            VALUES (${user.id}, ${recommendation.id}, ${grade.subject}, ${grade.score})
+          `;
+        }
       } catch (dbError) {
         console.error('Database error:', dbError)
-        // Continue even if database save fails
       }
     }
 

@@ -27,23 +27,29 @@ model User {
 
 
 model Input {
-  id            Int      @id @default(autoincrement())
-  userId        Int?     @map("user_id")
-  interestText  String   @map("interest_text") @db.Text
-  careerGoals   String?  @map("career_goals") @db.Text
-  createdAt     DateTime @default(now()) @map("created_at")
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id               Int             @id @default(autoincrement())
+  userId           Int?            @map("user_id")
+  recommendationId Int?            @map("recommendation_id")
+  interestText     String          @map("interest_text") @db.Text
+  careerGoals      String?         @map("career_goals") @db.Text
+  createdAt        DateTime        @default(now()) @map("created_at")
+  user             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recommendation   Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
 
   @@map("inputs")
 }
 
 model Grade {
-  id      Int     @id @default(autoincrement())
-  userId  Int?    @map("user_id")
-  subject String
-  score   Decimal
-  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id               Int             @id @default(autoincrement())
+  userId           Int?            @map("user_id")
+  recommendationId Int?            @map("recommendation_id")
+  subject          String
+  score            Decimal
+  createdAt        DateTime        @default(now()) @map("created_at")
+  user             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recommendation   Recommendation? @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
 
+  @@index([userId, createdAt])
   @@map("grades")
 }
 
@@ -65,14 +71,16 @@ model University {
 }
 
 model Recommendation {
-  id         Int      @id @default(autoincrement())
-  userId     Int?     @map("user_id")
-  majors     Json
-  jobs       Json
+  id           Int      @id @default(autoincrement())
+  userId       Int?     @map("user_id")
+  majors       Json
+  jobs         Json
   universities Json
-  skillGaps  Json     @map("skill_gaps")
-  createdAt  DateTime @default(now()) @map("created_at")
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  skillGaps    Json     @map("skill_gaps")
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  inputs       Input[]
+  grades       Grade[]
 
   @@map("recommendations")
 }

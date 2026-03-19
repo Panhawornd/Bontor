@@ -99,7 +99,7 @@ const UNIVERSITY_DATABASE = {
       "Economics",
       "Computer Science",
     ],
-    imageUrl: "https://westernuniversity.edu.kh/laravel-filemanager/photos/shares/map/map%20toul%20kork%20(1).png",
+    imageUrl: "https://westernuniversity.edu.kh/_nuxt/main_campus.COySEhL9.jpg",
     minGrade: 60,
     entranceExam: false,
     scholarshipAvailable: true,

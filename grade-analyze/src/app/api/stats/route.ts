@@ -23,10 +23,8 @@ export async function GET(req: Request) {
     }
 
     const userId = payload.userId
-    const [analysisCount, requestCount] = await Promise.all([
-      prisma.input.count({ where: { userId } }),
-      prisma.recommendation.count({ where: { userId } }),
-    ])
+    const analysisCount = await prisma.input.count({ where: { userId } });
+    const requestCount = 0; // TODO: Implement chat agent request tracking
 
     return NextResponse.json({ analysisCount, requestCount })
   } catch (error) {

@@ -15,7 +15,6 @@ const Lanyard = dynamic(() => import('@/components/Lanyard'), { ssr: false });
 
 function AboutPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [hasToken, setHasToken] = useState(false); // Always false on SSR to avoid hydration mismatch
   const [authLoading, setAuthLoading] = useState(false);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
@@ -56,7 +55,7 @@ function AboutPageContent() {
           setHasToken(false);
           localStorage.removeItem('just_logged_in'); // Clear flag if not authenticated
         }
-      } catch (error) {
+      } catch (_error) {
         setHasToken(false);
         localStorage.removeItem('just_logged_in'); // Clear flag on error
       } finally {
@@ -655,7 +654,7 @@ type TeamMember = {
   imagePath?: string;
 };
 
-function MemberCard({ member, idx, imageOnLeft }: { member: TeamMember; idx: number; imageOnLeft: boolean }) {
+function MemberCard({ member, imageOnLeft }: { member: TeamMember; idx: number; imageOnLeft: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   
   return (

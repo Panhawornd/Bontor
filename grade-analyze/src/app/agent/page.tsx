@@ -677,7 +677,7 @@ Fundamental skills to prepare before enrolling:
                     {chatHistory.map((c, idx) => (
                       <div key={idx} className="group relative mt-2 px-3 py-2 text-sm text-gray-100 hover:bg-gray-800 rounded-md transition-colors">
                         <button onClick={() => { handleLoadChat(idx); setIsSidebarOpen(false); }} className="w-full text-left truncate pr-8">{c.title || `Chat ${idx + 1}`}</button>
-                        <button onClick={(e) => handleDeleteChat(idx, e)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-700 rounded transition-all duration-200" title="Delete chat">
+                        <button onClick={(e) => handleDeleteChat(idx, e)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 transition-all duration-200" title="Delete chat">
                           <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />
                         </button>
                       </div>
@@ -737,7 +737,7 @@ Fundamental skills to prepare before enrolling:
                       </button>
                       <button
                         onClick={(e) => handleDeleteChat(idx, e)}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 hover:bg-gray-700 rounded transition-all duration-200"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 transition-all duration-200"
                         title="Delete chat"
                       >
                         <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />

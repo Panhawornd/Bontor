@@ -353,7 +353,7 @@ export default function RecommendationDashboard({ data }: RecommendationDashboar
                 {uni.country}
               </p>
               <div>
-                <p style={{ 
+                <p className="rec-section-p" style={{ 
                   fontSize: '12px', 
                   color: 'var(--text-muted)', 
                   marginBottom: '8px',

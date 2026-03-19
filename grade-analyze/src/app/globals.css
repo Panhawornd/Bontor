@@ -487,7 +487,9 @@ h4 {
     font-size: 14px !important;
     margin-bottom: 14px !important;
   }
-
+  .rec-dashboard-container .rec-section-p {
+    font-size: 14px !important;
+  }
   /* Section card titles: add horizontal margin to match chart card underline width */
   .rec-section-card .rec-section-title {
     margin-left: 15px !important;

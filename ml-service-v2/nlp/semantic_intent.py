@@ -62,6 +62,7 @@ class SemanticIntentDetector:
 
         logger.info("Pre-computing major embeddings from database (Pure AI)…")
         enc = SemanticIntentDetector._encoder
+        assert enc is not None, "Encoder must be initialized"
         SemanticIntentDetector._major_embeddings = {}
 
         for major_name, info in MAJOR_DATABASE.items():
@@ -86,7 +87,6 @@ class SemanticIntentDetector:
                     weighted_skills.append(skill)
             
             # Repeat subjects and keywords to give them more weight against the description
-            # This makes "math" a stronger signal if it's a required subject
             major_text = (
                 f"{desc} "
                 f"{' '.join(keywords)} {' '.join(keywords)} "
@@ -97,11 +97,12 @@ class SemanticIntentDetector:
             
             clean_profile = clean_text(major_text)
             embedding = enc.encode(clean_profile)
-            SemanticIntentDetector._major_embeddings[major_name] = embedding
+            if SemanticIntentDetector._major_embeddings is not None:
+                SemanticIntentDetector._major_embeddings[major_name] = embedding
 
         # Negative anchors
         neg_embs = [enc.encode(p) for p in SemanticIntentDetector._NEGATIVE_ANCHORS]
-        SemanticIntentDetector._negative_embedding = np.mean(neg_embs, axis=0)
+        SemanticIntentDetector._negative_embedding = np.mean(neg_embs, axis=0) # type: ignore
         logger.info(
             f"Pre-computed embeddings for {len(MAJOR_DATABASE)} majors + negative anchor"
         )
@@ -184,10 +185,14 @@ class SemanticIntentDetector:
                         if re.search(rf"\b{re.escape(keyword)}\b", clause):
                             negated_majors.update(majors)
 
+        enc = SemanticIntentDetector._encoder
+        assert enc is not None, "Encoder must be initialized"
+        assert SemanticIntentDetector._major_embeddings is not None, "Embeddings must be initialized"
+        
         user_emb = enc.encode(clean_text(text))
 
         # Check negative sentiment — require BOTH pattern match AND semantic signal
-        neg_sim = self._cosine(user_emb, SemanticIntentDetector._negative_embedding)
+        neg_sim = self._cosine(user_emb, SemanticIntentDetector._negative_embedding) # type: ignore
         is_negative = has_negation and neg_sim > 0.25 and not has_mixed_intent
 
         boosts: Dict[str, float] = {}
@@ -236,6 +241,7 @@ class SemanticIntentDetector:
 
         lower_text = text.lower()
         enc = SemanticIntentDetector._encoder
+        assert enc is not None, "Encoder must be initialized"
         user_emb = enc.encode(lower_text)
 
         penalties: Dict[str, float] = {}
@@ -258,11 +264,13 @@ class SemanticIntentDetector:
             import re
             KEYWORD_TO_MAJORS = {
                 "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
+                "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
                 "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
                 "biology": ["Medicine", "Pharmacy", "Dentistry"],
                 "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
-                "coding": ["Software Engineering"],
-                "programming": ["Software Engineering"],
+                "code": ["Software Engineering", "Data Science", "Cybersecurity", "Telecommunication and Networking"],
+                "coding": ["Software Engineering", "Data Science", "Cybersecurity", "Telecommunication and Networking"],
+                "programming": ["Software Engineering", "Data Science", "Cybersecurity", "Telecommunication and Networking"],
                 "electrical": ["Electrical Engineering"],
                 "electronics": ["Electrical Engineering"],
                 "mechanical": ["Mechanical Engineering"],
@@ -293,13 +301,17 @@ class SemanticIntentDetector:
 
         # --- METHOD 2: SBERT-based negative detection (fallback) ---
         # Only run if there's actual negation language OR very high negative similarity
+        assert SemanticIntentDetector._negative_embedding is not None, "Negative anchor must be initialized"
         neg_sim = self._cosine(user_emb, SemanticIntentDetector._negative_embedding)
         if has_negation or neg_sim > 0.50:  # Require negation pattern OR very high neg signal
+            assert SemanticIntentDetector._major_embeddings is not None
             for major_name, major_emb in SemanticIntentDetector._major_embeddings.items():
                 if major_name in penalties:
                     continue  # Already handled by keyword method
                     
-                info = MAJOR_DATABASE.get(major_name, {})
+                # Get info from database (using cast to satisfy IDE)
+                from typing import cast, Any
+                info = cast(Dict[str, Any], MAJOR_DATABASE.get(major_name, {}) or {})
                 desc = info.get("description", major_name)
                 neg_text = f"I don't want {desc} I hate {major_name}"
                 neg_emb = enc.encode(neg_text.lower())

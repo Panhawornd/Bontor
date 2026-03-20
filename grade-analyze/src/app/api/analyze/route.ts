@@ -223,18 +223,26 @@ export async function POST(req: Request) {
           }
         })
 
-        // Save input using raw SQL to bypass Prisma's locked schema validation
-        await prisma.$executeRaw`
-          INSERT INTO inputs (user_id, recommendation_id, interest_text, career_goals)
-          VALUES (${user.id}, ${recommendation.id}, ${payload.interest_text}, ${payload.career_goals})
-        `;
+        // Save input using Prisma ORM
+        await prisma.input.create({
+          data: {
+            userId: user.id,
+            recommendationId: recommendation.id,
+            interestText: payload.interest_text,
+            careerGoals: payload.career_goals,
+          }
+        });
 
-        // Save grades using raw SQL to bypass Prisma's locked schema validation
+        // Save grades using Prisma ORM
         for (const grade of payload.grades) {
-          await prisma.$executeRaw`
-            INSERT INTO grades (user_id, recommendation_id, subject, score)
-            VALUES (${user.id}, ${recommendation.id}, ${grade.subject}, ${grade.score})
-          `;
+          await prisma.grade.create({
+            data: {
+              userId: user.id,
+              recommendationId: recommendation.id,
+              subject: grade.subject,
+              score: grade.score,
+            }
+          });
         }
       } catch (dbError) {
         console.error('Database error:', dbError)

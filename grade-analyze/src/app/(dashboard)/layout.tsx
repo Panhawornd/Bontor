@@ -583,7 +583,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               onClick={() => handleSelectHistory(item.id)}
                               className={`block w-full text-left px-3 py-2 rounded transition-colors ${selectedHistoryId === item.id && pathname === '/history' ? 'bg-gray-800' : 'hover:bg-gray-800'}`}
                             >
-                              <p className={`text-xs font-medium truncate pr-6 ${selectedHistoryId === item.id && pathname === '/history' ? 'text-blue-400' : 'text-gray-100'}`}>
+                              <p className={`text-xs font-medium truncate pr-6 ${selectedHistoryId === item.id && pathname === '/history' ? 'text-gray-100' : 'text-gray-100'}`}>
                                 {item.interestText}
                               </p>
                               <p className="text-[10px] text-gray-500 mt-0.5 font-normal">

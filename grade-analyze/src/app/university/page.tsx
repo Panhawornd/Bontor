@@ -491,7 +491,7 @@ export default function UniversityPage() {
                 placeholder="Search universities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-12 py-3 w-full bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-full focus:outline-none focus:border-blue-500 transition-all"
+                className="pl-12 pr-12 py-3 w-full bg-[#111111] border border-gray-800 text-white placeholder-gray-500 rounded-full focus:outline-none focus:border-blue-500 transition-all"
                 style={{
                   boxShadow: 'none'
                 }}
@@ -516,10 +516,10 @@ export default function UniversityPage() {
             <div style={{ 
               display: 'flex', 
               gap: '12px',
-              backgroundColor: '#1a1a1a',
+              backgroundColor: '#111111',
               padding: '4px',
               borderRadius: '8px',
-              border: '1px solid #2a2a2a'
+              border: '1px solid #1f1f1f'
             }}>
               <button
                 type="button"

@@ -110,7 +110,7 @@ export default function ContactPage() {
           <button
             type="submit"
             disabled={sending}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md bg-blue-700 hover:bg-blue-800 border border-blue-700 hover:border-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md bg-gray-800 hover:bg-gray-700 border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
           >
             {sending ? "Sending..." : "Send Message"}
             <Send size={14} />

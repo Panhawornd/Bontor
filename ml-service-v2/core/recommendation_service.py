@@ -152,6 +152,7 @@ class RecommendationService:
             "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture", "Logistic"],
             "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
+            "bio": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
             
             # ===== COMPUTER SCIENCE / IT =====

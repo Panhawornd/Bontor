@@ -17,7 +17,7 @@ MAJOR_DATABASE = {
         }
     },
     "Medicine": {
-        "keywords": ["doctor", "medical", "health", "biology", "anatomy", "patient", "hospital", "clinic", "helping people", "saving lives", "help people", "save lives", "care", "healing", "treatment", "cure", "medicine", "healthcare", "surgeon", "physician", "medical research", "diagnosis", "surgery", "pharmacology", "cardiology", "neurology", "pediatrics", "emergency medicine", "medical technology", "clinical", "therapeutic", "medical practice", "healthcare provider", "medical specialist", "medical school", "medical degree", "medical profession", "biology", "life sciences", "chemistry"],
+        "keywords": ["doctor", "medical", "health", "bio", "biology", "anatomy", "patient", "hospital", "clinic", "helping people", "saving lives", "help people", "save lives", "care", "healing", "treatment", "cure", "medicine", "healthcare", "surgeon", "physician", "medical research", "diagnosis", "surgery", "pharmacology", "cardiology", "neurology", "pediatrics", "emergency medicine", "medical technology", "clinical", "therapeutic", "medical practice", "healthcare provider", "medical specialist", "medical school", "medical degree", "medical profession", "biology", "life sciences", "chemistry"],
         "required_subjects": ["biology", "chemistry", "math"],
         "description": "Study of human health, diseases, and medical treatment",
         "career_paths": ["Doctor", "Surgeon", "Medical Researcher", "Pharmacist", "Pediatrician", "Cardiologist", "Neurologist", "Emergency Medicine Physician", "Medical Specialist"],
@@ -115,7 +115,7 @@ MAJOR_DATABASE = {
         }
     },
     "Psychology": {
-        "keywords": ["psychology", "mental", "behavior", "counseling", "therapy", "human", "mind", "helping people", "help people", "understanding people", "understand people", "human behavior", "people", "mental health", "support", "care", "psychologist", "counselor", "therapist", "clinical psychology", "cognitive psychology", "social psychology", "developmental psychology", "forensic psychology", "sports psychology", "industrial psychology", "mental health counselor", "psychological research", "behavioral analysis", "psychological assessment", "psychological treatment", "psychological therapy", "psychological degree", "psychological career", "biology", "english"],
+        "keywords": ["psychology", "mental", "behavior", "counseling", "therapy", "human", "mind", "helping people", "help people", "understanding people", "understand people", "human behavior", "people", "mental health", "support", "care", "psychologist", "counselor", "therapist", "clinical psychology", "cognitive psychology", "social psychology", "developmental psychology", "forensic psychology", "sports psychology", "industrial psychology", "mental health counselor", "psychological research", "behavioral analysis", "psychological assessment", "psychological treatment", "psychological therapy", "psychological degree", "psychological career", "biology", "bio", "english"],
         "required_subjects": ["biology", "english"],
         "description": "Study of human behavior, cognition, and mental processes",
         "career_paths": ["Psychologist", "Counselor", "Therapist", "Researcher", "School Psychologist", "Forensic Psychologist", "Sports Psychologist", "Industrial Psychologist", "Mental Health Counselor"],
@@ -171,7 +171,7 @@ MAJOR_DATABASE = {
         }
     },
     "Dentistry": {
-        "keywords": ["dentistry", "dentist", "dental", "teeth", "oral", "health", "mouth", "tooth", "gum", "dental care", "orthodontist", "oral surgery", "dental hygiene", "dental clinic", "oral health", "dental treatment", "dental procedures", "dental technology", "cosmetic dentistry", "dental implants", "periodontics", "endodontics", "prosthodontics", "pediatric dentistry", "dental research", "dental materials", "dental degree", "dental career", "dental profession", "biology", "chemistry", "math"],
+        "keywords": ["dentistry", "dentist", "dental", "teeth", "oral", "health", "mouth", "tooth", "gum", "dental care", "orthodontist", "oral surgery", "dental hygiene", "dental clinic", "oral health", "dental treatment", "dental procedures", "dental technology", "cosmetic dentistry", "dental implants", "periodontics", "endodontics", "prosthodontics", "pediatric dentistry", "dental research", "dental materials", "dental degree", "dental career", "dental profession", "biology", "bio", "chemistry", "math"],
         "required_subjects": ["biology", "chemistry", "math"],
         "description": "Study of oral health, dental care, and treatment of teeth and gums",
         "career_paths": ["Dentist", "Orthodontist", "Oral Surgeon", "Dental Hygienist", "Dental Assistant", "Periodontist", "Endodontist", "Prosthodontist", "Pediatric Dentist", "Cosmetic Dentist"],
@@ -199,7 +199,7 @@ MAJOR_DATABASE = {
         }
     },
     "Pharmacy": {
-        "keywords": ["pharmacy", "pharmacist", "medication", "drugs", "pharmaceutical", "prescription", "pharmacology", "dispensing", "dosage", "medical drugs", "chemists", "pharmacy practice", "clinical pharmacy", "pharmaceutical chemistry", "pharmaceutical technology", "pharmaceutical manufacturing", "chemistry", "biology", "math"],
+        "keywords": ["pharmacy", "pharmacist", "medication", "drugs", "pharmaceutical", "prescription", "pharmacology", "dispensing", "dosage", "medical drugs", "chemists", "pharmacy practice", "clinical pharmacy", "pharmaceutical chemistry", "pharmaceutical technology", "pharmaceutical manufacturing", "chemistry", "biology", "bio", "math"],
         "required_subjects": ["biology", "chemistry", "math"],
         "description": "Study of medications, drug development, and pharmaceutical care",
         "career_paths": ["Pharmacist", "Pharmaceutical Researcher", "Clinical Pharmacist", "Pharmaceutical Sales Representative", "Pharmaceutical Marketing Manager", "Pharmaceutical Quality Assurance Manager", "Pharmaceutical Regulatory Affairs Specialist", "Pharmaceutical Manufacturing Manager", "Pharmaceutical Consultant", "Pharmaceutical Analyst"],

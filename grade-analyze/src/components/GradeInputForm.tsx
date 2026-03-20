@@ -315,21 +315,21 @@ export default function GradeInputForm({ onSubmit, loading, initialData, onFormC
             className="px-4 py-1.5 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ 
               width: '100%',
-              backgroundColor: isFormValid ? '#1d4ed8' : '#1f2937',
+              backgroundColor: isFormValid ? '#1F2937' : '#1f2937',
               borderWidth: '1px',
               borderStyle: 'solid',
-              borderColor: isFormValid ? '#1d4ed8' : '#374151'
+              borderColor: isFormValid ? '#4B5563' : '#374151'
             }}
             onMouseEnter={(e) => {
               if (isFormValid && !loading) {
-                e.currentTarget.style.backgroundColor = '#1e40af'
-                e.currentTarget.style.borderColor = '#1e40af'
+                e.currentTarget.style.backgroundColor = '#374151'
+                e.currentTarget.style.borderColor = '#4B5563'
               }
             }}
             onMouseLeave={(e) => {
               if (isFormValid && !loading) {
-                e.currentTarget.style.backgroundColor = '#1d4ed8'
-                e.currentTarget.style.borderColor = '#1d4ed8'
+                e.currentTarget.style.backgroundColor = '#1F2937'
+                e.currentTarget.style.borderColor = '#4B5563'
               }
             }}
           >

@@ -209,7 +209,7 @@ class ModelTrainer:
         self.model = RandomForestClassifier(
             n_estimators=n_estimators,
             max_depth=max_depth,
-            min_samples_leaf=3,
+            min_samples_leaf=4,
             class_weight="balanced",
             random_state=42,
             n_jobs=-1,
@@ -473,10 +473,10 @@ class ModelTrainer:
         if tune_hyperparams:
             logger.info("Running lightweight hyperparameter tuning (GridSearchCV)…")
             param_grid = {
-                "n_estimators": [600, 1000],
-                "max_depth": [20, 30],
-                "min_samples_leaf": [2, 3],
-                "max_features": ["sqrt", "log2"],
+                "n_estimators": [500, 800],
+                "max_depth": [20, 25],
+                "min_samples_leaf": [3, 5],
+                "max_features": ["sqrt"],
             }
             tuner = GridSearchCV(
                 estimator=RandomForestClassifier(
@@ -503,6 +503,9 @@ class ModelTrainer:
 
         y_pred = self.model.predict(X_test)
         acc = accuracy_score(y_test, y_pred)
+        
+        y_train_pred = self.model.predict(X_train)
+        train_acc = accuracy_score(y_train, y_train_pred)
         precision_weighted = precision_score(y_test, y_pred, average="weighted", zero_division=0)
         recall_weighted = recall_score(y_test, y_pred, average="weighted", zero_division=0)
         precision_macro = precision_score(y_test, y_pred, average="macro", zero_division=0)
@@ -520,6 +523,7 @@ class ModelTrainer:
 
         report_dict = classification_report(y_test, y_pred, output_dict=True)
         logger.info(f"Classification Report:\n{classification_report(y_test, y_pred)}")
+        logger.info(f"Train Accuracy: {train_acc:.4f}")
         logger.info(f"Test Accuracy: {acc:.4f}")
         logger.info(
             "Weighted Precision: %.4f | Weighted Recall: %.4f",
@@ -559,6 +563,7 @@ class ModelTrainer:
             "n_features": X.shape[1],
             "n_classes": len(self.majors_list),
             "classes": self.majors_list,
+            "train_accuracy": float(train_acc),
             "test_accuracy": acc,
             "test_precision_weighted": float(precision_weighted),
             "test_recall_weighted": float(recall_weighted),
@@ -581,6 +586,7 @@ class ModelTrainer:
         logger.info(f"Training metadata saved to {TRAINING_META_PATH}")
 
         return self.model, {
+            "train_accuracy": float(train_acc),
             "test_accuracy": acc,
             "test_precision_weighted": float(precision_weighted),
             "test_recall_weighted": float(recall_weighted),

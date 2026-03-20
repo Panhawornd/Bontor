@@ -31,9 +31,9 @@ def main():
     # Train the model
     model, metrics = train_random_forest(
         majors_database=MAJOR_DATABASE,
-        n_samples=50000,
-        n_estimators=1000,
-        max_depth=30,
+        n_samples=53424, # Match exact count from last run
+        n_estimators=700,
+        max_depth=25,
         tune_hyperparams=True,
     )
     
@@ -42,6 +42,7 @@ def main():
     print("  Training Complete!")
     print("=" * 60)
 
+    print(f"  Train Accuracy:  {metrics['train_accuracy']:.2%}")
     print(f"  Test Accuracy:   {metrics['test_accuracy']:.2%}")
     print(f"  Precision(w):    {metrics['test_precision_weighted']:.2%}")
     print(f"  Recall(w):       {metrics['test_recall_weighted']:.2%}")

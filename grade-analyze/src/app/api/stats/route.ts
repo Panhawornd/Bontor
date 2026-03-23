@@ -23,10 +23,24 @@ export async function GET(req: Request) {
     }
 
     const userId = payload.userId
+    
+    // Count analyses (from input table)
     const analysisCount = await prisma.input.count({ where: { userId } });
-    const requestCount = 0; // TODO: Implement chat agent request tracking
+    
+    // Count total chat sessions
+    const chatCount = await prisma.chatSession.count({ where: { userId } });
+    
+    // Count only user messages across all sessions (user's questions)
+    const requestCount = await prisma.chatMessage.count({
+      where: {
+        role: 'user',
+        session: {
+          userId: userId
+        }
+      }
+    });
 
-    return NextResponse.json({ analysisCount, requestCount })
+    return NextResponse.json({ analysisCount, chatCount, requestCount })
   } catch (error) {
     console.error('Stats error:', error)
     return NextResponse.json({ analysisCount: 0, requestCount: 0 })

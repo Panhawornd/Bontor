@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, useLayoutEffect, Suspense } from "react";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
+import { useSearchParams } from "next/navigation";
 import {
   User,
   LogOut,
@@ -15,97 +14,89 @@ import {
   Bot,
   BotMessageSquare,
   Trash2,
-  X,
 } from "lucide-react";
 
 export default function AgentPage() {
-  const router = useRouter();
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AgentPageContent />
+    </Suspense>
+  );
+}
+
+function AgentPageContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [hasToken, setHasToken] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ name: string; email?: string } | null>(
     null
   );
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
-  const [chatHistory, setChatHistory] = useState<{ title: string; messages: { role: 'user' | 'assistant'; content: string }[] }[]>([]);
+  const [chatHistory, setChatHistory] = useState<{ id: number; title: string; messages: { role: 'user' | 'assistant'; content: string }[] }[]>([]);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [activeChatIndex, setActiveChatIndex] = useState<number | null>(null);
   const chatAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
-  const [inputHeight, setInputHeight] = useState(100); // Default bottom padding
-  const hasLoaded = useRef(false); // Prevent save effect from overwriting on initial mount
 
-  // Load chat history and active chat index from localStorage on component mount
+  // Unified initialization to load both User and Chat History before showing the page
   useEffect(() => {
-    const savedChatHistory = localStorage.getItem('chatHistory');
-    const savedActiveChatIndex = localStorage.getItem('activeChatIndex');
-    
-    if (savedChatHistory) {
+    const initPage = async () => {
       try {
-        const parsedHistory = JSON.parse(savedChatHistory);
-        // Filter out chats with no messages
-        const filteredHistory = parsedHistory.filter((chat: { title: string; messages: { role: 'user' | 'assistant'; content: string }[] }) => chat.messages && chat.messages.length > 0);
-        setChatHistory(filteredHistory);
-        
-        // If we have a saved active chat index and it's valid, load those messages
-        if (savedActiveChatIndex !== null) {
-          const activeIndex = parseInt(savedActiveChatIndex);
-          if (!isNaN(activeIndex) && activeIndex >= 0 && activeIndex < filteredHistory.length) {
-            setActiveChatIndex(activeIndex);
-            setMessages(filteredHistory[activeIndex].messages);
+        // Run auth check and chat history loading in parallel
+        const [authRes, historyRes] = await Promise.all([
+          fetch("/api/auth/me"),
+          fetch("/api/agent/sessions")
+        ]);
+
+        // Process Auth
+        if (authRes.ok) {
+          const authData = await authRes.json();
+          if (authData.user) {
+            setUser(authData.user);
           }
-        }
-      } catch (error) {
-        console.error('Error loading chat history:', error);
-      }
-    }
-    hasLoaded.current = true;
-  }, []);
-
-  // Save chat history to localStorage whenever it changes
-  useEffect(() => {
-    if (!hasLoaded.current) return; // Skip save until load has completed
-    // Filter out chats with no messages before saving
-    const filteredHistory = chatHistory.filter(chat => chat.messages && chat.messages.length > 0);
-    localStorage.setItem('chatHistory', JSON.stringify(filteredHistory));
-  }, [chatHistory]);
-
-  // Save active chat index to localStorage whenever it changes
-  useEffect(() => {
-    if (activeChatIndex !== null) {
-      localStorage.setItem('activeChatIndex', activeChatIndex.toString());
-    } else {
-      localStorage.removeItem('activeChatIndex');
-    }
-  }, [activeChatIndex]);
-
-  useEffect(() => {
-    // Check if user is authenticated via cookie
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        const data = await response.json();
-
-        if (data.user) {
-          setUser(data.user);
-          setHasToken(true);
         } else {
-          setHasToken(false);
+        }
+
+        // Process Chat History
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          const sessions = historyData.sessions.map((s: { id: number; title: string; messages: { role: string; content: string }[] }) => ({
+            id: s.id,
+            title: s.title,
+            messages: s.messages.map((m: { role: string; content: string }) => ({
+              role: m.role as 'user' | 'assistant',
+              content: m.content,
+            })),
+          }));
+          setChatHistory(sessions);
         }
       } catch (error) {
-        console.error("Auth check error:", error);
-        setHasToken(false);
+        console.error("Initialization error:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuth();
+    initPage();
   }, []);
+
+  // Handle sessionId from query search parameters
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const sessionIdParam = searchParams.get('sessionId');
+    if (sessionIdParam && chatHistory.length > 0) {
+      const id = parseInt(sessionIdParam);
+      const sessionIndex = chatHistory.findIndex(s => s.id === id);
+      if (sessionIndex !== -1) {
+        setActiveChatIndex(sessionIndex);
+        setMessages(chatHistory[sessionIndex].messages);
+        setActiveSessionId(id);
+      }
+    }
+  }, [searchParams, chatHistory]);
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -150,125 +141,72 @@ export default function AgentPage() {
     // Measure input container height to adjust chat padding
     if (inputContainerRef.current) {
       // Add a small buffer (e.g., 20px)
-      setInputHeight(inputContainerRef.current.offsetHeight + 20);
     }
   }, [inputValue]);
   
-  const getMockResponse = (userMessage: string) => {
-    const lowerMessage = userMessage.toLowerCase();
-    if (lowerMessage.includes('software engineering')) {
-      return `Software Engineering is the application of engineering principles to software development. It involves designing, developing, testing, and maintaining software systems.
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
 
-Fundamental skills to prepare before enrolling:
-- Programming languages: Python, Java, C++
-- Data structures and algorithms
-- Version control (Git)
-- Problem-solving and logical thinking
-- Basic understanding of databases and web development`;
-    } else if (lowerMessage.includes('data science')) {
-      return `Data Science combines statistics, programming, and domain expertise to extract insights from data. It involves collecting, processing, and analyzing large datasets to inform decision-making.
-
-Fundamental skills to prepare before enrolling:
-- Programming: Python or R
-- Statistics and mathematics
-- Data manipulation (Pandas, SQL)
-- Machine learning basics
-- Data visualization (Matplotlib, Tableau)`;
-    } else if (lowerMessage.includes('telecom') || lowerMessage.includes('networking')) {
-      return `Telecommunications and Networking involves the transmission of information over distances using electronic means. It covers network design, protocols, and infrastructure for data, voice, and video communication.
-
-Fundamental skills to prepare before enrolling:
-- Computer networking basics (TCP/IP, OSI model)
-- Programming: Python or Java
-- Understanding of network security
-- Knowledge of wireless technologies
-- Basic electronics and signal processing`;
-    } else if (lowerMessage.includes('cybersecurity') || lowerMessage.includes('cyber security')) {
-      return `Cybersecurity focuses on protecting systems, networks, and data from digital attacks. It involves implementing security measures to prevent unauthorized access, data breaches, and cyber threats.
-
-Fundamental skills to prepare before enrolling:
-- Networking fundamentals
-- Programming: Python, Bash scripting
-- Understanding of encryption and cryptography
-- Knowledge of operating systems (Linux, Windows)
-- Ethical hacking and penetration testing basics`;
-    } else {
-      return `I'm here to help with information about majors and skills to prepare. Please ask about one of these areas for specific details and preparation skills!`;
-    }
-  };
-
-  const handleSend = () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || isLoading) return;
 
     // Add user message
     const userMessage = { role: 'user' as const, content: inputValue };
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setInputValue('');
+    setIsLoading(true);
 
-    // Reset textarea height if possible (since we can't easily access the ref here without passing it or using a ref for the textarea)
-    // But since inputValue controls the value, the next render will clear the text.
-    // The height reset is handled by the useEffect on inputValue or the style prop.
-    
-    // Handle chat history update — capture the resolved index for the timeout below
-    let resolvedIndex: number;
-    if (activeChatIndex === null) {
-      // No active chat (deleted or fresh start) — create a new one
-      const newChatTitle = `Chat ${chatHistory.length + 1}`;
-      const newChat = { title: newChatTitle, messages: newMessages };
-      resolvedIndex = chatHistory.length;
-      setChatHistory(prev => [...prev, newChat]);
-      setActiveChatIndex(resolvedIndex);
-    } else {
-      resolvedIndex = activeChatIndex;
-      // Update existing active chat
-      setChatHistory(prev => {
-        const updatedHistory = [...prev];
-        if (updatedHistory[resolvedIndex]) {
-          updatedHistory[resolvedIndex].messages = newMessages;
-        }
-        return updatedHistory;
+    try {
+      // Call the Gemini API with sessionId for DB persistence
+      const res = await fetch('/api/agent/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: newMessages,
+          sessionId: activeSessionId,
+        }),
       });
-    }
 
-    // Simulate assistant response after 1 second
-    setTimeout(() => {
-      const responseContent = getMockResponse(userMessage.content);
-      const assistantMessage = { role: 'assistant' as const, content: responseContent };
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
+
+      const assistantMessage = { role: 'assistant' as const, content: data.message };
       const finalMessages = [...newMessages, assistantMessage];
       setMessages(finalMessages);
 
-      // Update chat history with assistant response
-      setChatHistory(prev => {
-        const updatedHistory = [...prev];
-        if (updatedHistory[resolvedIndex]) {
-          updatedHistory[resolvedIndex].messages = finalMessages;
-        }
-        return updatedHistory;
-      });
-    }, 1000);
+      // Update local chat history state
+      const returnedSessionId = data.sessionId as number;
+
+      if (!activeSessionId) {
+        // New session was created by the API
+        const newTitle = inputValue.slice(0, 30) + (inputValue.length > 30 ? '...' : '');
+        setActiveSessionId(returnedSessionId);
+        setChatHistory(prev => [...prev, { id: returnedSessionId, title: newTitle, messages: finalMessages }]);
+        setActiveChatIndex(chatHistory.length);
+      } else {
+        // Update existing session in local state
+        setChatHistory(prev =>
+          prev.map(s => s.id === activeSessionId ? { ...s, messages: finalMessages } : s)
+        );
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong. Please try again.';
+      const assistantMessage = { role: 'assistant' as const, content: `Error: ${errorMessage}` };
+      const finalMessages = [...newMessages, assistantMessage];
+      setMessages(finalMessages);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewChat = () => {
-    // Don't create new chat if there are no chats yet
-    if (chatHistory.length === 0) return;
-
-    // Save current messages to the active chat in history if it exists and has messages
-    if (messages.length > 0 && activeChatIndex !== null) {
-      setChatHistory(prev => {
-        const updatedHistory = [...prev];
-        if (updatedHistory[activeChatIndex]) {
-          updatedHistory[activeChatIndex].messages = messages;
-        }
-        return updatedHistory;
-      });
-    }
-
-    // Start new chat
     setMessages([]);
-    const newChatIndex = chatHistory.length;
-    setChatHistory(prev => [...prev, { title: `Chat ${prev.length + 1}`, messages: [] }]);
-    setActiveChatIndex(newChatIndex);
+    setActiveChatIndex(null);
+    setActiveSessionId(null);
   };
 
   const handleLoadChat = (chatIndex: number) => {
@@ -276,26 +214,33 @@ Fundamental skills to prepare before enrolling:
     if (selectedChat) {
       setMessages(selectedChat.messages);
       setActiveChatIndex(chatIndex);
+      setActiveSessionId(selectedChat.id);
     }
   };
 
-  const handleDeleteChat = (chatIndex: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the load chat function
-    
-    setChatHistory(prev => {
-      const updatedHistory = prev.filter((_, idx) => idx !== chatIndex);
-      
-      // If we deleted the currently active chat, clear messages and reset active index
-      if (activeChatIndex === chatIndex) {
-        setMessages([]);
-        setActiveChatIndex(null);
-      } else if (activeChatIndex !== null && activeChatIndex > chatIndex) {
-        // If we deleted a chat before the active one, adjust the active index
-        setActiveChatIndex(activeChatIndex - 1);
-      }
-      
-      return updatedHistory;
-    });
+  const handleDeleteChat = async (chatIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    const session = chatHistory[chatIndex];
+    if (!session) return;
+
+    // Delete from database
+    try {
+      await fetch(`/api/agent/sessions/${session.id}`, { method: 'DELETE' });
+    } catch (error) {
+      console.error('Failed to delete chat session:', error);
+    }
+
+    // Update local state
+    setChatHistory(prev => prev.filter((_, idx) => idx !== chatIndex));
+
+    if (activeChatIndex === chatIndex) {
+      setMessages([]);
+      setActiveChatIndex(null);
+      setActiveSessionId(null);
+    } else if (activeChatIndex !== null && activeChatIndex > chatIndex) {
+      setActiveChatIndex(activeChatIndex - 1);
+    }
   };
 
   const handleLogout = async () => {
@@ -771,6 +716,15 @@ Fundamental skills to prepare before enrolling:
                     </div>
                   </div>
                 ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -800,14 +754,15 @@ Fundamental skills to prepare before enrolling:
                       handleSend();
                     }
                   }}
-                  placeholder="Ask agent a question..."
-                  className="w-full bg-[#111111] placeholder-gray-500 text-gray-200 px-4 py-3 rounded-lg focus:outline-none text-sm min-h-[60px] max-h-[200px] resize-none overflow-y-auto custom-scrollbar"
+                  disabled={isLoading}
+                  placeholder={isLoading ? "Waiting for response..." : "Ask agent a question..."}
+                  className="w-full bg-[#111111] placeholder-gray-500 text-gray-200 px-4 py-3 rounded-lg focus:outline-none text-sm min-h-[60px] max-h-[200px] resize-none overflow-y-auto custom-scrollbar disabled:opacity-50"
                 />
                 <div className="mt-3 flex items-center justify-between">
                   <button className="p-2 text-gray-300 hover:text-white">
                     <Paperclip className="w-5 h-5" />
                   </button>
-                  <button onClick={handleSend} className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md">
+                  <button onClick={handleSend} disabled={isLoading || !inputValue.trim()} className="p-3 mx-2 my-2 bg-white/6 hover:bg-white/10 rounded-md disabled:opacity-30 disabled:cursor-not-allowed">
                     <ArrowUp className="w-5 h-5 text-white" />
                   </button>
                 </div>

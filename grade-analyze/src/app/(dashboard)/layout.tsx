@@ -59,6 +59,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [analysisCount, setAnalysisCount] = useState(0);
+  const [chatCount, setChatCount] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
   const [recentAnalysis, setRecentAnalysis] = useState<AnalysisResult | null>(null);
   const [user, setUser] = useState<{ name: string; email?: string } | null>(null);
@@ -118,6 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setAnalysisCount(statsData.analysisCount ?? 0);
+          setChatCount(statsData.chatCount ?? 0);
           setRequestCount(statsData.requestCount ?? 0);
         }
       } else {
@@ -141,8 +143,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const editInputRef = useRef<HTMLInputElement>(null);
   const editInputRefMobile = useRef<HTMLInputElement>(null);
 
-  // Chat History
-  const [chatHistory, setChatHistory] = useState<{ title: string }[]>([]);
+  // Chat History from DB
+  const [chatSessions, setChatSessions] = useState<{ id: number; title: string; updatedAt: string }[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -176,6 +178,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (statsRes.ok) {
           const data = await statsRes.json();
           setAnalysisCount(data.analysisCount ?? 0);
+          setChatCount(data.chatCount ?? 0);
           setRequestCount(data.requestCount ?? 0);
         }
 
@@ -193,16 +196,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           }
         }
 
-        // Also load chat history from localStorage
-        try {
-          const storedChats = localStorage.getItem('chatHistory');
-          if (storedChats) {
-            const parsed = JSON.parse(storedChats);
-            const validChats = parsed.filter((c: { messages?: unknown[] }) => c.messages && (c.messages as unknown[]).length > 0);
-            setChatHistory(validChats);
+        // Load chat history from DB
+        const chatSessionsRes = await fetch('/api/agent/sessions');
+        if (chatSessionsRes.ok) {
+          const chatData = await chatSessionsRes.json();
+          if (Array.isArray(chatData.sessions)) {
+            setChatSessions(chatData.sessions.map((s: { id: number; title: string; updatedAt: string }) => ({
+              id: s.id,
+              title: s.title,
+              updatedAt: s.updatedAt
+            })));
           }
-        } catch {
-          // silently fail
         }
       } catch {
         // silently fail
@@ -505,11 +509,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
                 {chatHistoryOpen && (
                   <div className="ml-7 flex flex-col gap-0.5">
-                    {chatHistory.length === 0 ? (
+                    {chatSessions.length === 0 ? (
                       <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
                     ) : (
-                      chatHistory.map((c, i) => (
-                        <Link key={i} href="/agent" onClick={() => setIsSidebarOpen(false)} className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate">{c.title || `Chat ${i + 1}`}</Link>
+                      chatSessions.map((c, i) => (
+                        <Link key={i} href={`/agent?sessionId=${c.id}`} onClick={() => setIsSidebarOpen(false)} className="block w-full text-left px-3 py-2 rounded transition-colors hover:bg-gray-800">
+                          <p className="text-xs font-medium truncate pr-6 text-gray-100">
+                            {c.title || `Chat ${i + 1}`}
+                          </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                            {new Date(c.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </Link>
                       ))
                     )}
                   </div>
@@ -621,11 +632,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </button>
                 {chatHistoryOpen && (
                   <div className="ml-7 flex flex-col gap-0.5">
-                    {chatHistory.length === 0 ? (
+                    {chatSessions.length === 0 ? (
                       <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
                     ) : (
-                      chatHistory.map((c, i) => (
-                        <Link key={i} href="/agent" onClick={() => setIsSidebarOpen(false)} className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate">{c.title || `Chat ${i + 1}`}</Link>
+                      chatSessions.map((c, i) => (
+                        <Link key={i} href={`/agent?sessionId=${c.id}`} onClick={() => setIsSidebarOpen(false)} className="block w-full text-left px-3 py-2 rounded transition-colors hover:bg-gray-800">
+                          <p className="text-xs font-medium truncate pr-6 text-gray-100">
+                            {c.title || `Chat ${i + 1}`}
+                          </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                            {new Date(c.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </Link>
                       ))
                     )}
                   </div>
@@ -757,16 +775,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
               {chatHistoryOpen && (
                 <div className="ml-7 flex flex-col gap-0.5">
-                  {chatHistory.length === 0 ? (
+                  {chatSessions.length === 0 ? (
                     <p className="text-xs text-gray-500 px-3 py-1">No chats yet</p>
                   ) : (
-                    chatHistory.map((c, i) => (
+                    chatSessions.map((c, i) => (
                       <Link
                         key={i}
-                        href="/agent"
-                        className="block text-left text-xs text-gray-100 hover:bg-gray-800 px-3 py-1.5 rounded transition-colors truncate"
+                        href={`/agent?sessionId=${c.id}`}
+                        className="block w-full text-left px-3 py-2 rounded transition-colors hover:bg-gray-800"
                       >
-                        {c.title || `Chat ${i + 1}`}
+                        <p className="text-xs font-medium truncate pr-6 text-gray-100">
+                          {c.title || `Chat ${i + 1}`}
+                        </p>
+                        <p className="text-[10px] text-gray-500 mt-0.5 font-normal">
+                          {new Date(c.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
                       </Link>
                     ))
                   )}
@@ -791,7 +814,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Render Child Content Here with Context Provider */}
             <DashboardContext.Provider value={{
               analysisCount,
-              chatCount: chatHistory.length,
+              chatCount,
               requestCount,
               recentAnalysis,
               statsLoading,

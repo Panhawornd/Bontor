@@ -30,7 +30,7 @@ model User {
 model Input {
   id               Int             @id @default(autoincrement())
   userId           Int?            @map("user_id")
-  recommendationId Int?            @map("recommendation_id")
+  recommendationId Int?            @unique @map("recommendation_id")
   interestText     String          @map("interest_text") @db.Text
   careerGoals      String?         @map("career_goals") @db.Text
   createdAt        DateTime        @default(now()) @map("created_at")
@@ -80,7 +80,7 @@ model Recommendation {
   skillGaps    Json     @map("skill_gaps")
   createdAt    DateTime @default(now()) @map("created_at")
   user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  inputs       Input[]
+  input        Input?
   grades       Grade[]
 
   @@map("recommendations")

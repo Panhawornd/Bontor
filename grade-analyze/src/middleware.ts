@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
   if (token && isAuthOnlyBlockedRoute) {
     const payload = await verifyToken(token)
     if (payload) {
-      return NextResponse.redirect(new URL('/Input', request.url))
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 

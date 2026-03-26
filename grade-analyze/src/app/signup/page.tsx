@@ -75,7 +75,7 @@ export default function Signup() {
       })
 
       if (response.ok) {
-        router.push('/Input')
+        window.location.href = '/dashboard'
       } else {
         const data = await response.json()
         setError(data.error || 'Signup failed')

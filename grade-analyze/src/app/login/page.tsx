@@ -59,7 +59,7 @@ function LoginContent() {
         localStorage.setItem('just_logged_in', 'true')
         localStorage.removeItem('just_logged_out')
         // Use window.location for a hard redirect to ensure cookie is available
-        window.location.href = '/Input'
+        window.location.href = '/dashboard'
       } else {
         const data = await response.json()
         setError(data.error || 'Login failed')

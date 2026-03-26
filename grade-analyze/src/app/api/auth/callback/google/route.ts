@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Create response with redirect to /Input
-    const response = NextResponse.redirect(new URL('/Input', request.url))
+    const response = NextResponse.redirect(new URL('/dashboard', request.url))
 
     // Set the same auth-token cookie as regular login
     response.cookies.set('auth-token', token, {

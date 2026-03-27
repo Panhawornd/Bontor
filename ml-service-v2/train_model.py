@@ -25,15 +25,14 @@ def main():
     print("  NLP + ML Recommendation System - Model Training")
     print("=" * 60)
     print()
-    print(f"Training with {len(MAJOR_DATABASE)} majors")
+    print(f"Training with {len(MAJOR_DATABASE)} majors from students_dataset.csv")
     print()
     
     # Train the model
     model, metrics = train_random_forest(
         majors_database=MAJOR_DATABASE,
-        n_samples=53424, # Match exact count from last run
-        n_estimators=700,
-        max_depth=25,
+        n_estimators=1000,
+        max_depth=30,
         tune_hyperparams=True,
     )
     

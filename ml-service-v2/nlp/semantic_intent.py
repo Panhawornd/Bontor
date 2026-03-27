@@ -162,7 +162,7 @@ class SemanticIntentDetector:
             NEGATED_KEYWORD_MAP = {
                 "coding": ["Software Engineering"],
                 "programming": ["Software Engineering"],
-                "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering"],
+                "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Logistic"],
                 "biology": ["Medicine", "Pharmacy", "Dentistry"],
                 "bio": ["Medicine", "Pharmacy", "Dentistry"],
                 "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy"],
@@ -267,9 +267,10 @@ class SemanticIntentDetector:
             # Use word-boundary matching, NOT substring matching
             import re
             KEYWORD_TO_MAJORS = {
-                "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
-                "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance"],
-                "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
+                "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance", "Logistic", "UX/UI Design", "Business Administration", "Business Management", "Accounting", "Education", "Medicine", "Pharmacy", "Dentistry"],
+                "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance", "Logistic", "UX/UI Design", "Business Administration", "Business Management", "Accounting", "Education", "Medicine", "Pharmacy", "Dentistry"],
+                "numbers": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance", "Logistic", "UX/UI Design", "Business Administration", "Business Management", "Accounting", "Education", "Medicine", "Pharmacy", "Dentistry"],
+                "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Software Engineering", "Telecommunication and Networking", "Medicine", "Dentistry"],
                 "biology": ["Medicine", "Pharmacy", "Dentistry"],
                 "bio": ["Medicine", "Pharmacy", "Dentistry"],
                 "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
@@ -299,8 +300,8 @@ class SemanticIntentDetector:
                 "transportation": ["Logistic"],
             }
             
-            # Split into clauses by contrasting conjunctions to isolate negated keywords
-            clauses = re.split(r'\b(?:but|however|instead|except|although|while)\b', lower_text)
+            # Split into clauses by sentence boundaries AND contrasting conjunctions
+            clauses = re.split(r'(?:\.\s+|\b(?:but|however|instead|except|although|while|prefer|rather)\b)', lower_text)
             for clause in clauses:
                 if any(re.search(neg, clause) for neg in NEGATION_PATTERNS):
                     for keyword, majors in KEYWORD_TO_MAJORS.items():

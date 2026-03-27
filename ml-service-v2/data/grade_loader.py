@@ -16,7 +16,7 @@ import csv
 import logging
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -96,38 +96,47 @@ def load_csv(filepath: Optional[Path] = None) -> List[Dict[str, str]]:
 
 
 def load_all_csvs() -> List[Dict[str, str]]:
-    """Load all CSV files from the csv directory."""
-    all_rows: List[Dict[str, str]] = []
+    """Load only the student_dataset.csv file."""
     if not CSV_DIR.exists():
-        return all_rows
-    csv_files = sorted(CSV_DIR.glob("*.csv"))
-    for csv_file in csv_files:
-        all_rows.extend(load_csv(csv_file))
-    logger.info(
-        f"Total: {len(all_rows)} student records from {len(csv_files)} file(s)"
-    )
-    return all_rows
+        return []
+    
+    filepath = CSV_DIR / "students_dataset.csv"
+    if not filepath.exists():
+        logger.warning(f"students_dataset.csv not found in {CSV_DIR}")
+        return []
+        
+    rows = load_csv(filepath)
+    return rows
 
 
 def convert_row_to_grades(
     row: Dict[str, str], randomize: bool = True
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """
     Convert a CSV row of letter grades to numeric scores.
-    Returns dict like: {"math": 112.5, "physics": 67.5, ...}
+    Also returns Major and Interest if present.
     """
+    data: Dict[str, Any] = {}
     grades: Dict[str, float] = {}
+    
     for key, value in row.items():
         col = key.strip().lower()
         subject = COLUMN_MAP.get(col)
-        if subject is None:
-            continue  # skip Result or unknown columns
-        letter = value.strip().upper()
-        if letter in GRADE_RANGES:
-            grades[subject] = letter_to_score(letter, subject, randomize)
-        else:
-            grades[subject] = 0.0
-    return grades
+        if subject:
+            letter = value.strip().upper()
+            if letter in GRADE_RANGES:
+                grades[subject] = letter_to_score(letter, subject, randomize)
+            else:
+                grades[subject] = 0.0
+        
+        # Keep Major and Interest
+        if col == "major":
+            data["major"] = value.strip()
+        elif col == "interest":
+            data["interest"] = value.strip()
+            
+    data["grades"] = grades
+    return data
 
 
 def get_real_grade_distributions() -> Dict[str, Tuple[float, float]]:
@@ -145,7 +154,8 @@ def get_real_grade_distributions() -> Dict[str, Tuple[float, float]]:
     subject_scores: Dict[str, List[float]] = {s: [] for s in MAX_SCORES}
 
     for row in rows:
-        grades = convert_row_to_grades(row, randomize=False)
+        row_data = convert_row_to_grades(row, randomize=False)
+        grades = row_data["grades"]
         for subject, score in grades.items():
             if score > 0:
                 normalised = score / MAX_SCORES[subject]
@@ -168,27 +178,23 @@ def get_real_grade_distributions() -> Dict[str, Tuple[float, float]]:
     return distributions
 
 
-def get_real_students_augmented(n_copies: int = 20) -> List[Dict[str, float]]:
+def get_real_students_augmented(n_copies: int = 1) -> List[Dict[str, Any]]:
     """
-    Return real students as numeric grade dicts, augmented.
-
-    Each student is returned `n_copies` times. Each copy randomly
-    samples within the letter-grade range, providing natural variation.
+    Return real students as numeric grade dicts (including Major/Interest).
 
     Returns:
-        List of grade dicts [{"math": 112.5, "physics": 67.5, ...}, ...]
+        List of data dicts [{"grades": {...}, "major": "...", "interest": "..."}, ...]
     """
     rows = load_all_csvs()
     if not rows:
         return []
 
-    results: List[Dict[str, float]] = []
+    results: List[Dict[str, Any]] = []
     for row in rows:
         for _ in range(n_copies):
             results.append(convert_row_to_grades(row, randomize=True))
 
     logger.info(
-        f"Generated {len(results)} augmented samples "
-        f"from {len(rows)} real students (×{n_copies})"
+        f"Loaded {len(results)} samples from students_dataset.csv"
     )
     return results

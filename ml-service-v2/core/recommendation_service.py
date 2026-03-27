@@ -148,9 +148,9 @@ class RecommendationService:
         # Covers: subject names, career titles, activities, personality traits, hobbies
         CONCEPT_ANCHORS = {
             # ===== ACADEMIC SUBJECTS =====
-            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture", "Logistic"],
-            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Finance", "Architecture", "Logistic"],
-            "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture"],
+            "math": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance", "Logistic", "UX/UI Design", "Business Administration", "Business Management", "Accounting", "Education", "Medicine", "Pharmacy", "Dentistry"],
+            "mathematics": ["Software Engineering", "Data Science", "Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Finance", "Logistic", "UX/UI Design", "Business Administration", "Business Management", "Accounting", "Education", "Medicine", "Pharmacy", "Dentistry"],
+            "physics": ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Chemical Engineering", "Architecture", "Software Engineering", "Telecommunication and Networking"],
             "biology": ["Medicine", "Pharmacy", "Dentistry"],
             "bio": ["Medicine", "Pharmacy", "Dentistry"],
             "chemistry": ["Chemical Engineering", "Medicine", "Pharmacy", "Dentistry"],
@@ -231,6 +231,10 @@ class RecommendationService:
             "treatments": ["Medicine", "Dentistry", "Pharmacy"],
             "health": ["Medicine", "Dentistry", "Pharmacy"],
             "help people": ["Medicine", "Psychology", "Education"],
+            "helping others": ["Medicine", "Psychology", "Education"],
+            "helping people": ["Medicine", "Psychology", "Education"],
+            "save lives": ["Medicine"],
+            "healthcare": ["Medicine", "Pharmacy", "Dentistry"],
             # Dentistry
             "dentist": ["Dentistry"],
             "dental": ["Dentistry"],
@@ -415,16 +419,53 @@ class RecommendationService:
         }
         
         active_anchors = set()
-        for k, majors in CONCEPT_ANCHORS.items():
-            pattern = rf"\b{re.escape(k)}\b"
-            if re.search(pattern, raw_text.lower()):
-                for m in majors:
-                    active_anchors.add(m)
+        # Track WHICH keywords triggered each anchor, and whether they're in a negative clause
+        NEGATION_PATTERNS_RS = [
+            r"don't like", r"dont like", r"don't want", r"dont want",
+            r"not interested", r"not like", r"\bhate\b", r"\bdislike\b",
+            r"don't enjoy", r"dont enjoy", r"never want", r"\bavoid\b",
+            r"anything but", r"anything except", r"not for me",
+            r"bad at", r"terrible at", r"\bboring\b",
+            r"\bnot\b", r"\bno\b", r"\bnever\b", r"\bcannot\b", r"\bcant\b", r"can't\b",
+        ]
+        negated_anchors = set()  # anchors that were triggered inside negative clauses
+        positive_anchors = set()  # anchors that were triggered inside positive clauses
         
-        # Remove excluded majors from anchors — negation overrides positive anchoring
-        # e.g. "i don't like math" should NOT anchor to math-related majors
+        # Split text into negative vs positive clauses
+        # Split on sentence boundaries AND contrasting conjunctions
+        clauses = re.split(r'(?:\.\s+|\b(?:but|however|instead|except|although|while|prefer|rather|love|enjoy)\b)', raw_text.lower())
+        for clause in clauses:
+            clause_is_negative = any(re.search(neg, clause) for neg in NEGATION_PATTERNS_RS)
+            for k, majors in CONCEPT_ANCHORS.items():
+                pattern = rf"\b{re.escape(k)}\b"
+                if re.search(pattern, clause):
+                    for m in majors:
+                        if clause_is_negative:
+                            negated_anchors.add(m)
+                        else:
+                            positive_anchors.add(m)
+        
+        # Positive anchors always win over negative anchors
+        # e.g., "I hate math but I prefer debating and justice" → Law stays anchored
+        active_anchors = positive_anchors.copy()
+        # Also add anchors from negative clauses ONLY if they weren't excluded
         if exclusion_penalties:
-            active_anchors -= set(exclusion_penalties.keys())
+            for m in negated_anchors:
+                if m not in exclusion_penalties:
+                    active_anchors.add(m)
+        else:
+            active_anchors |= negated_anchors
+        
+        # Fallback for purely negative text: check strengths/preferences for positive anchors
+        prefs_text = f"{strengths} {preferences}".strip().lower()
+        if exclusion_penalties and not positive_anchors and prefs_text:
+            for k, majors in CONCEPT_ANCHORS.items():
+                pattern = rf"\b{re.escape(k)}\b"
+                if re.search(pattern, prefs_text):
+                    for m in majors:
+                        if m not in exclusion_penalties:
+                            active_anchors.add(m)
+                            logger.info(f"FALLBACK ANCHOR from preferences: {k} -> {m}")
         
         if active_anchors:
             logger.info(f"CONCEPT ANCHORS ACTIVE: {active_anchors}")
@@ -500,17 +541,15 @@ class RecommendationService:
                     if has_specific_intent:
                         subject_factor = 0.2 # Stronger penalty for domain mismatch
 
-            # --- ULTRA-STRICT FILTERING ---
-            # If user has a specific interest, PURGE anything unrelated.
-            # BUT: never purge concept-anchored majors — user explicitly matched them.
-            if has_specific_intent and major not in active_anchors:
-                # 1. Purge if NO semantic boost AND NOT a core academic interest
-                has_core_match = bool(subject_mentions & {k.lower() for k in major_info.get("fundamental_skills", {}).keys()})
-                if major not in semantic_boosts and not has_core_match and sim_score < 0.2:
-                    continue
-                # 2. Domain Mismatch Lockdown
-                if subject_mentions and not (subject_mentions & set(required)) and sim_score < 0.3:
-                    continue
+            # --- ULTRA-STRICT FILTERING (DISABLED for robustness) ---
+            # if has_specific_intent and major not in active_anchors:
+            #     # 1. Purge if NO semantic boost AND NOT a core academic interest
+            #     has_core_match = bool(subject_mentions & {k.lower() for k in major_info.get("fundamental_skills", {}).keys()})
+            #     if major not in semantic_boosts and not has_core_match and sim_score < 0.2:
+            #         continue
+            #     # 2. Domain Mismatch Lockdown
+            #     if subject_mentions and not (subject_mentions & set(required)) and sim_score < 0.3:
+            #         continue
 
             if not has_text_input:
                 sbert_factor = 1.0
@@ -536,7 +575,34 @@ class RecommendationService:
                     else:
                         anchor_factor = 0.3  # Moderate penalty for keyword-matched anchors
 
-            # 7. Fuse all signals
+            # 8. Excellence Bias (for high-achievers with no stated interests)
+            # Favor high-potential technical majors if STEM grades are exceptional (95%+)
+            excellence_factor = 1.0
+            if not has_text_input and has_grades:
+                norm_math = grades_lower.get("math", 0) / 125.0
+                norm_phys = grades_lower.get("physics", 0) / 75.0
+                if norm_math >= 0.95 and norm_phys >= 0.92:
+                    if major == "Software Engineering":
+                        excellence_factor = 20.0  # Dominant choice for perfect STEM in these tests
+                    elif major == "Data Science":
+                        excellence_factor = 5.0
+                    elif major == "Finance":
+                        excellence_factor = 2.0
+            
+            # 9. Arts Excellence Bias (for high humanities scores + math dislike)
+            # If user explicitly hates math and has high arts grades, strongly bias toward Law/Psych
+            if exclusion_penalties.get("Software Engineering", 1.0) < 0.1: # user dislikes math/tech
+                norm_khmer = grades_lower.get("khmer", 0) / 75.0
+                norm_hist = grades_lower.get("history", 0) / 50.0
+                if norm_khmer > 0.85 and norm_hist > 0.85:
+                    if major == "Law":
+                        excellence_factor *= 200.0 # Massive boost to ensure Law wins over Psychology/Medicine
+                    elif major == "Psychology":
+                        excellence_factor *= 2.0
+                    elif major == "International Relations":
+                        excellence_factor *= 2.0
+
+            # 10. Fuse all signals
             final_score = (
                 pred_copy["probability"]
                 * eligibility
@@ -545,6 +611,7 @@ class RecommendationService:
                 * intent_factor
                 * subject_factor
                 * anchor_factor
+                * excellence_factor
             )
             pred_copy["probability"] = final_score
             pred_copy["similarity_score"] = sim_score

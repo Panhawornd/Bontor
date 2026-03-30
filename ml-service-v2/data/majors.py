@@ -3,7 +3,7 @@ Major database with keywords, descriptions, career paths, and fundamental skills
 """
 MAJOR_DATABASE = {
     "Software Engineering": {
-        "keywords": ["software engineering", "software developer", "coding", "programming", "code", "apps", "python", "javascript", "backend", "frontend", "algorithm", "software development", "build apps", "web development", "mobile development", "technology", "computer science", "tech", "logic", "math", "mathematics", "critical thinking"],
+        "keywords": ["software engineering", "software developer", "coding", "programming", "code", "apps", "python", "javascript", "backend", "frontend", "algorithm", "software development", "build apps", "web development", "mobile development", "technology", "computer science", "tech", "logic", "math", "mathematics", "critical thinking", "problem solving", "problem-solving"],
         "required_subjects": ["math", "physics"],
         "description": "Professional study of building software systems, applications, and digital solutions using code.",
         "career_paths": ["Software Engineer", "Full Stack Developer", "Backend Developer", "Frontend Developer", "App Developer", "System Architect"],

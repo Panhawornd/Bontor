@@ -174,6 +174,9 @@ class RecommendationService:
             "tech": ["Software Engineering", "Data Science"],
             "digital": ["Software Engineering", "Data Science", "Cybersecurity", "UX/UI Design"],
             # Logic & problem-solving (IT context)
+            "problem solving": ["Software Engineering", "Data Science", "Cybersecurity", "Mechanical Engineering", "Electrical Engineering"],
+            "problem-solving": ["Software Engineering", "Data Science", "Cybersecurity", "Mechanical Engineering", "Electrical Engineering"],
+            "logic": ["Software Engineering", "Data Science", "Cybersecurity", "Finance"],
             "logical problems": ["Software Engineering", "Data Science"],
             "puzzles": ["Software Engineering", "Data Science"],
             "structured thinking": ["Software Engineering", "Data Science"],
